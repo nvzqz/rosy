@@ -98,7 +98,7 @@ pub fn init_load_path() {
 /// use rosy::{Object, String, protected};
 ///
 /// let string = String::from("¡Hola!");
-/// let result = protected(|| string.call("likes_pie?"));
+/// let result = protected(|| unsafe { string.call_unchecked("likes_pie?") });
 ///
 /// assert!(result.is_err());
 /// ```
@@ -112,7 +112,9 @@ pub fn init_load_path() {
 /// let string = String::from("Hiii!!!");
 ///
 /// let outer = protected(|| {
-///     protected(|| string.call("likes_pie?")).unwrap_err();
+///     protected(|| unsafe {
+///         string.call_unchecked("likes_pie?")
+///     }).unwrap_err();
 ///     string
 /// });
 ///

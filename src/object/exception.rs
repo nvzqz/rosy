@@ -4,7 +4,13 @@ use crate::object::{Object, AnyObject, Array, Class};
 use std::fmt;
 
 /// Some concrete Ruby exception.
-pub trait Exception: Object {
+///
+/// # Safety
+///
+/// The implementing object type _must_ be an exception type. Otherwise, methods
+/// like [`backtrace`](#method.backtrace) and [`cause`](#method.cause) will
+/// cause a segmentation fault.
+pub unsafe trait Exception: Object {
     /// Returns `self` as an [`AnyException`](struct.AnyException.html).
     #[inline]
     fn into_any_exception(self) -> AnyException { *self.as_any_exception() }
@@ -17,17 +23,17 @@ pub trait Exception: Object {
 
     /// Returns a backtrace associated with `self`.
     ///
-    /// The array contains strings
+    /// The array contains strings.
     #[inline]
     fn backtrace(&self) -> Option<Array> {
-        let value = self.call("backtrace");
+        let value = unsafe { self.call_unchecked("backtrace") };
         if value.is_nil() { None } else { Some(Array::_new(value.raw())) }
     }
 
     /// The underlying exception that caused `self`.
     #[inline]
     fn cause(&self) -> Option<AnyException> {
-        let cause = self.call("cause");
+        let cause = unsafe { self.call_unchecked("cause") };
         if cause.is_nil() { None } else { Some(AnyException(cause)) }
     }
 }
@@ -48,7 +54,7 @@ unsafe impl Object for AnyException {
     }
 }
 
-impl Exception for AnyException {
+unsafe impl Exception for AnyException {
 
 }
 

@@ -31,7 +31,7 @@ impl InstrSeq {
     #[inline]
     fn _compile(args: &[AnyObject]) -> Result<Self, AnyException> {
         let class = Class::instr_seq();
-        crate::protected(|| Self(class.call_with("compile", args)))
+        class.call_with("compile", args).map(Self)
     }
 
     /// Compiles `script` into an instruction sequence.
@@ -52,7 +52,7 @@ impl InstrSeq {
     #[inline]
     fn _compile_file(args: &[AnyObject]) -> Result<Self, AnyException> {
         let class = Class::instr_seq();
-        crate::protected(|| Self(class.call_with("compile_file", args)))
+        class.call_with("compile_file", args).map(Self)
     }
 
     /// Compiles the contents of a file at `path` into an instruction sequence.
@@ -98,7 +98,7 @@ impl InstrSeq {
     #[inline]
     pub unsafe fn from_binary(binary: impl Into<String>) -> Self {
         let class = Class::instr_seq();
-        Self(class.call_with("load_from_binary", &[binary.into()]))
+        Self(class.call_with_unchecked("load_from_binary", &[binary.into()]))
     }
 
     /// Evaluates `self` and returns the result.
@@ -119,13 +119,13 @@ impl InstrSeq {
     /// ```
     #[inline]
     pub fn eval(&self) -> Result<AnyObject, AnyException> {
-        crate::protected(|| self.call("eval"))
+        self.call("eval")
     }
 
     /// Returns the serialized binary data.
     #[inline]
     pub fn to_binary(&self) -> String {
-        String::_new(self.call("to_binary").raw())
+        unsafe { String::_new(self.call_unchecked("to_binary").raw()) }
     }
 
     /// Writes the serialized binary data of `self` to `w`.
@@ -143,20 +143,20 @@ impl InstrSeq {
     /// Returns a human-readable form of `self`.
     #[inline]
     pub fn disassemble(&self) -> String {
-        String::_new(self.call("disasm").raw())
+        unsafe { String::_new(self.call_unchecked("disasm").raw()) }
     }
 
     /// Returns the file path of `self`, or `<compiled>` if it was compiled from
     /// a string.
     #[inline]
     pub fn path(&self) -> String {
-        String::_new(self.call("path").raw())
+        unsafe { String::_new(self.call_unchecked("path").raw()) }
     }
 
     /// Returns the absolute path of `self` if it was compiled from a file.
     #[inline]
     pub fn absolute_path(&self) -> Option<String> {
-        let path = self.call("absolute_path");
+        let path = unsafe { self.call_unchecked("absolute_path") };
         if path.is_nil() { None } else { Some(String::_new(path.raw())) }
     }
 }

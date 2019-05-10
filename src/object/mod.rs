@@ -107,10 +107,39 @@ pub unsafe trait Object: Copy {
     }
 
     /// Calls `method` on `self` and returns the result.
+    ///
+    /// # Safety
+    ///
+    /// An exception will be raised if `method` is not defined on `self`.
     #[inline]
-    fn call(self, method: impl Into<SymbolId>) -> AnyObject {
+    unsafe fn call_unchecked(self, method: impl Into<SymbolId>) -> AnyObject {
         let args: &[AnyObject] = &[];
-        self.call_with(method, args)
+        self.call_with_unchecked(method, args)
+    }
+
+    /// Calls `method` on `self` and returns the result.
+    #[inline]
+    fn call(self, method: impl Into<SymbolId>) -> Result<AnyObject, AnyException> {
+        crate::protected(|| unsafe { self.call_unchecked(method) })
+    }
+
+    /// Calls `method` on `self` with `args` and returns the result.
+    ///
+    /// # Safety
+    ///
+    /// An exception will be raised if `method` is not defined on `self`.
+    #[inline]
+    unsafe fn call_with_unchecked(
+        self,
+        method: impl Into<SymbolId>,
+        args: &[impl Object]
+    ) -> AnyObject {
+        AnyObject(ruby::rb_funcallv(
+            self.raw(),
+            method.into().raw(),
+            args.len() as _,
+            args.as_ptr() as _,
+        ))
     }
 
     /// Calls `method` on `self` with `args` and returns the result.
@@ -119,20 +148,52 @@ pub unsafe trait Object: Copy {
         self,
         method: impl Into<SymbolId>,
         args: &[impl Object]
+    ) -> Result<AnyObject, AnyException> {
+        crate::protected(|| unsafe { self.call_with_unchecked(method, args) })
+    }
+
+    /// Calls the public `method` on `self` and returns the result.
+    ///
+    /// # Safety
+    ///
+    /// An exception will be raised if either `method` is not defined on `self`
+    /// or `method` is not publicly callable.
+    #[inline]
+    unsafe fn call_public_unchecked(
+        self,
+        method: impl Into<SymbolId>,
     ) -> AnyObject {
-        unsafe { AnyObject(ruby::rb_funcallv(
-            self.raw(),
-            method.into().raw(),
-            args.len() as _,
-            args.as_ptr() as _,
-        )) }
+        let args: &[AnyObject] = &[];
+        self.call_public_with_unchecked(method, args)
     }
 
     /// Calls the public `method` on `self` and returns the result.
     #[inline]
-    fn call_public(self, method: impl Into<SymbolId>) -> AnyObject {
-        let args: &[AnyObject] = &[];
-        self.call_public_with(method, args)
+    fn call_public(
+        self,
+        method: impl Into<SymbolId>,
+    ) -> Result<AnyObject, AnyException> {
+        crate::protected(|| unsafe { self.call_public_unchecked(method) })
+    }
+
+    /// Calls the public `method` on `self` with `args` and returns the result.
+    ///
+    /// # Safety
+    ///
+    /// An exception will be raised if either `method` is not defined on `self`
+    /// or `method` is not publicly callable.
+    #[inline]
+    unsafe fn call_public_with_unchecked(
+        self,
+        method: impl Into<SymbolId>,
+        args: &[impl Object]
+    ) -> AnyObject {
+        AnyObject(ruby::rb_funcallv_public(
+            self.raw(),
+            method.into().raw(),
+            args.len() as _,
+            args.as_ptr() as _,
+        ))
     }
 
     /// Calls the public `method` on `self` with `args` and returns the result.
@@ -141,13 +202,10 @@ pub unsafe trait Object: Copy {
         self,
         method: impl Into<SymbolId>,
         args: &[impl Object]
-    ) -> AnyObject {
-        unsafe { AnyObject(ruby::rb_funcallv_public(
-            self.raw(),
-            method.into().raw(),
-            args.len() as _,
-            args.as_ptr() as _,
-        )) }
+    ) -> Result<AnyObject, AnyException> {
+        crate::protected(|| unsafe {
+            self.call_public_with_unchecked(method, args)
+        })
     }
 
     /// Returns a printable string representation of `self`.
@@ -159,7 +217,7 @@ pub unsafe trait Object: Copy {
     /// use rosy::{Object, Class};
     ///
     /// let a = Class::array();
-    /// assert_eq!(a.inspect(), a.call("inspect"));
+    /// assert_eq!(a.inspect(), a.call("inspect").unwrap());
     /// ```
     #[inline]
     fn inspect(self) -> String {
