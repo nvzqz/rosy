@@ -16,7 +16,9 @@ path = "src/lib.rs"
 members = ["ruby-sys"]
 
 [dependencies]
-rosy-ruby-sys = { path = "ruby-sys" }
+rosy-ruby-sys = { path = "ruby-sys", default-features = false }
 
 [features]
+default = ["static-ruby"]
 download = ["rosy-ruby-sys/download"]
+static-ruby = ["rosy-ruby-sys/static"]

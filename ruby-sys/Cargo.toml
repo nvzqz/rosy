@@ -20,4 +20,6 @@ aloxide = { version = "0.0.3", default-features = false }
 bindgen = "0.49"
 
 [features]
+default = ["static"]
 download = ["aloxide/download"]
+static = []

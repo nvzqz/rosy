@@ -9,6 +9,8 @@ use std::path::{Path, PathBuf};
 
 use aloxide::{Ruby, Version};
 
+const LINK_STATIC: bool = cfg!(feature = "static");
+
 fn generate_bindings(ruby: &Ruby, path: &Path) {
     let header = ruby.wrapper_header().expect("Generate header");
     let header_dir = ruby.header_dir().expect("Get header dir");
@@ -38,7 +40,10 @@ fn write_ruby_version_const(version: &Version, out_dir: &Path) {
     let mut file = File::create(&path).expect("Create Ruby version file");
     write!(
         file,
-        "/// The version of the static Ruby library being used: **{v}**.\n\
+        "/// The version of the Ruby library API being used: **{v}**.\n\
+        ///\n\
+        /// Note that this may differ from the version of the actual Ruby\n\
+        /// library being linked to when using dynamic linking.\n\
         pub const RUBY_VERSION: &str = \"{v}\";",
         v = version,
     ).expect("Write Ruby version");
@@ -56,7 +61,7 @@ fn ruby() -> Ruby {
 
 fn main() {
     let ruby = ruby();
-    ruby.link(true).unwrap();
+    ruby.link(LINK_STATIC).unwrap();
 
     let out_dir = env::var_os("OUT_DIR").expect("Couldn't get 'OUT_DIR'");
     let out_dir = PathBuf::from(out_dir);
