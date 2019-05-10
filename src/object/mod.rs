@@ -289,6 +289,20 @@ impl<O: Object> PartialEq<O> for AnyObject {
 
 impl Eq for AnyObject {}
 
+impl PartialEq<bool> for AnyObject {
+    #[inline]
+    fn eq(&self, other: &bool) -> bool {
+        self.to_bool() == Some(*other)
+    }
+}
+
+impl PartialEq<AnyObject> for bool {
+    #[inline]
+    fn eq(&self, other: &AnyObject) -> bool {
+        other == self
+    }
+}
+
 impl fmt::Debug for AnyObject {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
