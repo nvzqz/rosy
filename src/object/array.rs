@@ -3,12 +3,13 @@
 use crate::object::{Object, AnyObject, Ty};
 use std::{
     cmp::Ordering,
+    fmt,
     iter::FromIterator,
     ops::Add,
 };
 
 /// An instance of Ruby's `Array` class.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
 pub struct Array(AnyObject);
 
@@ -27,6 +28,13 @@ unsafe impl Object for Array {
 
     #[inline]
     fn is_ty(self, ty: Ty) -> bool { ty == Ty::Array }
+}
+
+impl fmt::Display for Array {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.as_any().fmt(f)
+    }
 }
 
 impl AsRef<AnyObject> for Array {

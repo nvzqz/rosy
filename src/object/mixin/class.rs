@@ -27,7 +27,7 @@ use std::{
 /// assert!(Class::exception() < Class::object());
 /// assert!(Class::arg_error() < Class::exception());
 /// ```
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
 pub struct Class(AnyObject);
 
@@ -50,6 +50,13 @@ unsafe impl Object for Class {
 
 impl crate::util::Sealed for Class {}
 
+impl fmt::Display for Class {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.as_any().fmt(f)
+    }
+}
+
 impl AsRef<AnyObject> for Class {
     #[inline]
     fn as_ref(&self) -> &AnyObject { &self.0 }
@@ -58,15 +65,6 @@ impl AsRef<AnyObject> for Class {
 impl From<Class> for AnyObject {
     #[inline]
     fn from(object: Class) -> AnyObject { object.0 }
-}
-
-impl fmt::Debug for Class {
-    #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_tuple("Class")
-            .field(&self.raw())
-            .finish()
-    }
 }
 
 impl<O: Object> PartialEq<O> for Class {

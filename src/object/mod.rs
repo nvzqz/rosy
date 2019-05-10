@@ -282,9 +282,14 @@ unsafe impl Object for AnyObject {
 impl fmt::Debug for AnyObject {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_tuple("AnyObject")
-            .field(&self._ptr())
-            .finish()
+        fmt::Display::fmt(&self.inspect(), f)
+    }
+}
+
+impl fmt::Display for AnyObject {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.to_s(), f)
     }
 }
 

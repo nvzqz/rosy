@@ -13,7 +13,7 @@ use std::{
 };
 
 /// An instance of Ruby's `Symbol` class.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
 pub struct Symbol(AnyObject);
 
@@ -34,11 +34,10 @@ unsafe impl Object for Symbol {
     fn is_ty(self, ty: Ty) -> bool { ty == Ty::Symbol }
 }
 
-impl fmt::Debug for Symbol {
+impl fmt::Display for Symbol {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_tuple("Symbol")
-            .field(&self.name())
-            .finish()
+        self.as_any().fmt(f)
     }
 }
 

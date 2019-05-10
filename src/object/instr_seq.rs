@@ -1,13 +1,16 @@
 //! Ruby instruction sequences.
 
 use crate::object::{Object, AnyObject, AnyException, Class, Hash, String};
-use std::io;
+use std::{
+    fmt,
+    io,
+};
 
 /// An instance of Ruby's `RubyVM::InstructionSequence` class.
 ///
 /// **Note:** The binary data that comes from an instruction sequence is not
 /// portable and should not be used in another version or architecture of Ruby.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
 pub struct InstrSeq(AnyObject);
 
@@ -19,6 +22,13 @@ unsafe impl Object for InstrSeq {
         } else {
             None
         }
+    }
+}
+
+impl fmt::Display for InstrSeq {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.as_any().fmt(f)
     }
 }
 

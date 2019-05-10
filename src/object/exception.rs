@@ -39,7 +39,7 @@ pub unsafe trait Exception: Object {
 }
 
 /// Any Ruby exception.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
 pub struct AnyException(AnyObject);
 
@@ -51,6 +51,13 @@ unsafe impl Object for AnyException {
         } else {
             None
         }
+    }
+}
+
+impl fmt::Display for AnyException {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.as_any().fmt(f)
     }
 }
 
@@ -66,15 +73,6 @@ impl<E: Exception> PartialEq<E> for AnyException {
 }
 
 impl Eq for AnyException {}
-
-impl fmt::Debug for AnyException {
-    #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_tuple("AnyException")
-            .field(&self.0.raw())
-            .finish()
-    }
-}
 
 impl AnyException {
     #[inline]

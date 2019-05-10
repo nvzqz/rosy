@@ -1,6 +1,6 @@
 use std::os::raw::{c_int, c_long};
 use ruby::{VALUE, ruby_value_type::{self, *}, ruby_special_consts::*};
-use crate::{Object, AnyObject, Ty};
+use crate::{AnyObject, Ty};
 
 extern "C" {
     // Defined in `wrapper.h`
@@ -55,7 +55,7 @@ pub fn value_type(v: VALUE) -> ruby_value_type {
             debug_assert!(
                 false,
                 "Unknown type of {:?} (raw: {})",
-                unsafe { AnyObject::from_raw(v).inspect() },
+                unsafe { AnyObject::from_raw(v) },
                 v,
             );
             RUBY_T_NONE

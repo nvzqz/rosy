@@ -2,6 +2,7 @@
 
 use crate::object::{Object, AnyObject, Class, Ty};
 use std::{
+    borrow::Cow,
     cmp::Ordering,
     convert::{TryFrom, TryInto},
     error::Error,
@@ -18,20 +19,14 @@ mod util {
 }
 
 /// An instance of Ruby's `String` class.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
 pub struct String(AnyObject);
 
-impl fmt::Debug for String {
+impl fmt::Display for String {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use fmt::Write;
-
-        let bytes = unsafe { self.as_bytes() };
-        write!(f, "\"")?;
-        for byte in bytes.iter().cloned().flat_map(std::ascii::escape_default) {
-            f.write_char(byte as char)?;
-        }
-        write!(f, "\"")
+        unsafe { self.to_str_lossy().fmt(f) }
     }
 }
 
@@ -440,7 +435,7 @@ impl String {
 }
 
 /// An encoding for `String`.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
 pub struct Encoding(AnyObject);
 
@@ -455,13 +450,10 @@ unsafe impl Object for Encoding {
     }
 }
 
-impl fmt::Debug for Encoding {
+impl fmt::Display for Encoding {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("Encoding")
-            .field("name", &self.name())
-            .field("addr", &self._enc())
-            .finish()
+        self.as_any().fmt(f)
     }
 }
 

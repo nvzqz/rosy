@@ -10,7 +10,7 @@ use crate::object::{
 use std::fmt;
 
 /// An instance of Ruby's `Module` type.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
 pub struct Module(AnyObject);
 
@@ -33,6 +33,13 @@ unsafe impl Object for Module {
 
 impl crate::util::Sealed for Module {}
 
+impl fmt::Display for Module {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.as_any().fmt(f)
+    }
+}
+
 impl AsRef<AnyObject> for Module {
     #[inline]
     fn as_ref(&self) -> &AnyObject { &self.0 }
@@ -41,15 +48,6 @@ impl AsRef<AnyObject> for Module {
 impl From<Module> for AnyObject {
     #[inline]
     fn from(object: Module) -> AnyObject { object.0 }
-}
-
-impl fmt::Debug for Module {
-    #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_tuple("Module")
-            .field(&self.raw())
-            .finish()
-    }
 }
 
 impl<O: Object> PartialEq<O> for Module {
