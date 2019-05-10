@@ -264,6 +264,20 @@ impl String {
         std::str::from_utf8(self.as_bytes())
     }
 
+    /// Returns the underlying string lossy-encoded as UTF-8. See
+    /// [`String::from_utf8_lossy`](https://doc.rust-lang.org/std/string/struct.String.html#method.from_utf8_lossy)
+    /// for more details.
+    ///
+    /// # Safety
+    ///
+    /// Care must be taken to ensure that, if the returned value is a reference
+    /// to `self`, the length of `self` and the characters pointed to by `self`
+    /// are not changed through the VM or otherwise.
+    #[inline]
+    pub unsafe fn to_str_lossy(&self) -> Cow<'_, str> {
+        std::string::String::from_utf8_lossy(self.as_bytes())
+    }
+
     /// Returns a reference to the underlying bytes of `self` as if they were
     /// UTF-8 encoded.
     ///
