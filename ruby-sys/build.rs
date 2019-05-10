@@ -62,6 +62,7 @@ fn ruby() -> Ruby {
 
 fn main() {
     let ruby = ruby();
+    println!("{}", ruby.run("require 'pp'; pp RbConfig::CONFIG").unwrap());
     ruby.link(LINK_STATIC).unwrap();
 
     let out_dir = env::var_os("OUT_DIR").expect("Couldn't get 'OUT_DIR'");
