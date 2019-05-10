@@ -373,17 +373,25 @@ impl AnyObject {
         self.raw() == crate::util::UNDEF_VALUE
     }
 
+    /// Returns whether `self` is `true`.
+    #[inline]
+    pub fn is_true(self) -> bool {
+        self.raw() == crate::util::TRUE_VALUE
+    }
+
+    /// Returns whether `self` is `false`.
+    #[inline]
+    pub fn is_false(self) -> bool {
+        self.raw() == crate::util::FALSE_VALUE
+    }
+
     /// Returns the boolean value for `self`, if any.
     #[inline]
     pub fn to_bool(self) -> Option<bool> {
-        use ruby::ruby_special_consts::*;
-
-        if self.raw() == RUBY_Qtrue as _ {
-            Some(true)
-        } else if self.raw() == RUBY_Qfalse as _ {
-            Some(false)
-        } else {
-            None
+        match self.raw() {
+            crate::util::TRUE_VALUE => Some(true),
+            crate::util::FALSE_VALUE => Some(false),
+            _ => None,
         }
     }
 
