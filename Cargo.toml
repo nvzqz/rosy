@@ -1,0 +1,22 @@
+[package]
+name = "rosy"
+version = "0.0.0"
+authors = ["Nikolai Vazquez"]
+edition = "2018"
+description = "Ruby bindings for Rust."
+license = "MIT/Apache-2.0"
+keywords = ["ruby"]
+categories = ["api-bindings"]
+include = ["Cargo.toml", "**/*.rs", "README.md", "CHANGELOG.md", "LICENSE*"]
+
+[lib]
+path = "src/lib.rs"
+
+[workspace]
+members = ["ruby-sys"]
+
+[dependencies]
+rosy-ruby-sys = { path = "ruby-sys" }
+
+[features]
+download = ["rosy-ruby-sys/download"]

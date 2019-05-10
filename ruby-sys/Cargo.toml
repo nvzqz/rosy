@@ -1,0 +1,23 @@
+[package]
+name = "rosy-ruby-sys"
+version = "0.0.0"
+authors = ["Nikolai Vazquez"]
+edition = "2018"
+description = "Low-level bindings to Ruby's C API for the `rosy` crate."
+license = "MIT/Apache-2.0"
+links = "ruby"
+build = "build.rs"
+keywords = ["ruby"]
+categories = ["api-bindings"]
+include = ["Cargo.toml", "**/*.rs", "README.md", "CHANGELOG.md", "LICENSE*"]
+
+[lib]
+name = "ruby_sys"
+path = "src/lib.rs"
+
+[build-dependencies]
+aloxide = { version = "0.0.3", default-features = false }
+bindgen = "0.49"
+
+[features]
+download = ["aloxide/download"]
