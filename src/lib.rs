@@ -33,11 +33,16 @@
 
 extern crate ruby_sys as ruby;
 
+#[doc(inline)]
+pub use ruby::RUBY_VERSION;
+
 use std::error::Error;
 use std::fmt;
 
-#[doc(inline)]
-pub use ruby::RUBY_VERSION;
+mod util;
+mod object;
+
+pub use object::*;
 
 /// Initializes the Ruby VM, returning an error code if it failed.
 #[inline]
@@ -80,6 +85,75 @@ pub unsafe fn destroy() -> Result<(), i32> {
 #[inline]
 pub fn init_load_path() {
     unsafe { ruby::ruby_init_loadpath() };
+}
+
+/// Calls `f` and returns its output or an exception if one is raised in `f`.
+///
+/// # Examples
+///
+/// This is great for calling methods that may not exist:
+///
+/// ```
+/// # rosy::init();
+/// use rosy::{Object, String, protected};
+///
+/// let string = String::from("¡Hola!");
+/// let result = protected(|| string.call("likes_pie?"));
+///
+/// assert!(result.is_err());
+/// ```
+///
+/// Calls can even be nested like so:
+///
+/// ```
+/// # rosy::init();
+/// use rosy::{Object, String, protected};
+///
+/// let string = String::from("Hiii!!!");
+///
+/// let outer = protected(|| {
+///     protected(|| string.call("likes_pie?")).unwrap_err();
+///     string
+/// });
+///
+/// assert_eq!(outer.unwrap(), string);
+/// ```
+#[inline]
+pub fn protected<F, O>(f: F) -> Result<O, AnyException>
+    where F: FnOnce() -> O
+{
+    unsafe extern "C" fn wrapper<F, O>(ctx: ruby::VALUE) -> ruby::VALUE
+        where F: FnOnce() -> O
+    {
+        let (f, out) = &mut *(ctx as *mut (Option<F>, &mut O));
+
+        // Get the `F` out of `Option<F>` to call by-value, which is required by
+        // the `FnOnce` trait
+        let f = f.take().unwrap_or_else(|| std::hint::unreachable_unchecked());
+
+        std::ptr::write(*out, f());
+
+        AnyObject::nil().raw()
+    }
+    unsafe {
+        // Required to prevent stack unwinding (if there's a `panic!` in `f()`)
+        // from dropping `out`, which is uninitialized memory until `f()`
+        use std::mem::ManuallyDrop;
+
+        // These shenanigans allow us to pass in a pointer to `f`, with a
+        // pointer to its uninitialized output, into `rb_protect` to make them
+        // accessible from `wrapper`
+        let mut out = ManuallyDrop::new(std::mem::uninitialized::<O>());
+        let mut ctx = (Some(f), &mut *out);
+        let ctx = &mut ctx as *mut (Option<F>, &mut O) as ruby::VALUE;
+
+        let mut err = 0;
+        ruby::rb_protect(Some(wrapper::<F, O>), ctx, &mut err);
+        match err {
+            0 => Ok(ManuallyDrop::into_inner(out)),
+            _ => Err(AnyException::_take_current()),
+        }
+    }
 }
 
 /// An error indicating that [`init`](fn.init.html) failed.

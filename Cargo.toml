@@ -18,7 +18,11 @@ members = ["ruby-sys"]
 [dependencies]
 rosy-ruby-sys = { path = "ruby-sys", default-features = false }
 
+[build-dependencies]
+aloxide = { version = "0.0.3", default-features = false }
+cc = "1"
+
 [features]
 default = ["static-ruby"]
-download = ["rosy-ruby-sys/download"]
+download = ["rosy-ruby-sys/download", "aloxide/download"]
 static-ruby = ["rosy-ruby-sys/static"]
