@@ -1,6 +1,6 @@
 //! Ruby arrays.
 
-use crate::object::{Object, AnyObject, Ty};
+use crate::object::{Object, AnyObject, Ty, String};
 use std::{
     cmp::Ordering,
     fmt,

@@ -1,5 +1,8 @@
 use ruby::VALUE;
-use std::fmt;
+use std::{
+    fmt,
+    ffi::CStr,
+};
 
 mod ty;
 pub mod array;
