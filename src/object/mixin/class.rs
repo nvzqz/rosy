@@ -4,6 +4,7 @@ use crate::object::{
     AnyObject,
     mixin::{Mixin, DefMixinError},
     Object,
+    String,
     symbol::SymbolId,
     Ty,
 };
@@ -240,6 +241,12 @@ impl Class {
     #[inline]
     pub fn inherits(self, other: Class) -> bool {
         self <= other
+    }
+
+    /// Returns the name of `self`.
+    #[inline]
+    pub fn name(self) -> String {
+        unsafe { String::_new(ruby::rb_class_name(self.raw())) }
     }
 }
 

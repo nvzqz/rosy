@@ -1,7 +1,7 @@
 //! Ruby mixins.
 
 use crate::{
-    object::{Object, AnyObject, symbol::SymbolId},
+    object::{Object, AnyObject, Array, symbol::SymbolId},
     util::Sealed,
 };
 
@@ -32,6 +32,21 @@ pub trait Mixin: Object + Sealed {
     #[inline]
     fn include(self, module: Module) {
         unsafe { ruby::rb_include_module(self.raw(), module.raw()) };
+    }
+
+    /// Returns whether `self` or one of its ancestors includes `module`.
+    ///
+    /// This is equivalent to the `include?` method.
+    #[inline]
+    #[must_use]
+    fn includes(self, module: Module) -> bool {
+        unsafe { ruby::rb_mod_include_p(self.raw(), module.raw()) != 0 }
+    }
+
+    /// Returns an array of the modules included in `self`.
+    #[inline]
+    fn included_modules(self) -> Array {
+        unsafe { Array::_new(ruby::rb_mod_included_modules(self.raw())) }
     }
 
     /// Prepends `module` in `self`.

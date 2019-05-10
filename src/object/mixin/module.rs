@@ -2,8 +2,10 @@
 
 use crate::object::{
     AnyObject,
+    Array,
     mixin::{Mixin, Class, DefMixinError},
     Object,
+    String,
     symbol::SymbolId,
     Ty,
 };
@@ -125,6 +127,23 @@ impl Module {
                 Err(error)
             }
         }
+    }
+
+    /// Returns the name of `self` or `nil` if anonymous.
+    #[inline]
+    pub fn name(self) -> Option<String> {
+        let raw = unsafe { ruby::rb_mod_name(self.raw()) };
+        if raw == crate::util::NIL_VALUE {
+            None
+        } else {
+            Some(String::_new(raw))
+        }
+    }
+
+    /// Returns the ancestors of this module, including itself.
+    #[inline]
+    pub fn ancestors(self) -> Array {
+        unsafe { Array::_new(ruby::rb_mod_ancestors(self.raw())) }
     }
 }
 
