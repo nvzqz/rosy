@@ -94,6 +94,29 @@ impl Symbol {
         unsafe { ruby::rb_sym2id(self.raw()) }
     }
 
+    /// Returns whether `name` is valid as a symbol value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # rosy::init().unwrap();
+    /// use rosy::Symbol;
+    ///
+    /// assert!(Symbol::is_valid("@hello"));
+    ///
+    /// assert!(!Symbol::is_valid("$"));
+    /// assert!(!Symbol::is_valid("@"));
+    /// assert!(!Symbol::is_valid(""));
+    /// ```
+    #[inline]
+    pub fn is_valid(name: impl AsRef<str>) -> bool {
+        let name = name.as_ref();
+        let ptr = name.as_ptr();
+        let len = name.len();
+        let enc = Encoding::utf8()._enc();
+        unsafe { ruby::rb_enc_symname2_p(ptr as _, len as _, enc) != 0 }
+    }
+
     /// Returns the identifier associated with this symbol.
     #[inline]
     pub fn id(self) -> SymbolId {
