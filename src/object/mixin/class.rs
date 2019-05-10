@@ -27,6 +27,22 @@ use std::{
 /// assert!(Class::exception() < Class::object());
 /// assert!(Class::arg_error() < Class::exception());
 /// ```
+///
+/// This very closely resembles Ruby's syntax for subclassing:
+///
+/// ```ruby
+/// class Mammal
+///   def breathe
+///     puts "inhale and exhale"
+///   end
+/// end
+///
+/// class Cat < Mammal
+///   def speak
+///     puts "meow"
+///   end
+/// end
+/// ```
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
 pub struct Class(AnyObject);
