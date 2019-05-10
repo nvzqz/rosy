@@ -279,6 +279,16 @@ unsafe impl Object for AnyObject {
     fn into_any(self) -> Self { self }
 }
 
+impl<O: Object> PartialEq<O> for AnyObject {
+    #[inline]
+    fn eq(&self, other: &O) -> bool {
+        let result = unsafe { self.call_with_unchecked("==", &[*other]) };
+        result.raw() == crate::util::TRUE_VALUE
+    }
+}
+
+impl Eq for AnyObject {}
+
 impl fmt::Debug for AnyObject {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
