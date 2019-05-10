@@ -14,8 +14,7 @@ const LINK_STATIC: bool = cfg!(feature = "static");
 fn generate_bindings(ruby: &Ruby, path: &Path) {
     let header = ruby.wrapper_header().expect("Generate header");
     let header_dir = ruby.header_dir().expect("Get header dir");
-    let arch_header_dir = ruby.arch_header_dir()
-        .expect("Get arch header dir");
+    let arch_header_dir = ruby.arch_header_dir().expect("Get arch header dir");
 
     bindgen::builder()
         .header_contents("rosy.h", &header)
@@ -23,6 +22,8 @@ fn generate_bindings(ruby: &Ruby, path: &Path) {
             format!("-I{}", header_dir),
             format!("-I{}", arch_header_dir),
         ])
+        .default_enum_style(bindgen::EnumVariation::ModuleConsts)
+        .rustified_enum("ruby_value_type")
         .generate()
         .expect("Generate bindings")
         .write_to_file(path)
