@@ -59,6 +59,13 @@ impl From<String> for Symbol {
     }
 }
 
+impl From<&str> for Symbol {
+    #[inline]
+    fn from(s: &str) -> Symbol {
+        SymbolId::from(s).into()
+    }
+}
+
 impl TryFrom<Symbol> for &str {
     type Error = std::str::Utf8Error;
 
