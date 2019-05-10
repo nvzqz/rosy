@@ -320,6 +320,23 @@ impl fmt::Display for AnyObject {
     }
 }
 
+impl<O: Object> From<Option<O>> for AnyObject {
+    #[inline]
+    fn from(option: Option<O>) -> Self {
+        option.map(Object::into_any).unwrap_or(AnyObject::nil())
+    }
+}
+
+impl<O: Object, E: Object> From<Result<O, E>> for AnyObject {
+    #[inline]
+    fn from(result: Result<O, E>) -> Self {
+        match result {
+            Ok(obj) => obj.into_any(),
+            Err(err) => err.into_any(),
+        }
+    }
+}
+
 impl From<bool> for AnyObject {
     #[inline]
     fn from(b: bool) -> Self {
