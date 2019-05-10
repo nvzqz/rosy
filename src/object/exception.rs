@@ -1,6 +1,6 @@
 //! Ruby exceptions.
 
-use crate::object::{Object, AnyObject, Array, Class};
+use crate::object::{Object, AnyObject, Array, Class, String};
 use std::fmt;
 
 /// Some concrete Ruby exception.
@@ -19,6 +19,31 @@ pub unsafe trait Exception: Object {
     #[inline]
     fn as_any_exception(&self) -> &AnyException {
         unsafe { &*(self as *const Self as *const AnyException) }
+    }
+
+    /// Raises the exception.
+    ///
+    /// # Safety
+    ///
+    /// This call should be wrapped around in code that can properly handle
+    /// `self`; otherwise a segmentation fault will occur.
+    ///
+    /// # Examples
+    ///
+    /// Using `protected` ensures that calling this method is indeed safe:
+    ///
+    /// ```
+    /// # rosy::init().unwrap();
+    /// use rosy::{AnyException, Exception, protected};
+    ///
+    /// let exc = AnyException::new("Oh noes, something happened!");
+    /// let err = protected(|| unsafe { exc.raise() }).unwrap_err();
+    ///
+    /// assert_eq!(exc, err);
+    /// ```
+    #[inline]
+    unsafe fn raise(self) {
+        ruby::rb_exc_raise(self.raw());
     }
 
     /// Returns a backtrace associated with `self`.
@@ -86,6 +111,23 @@ impl AnyException {
         let exc = ruby::rb_errinfo();
         ruby::rb_set_errinfo(crate::util::NIL_VALUE);
         AnyException::_new(exc)
+    }
+
+    /// Creates a new instance of `Exception` with `message`.
+    pub fn new(message: impl Into<String>) -> Self {
+        unsafe { Self::of_class(Class::exception(), message) }
+    }
+
+    /// Creates a new instance of `class` with `message`.
+    ///
+    /// # Safety
+    ///
+    /// The `class` argument must inherit from an exception class.
+    pub unsafe fn of_class(
+        class: impl Into<Class>,
+        message: impl Into<String>,
+    ) -> Self {
+        Self(class.into().new_instance(&[message.into()]))
     }
 
     /// Returns the current pending exception.
