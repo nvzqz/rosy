@@ -19,6 +19,7 @@ matrix:
 env:
   global:
   - RUSTFLAGS: "-Dwarnings"
+  - RUST_BACKTRACE: "full"
 
 cache:
   directories:
