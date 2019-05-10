@@ -299,4 +299,23 @@ impl Array {
     pub fn sort(self) {
         unsafe { ruby::rb_ary_sort_bang(self.raw()) };
     }
+
+    /// Joins the contents of `self` with `separator`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # rosy::init().unwrap();
+    /// use rosy::{Array, String};
+    ///
+    /// let s = String::from("-");
+    /// let a = Array::from_slice(&[s, s, s]);
+    ///
+    /// assert_eq!(a.join("."), "-.-.-");
+    /// ```
+    #[inline]
+    pub fn join(self, separator: impl Into<String>) -> String {
+        let separator = separator.into();
+        unsafe { String::_new(ruby::rb_ary_join(self.raw(), separator.raw())) }
+    }
 }
