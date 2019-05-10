@@ -1,7 +1,8 @@
 //! Ruby mixins.
 
 use crate::{
-    object::{Object, AnyObject, Array, symbol::SymbolId},
+    EvalArgs,
+    object::{Object, AnyObject, AnyException, Array, symbol::SymbolId},
     util::Sealed,
 };
 
@@ -192,6 +193,27 @@ pub trait Mixin: Object + Sealed {
     #[inline]
     fn attr_accessor(self, name: impl Into<SymbolId>) {
         _attr(self.raw(), name.into(), true, true);
+    }
+
+    /// Evaluates `args` in the context of `self`.
+    ///
+    /// See the docs for `EvalArgs` for more info.
+    ///
+    /// # Safety
+    ///
+    /// An exception may be raised by the code or by `args` being invalid.
+    #[inline]
+    unsafe fn eval_unchecked(self, args: impl EvalArgs) -> AnyObject {
+        args.eval_in_unchecked(self)
+    }
+
+    /// Evaluates `args` in the context of `self`, returning any raised
+    /// exceptions.
+    ///
+    /// See the docs for `EvalArgs` for more info.
+    #[inline]
+    fn eval(self, args: impl EvalArgs) -> Result<AnyObject, AnyException> {
+        args.eval_in(self)
     }
 }
 
