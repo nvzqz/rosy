@@ -2,7 +2,7 @@
 
 use crate::{
     EvalArgs,
-    object::{Object, AnyObject, AnyException, Array, symbol::SymbolId},
+    object::{Object, AnyObject, AnyException, Array, SymbolId},
     util::Sealed,
 };
 

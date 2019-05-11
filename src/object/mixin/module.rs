@@ -6,7 +6,7 @@ use crate::object::{
     mixin::{Mixin, Class, DefMixinError},
     Object,
     String,
-    symbol::SymbolId,
+    SymbolId,
     Ty,
 };
 use std::fmt;

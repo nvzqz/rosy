@@ -5,7 +5,7 @@ use crate::object::{
     mixin::{Mixin, DefMixinError},
     Object,
     String,
-    symbol::SymbolId,
+    SymbolId,
     Ty,
 };
 use std::{

@@ -21,11 +21,9 @@ pub use self::{
     instr_seq::InstrSeq,
     mixin::{Mixin, Class, Module},
     string::String,
-    symbol::Symbol,
+    symbol::{Symbol, SymbolId},
     ty::Ty,
 };
-
-use symbol::SymbolId;
 
 /// Some concrete Ruby object.
 ///
