@@ -104,12 +104,13 @@ impl Symbol {
     ///
     /// assert!(Symbol::is_valid("@hello"));
     ///
+    /// assert!(!Symbol::is_valid("\0a"));
     /// assert!(!Symbol::is_valid("$"));
     /// assert!(!Symbol::is_valid("@"));
     /// assert!(!Symbol::is_valid(""));
     /// ```
     #[inline]
-    pub fn is_valid(name: impl AsRef<str>) -> bool {
+    pub fn is_valid(name: impl AsRef<[u8]>) -> bool {
         let name = name.as_ref();
         let ptr = name.as_ptr();
         let len = name.len();
