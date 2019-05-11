@@ -106,10 +106,28 @@ impl Hash {
 
     /// Creates a new hash table from `pairs`.
     ///
-    /// The caller should ensure that `pairs` is an even number of values. Not
-    /// upholding this constraint is considered a programming error.
+    /// # Examples
+    ///
+    /// Although this may insert the objects efficiently, it requires a bit more
+    /// verbose code.
+    ///
+    /// However, one can use the [turbofish (`::<>`) syntax](https://turbo.fish)
+    /// to allow the compiler to infer types more easily:
+    ///
+    /// ```
+    /// # rosy::init().unwrap();
+    /// use rosy::{Hash, String};
+    ///
+    /// let hash = Hash::from_pairs::<String, String>(&[
+    ///     ("user".into(), "nvzqz".into()),
+    ///     ("name".into(), "Nikolai Vazquez".into()),
+    /// ]);
+    ///
+    /// assert_eq!(hash.get("user"), "nvzqz");
+    /// assert_eq!(hash.get("name"), "Nikolai Vazquez");
+    /// ```
     #[inline]
-    pub fn from_pairs(pairs: &[impl Object]) -> Self {
+    pub fn from_pairs<K: Object, V: Object>(pairs: &[(K, V)]) -> Self {
         let hash = Self::new();
         hash.insert_pairs(pairs);
         hash
@@ -138,13 +156,10 @@ impl Hash {
     }
 
     /// Inserts `pairs` into `self` in bulk.
-    ///
-    /// The caller should ensure that `pairs` is an even number of values. Not
-    /// upholding this constraint is considered a programming error.
     #[inline]
-    pub fn insert_pairs(self, pairs: &[impl Object]) {
+    pub fn insert_pairs<K: Object, V: Object>(self, pairs: &[(K, V)]) {
         unsafe { ruby::rb_hash_bulk_insert_into_st_table(
-            pairs.len() as _,
+            (pairs.len() * 2) as _,
             pairs.as_ptr() as *const _,
             self.raw(),
         ) };
