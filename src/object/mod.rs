@@ -305,7 +305,22 @@ macro_rules! impl_eq {
             }
         }
 
+        // Needed to prevent conflict with `PartialEq<impl Object>`
+        impl PartialEq<&$t> for AnyObject {
+            #[inline]
+            fn eq(&self, other: &&$t) -> bool {
+                *self == **other
+            }
+        }
+
         impl PartialEq<AnyObject> for $t {
+            #[inline]
+            fn eq(&self, obj: &AnyObject) -> bool {
+                obj == self
+            }
+        }
+
+        impl PartialEq<AnyObject> for &$t {
             #[inline]
             fn eq(&self, obj: &AnyObject) -> bool {
                 obj == self
