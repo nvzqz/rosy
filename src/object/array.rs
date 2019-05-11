@@ -89,8 +89,7 @@ impl<'r, O: Object> FromIterator<O> for Array {
     fn from_iter<T: IntoIterator<Item=O>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (size, _) = iter.size_hint();
-        let raw = unsafe { ruby::rb_ary_new_capa(size as _) };
-        let mut array = Array::_new(raw);
+        let mut array = Array::with_capacity(size);
         array.extend(iter);
         array
     }
@@ -145,6 +144,12 @@ impl Array {
         where &'s [T]: Into<Self>
     {
         slice.into()
+    }
+
+    /// Creates a new instance with `capacity` amount of storage.
+    #[inline]
+    pub fn with_capacity(capacity: usize) -> Self {
+        unsafe { Self::_new(ruby::rb_ary_new_capa(capacity as _)) }
     }
 
     /// Returns the number of elements in `self`.
