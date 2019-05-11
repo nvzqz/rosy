@@ -41,6 +41,7 @@ use std::fmt;
 
 mod util;
 mod object;
+pub mod gc;
 
 pub use object::*;
 
