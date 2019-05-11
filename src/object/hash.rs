@@ -4,7 +4,6 @@ use crate::object::{Object, AnyObject, Ty};
 use std::{
     fmt,
     iter::FromIterator,
-    collections::HashMap,
 };
 
 /// An instance of Ruby's `Hash` class.
@@ -73,6 +72,36 @@ impl Hash {
     #[inline]
     pub fn new() -> Self {
         unsafe { Self::_new(ruby::rb_hash_new()) }
+    }
+
+    /// Creates an instance from the key-value pairs in `map`.
+    ///
+    /// # Examples
+    ///
+    /// This initializer is general enough to work with most map types. The most
+    /// common use case would probably be interacting with Rust's [`HashMap`].
+    ///
+    /// ```
+    /// # rosy::init().unwrap();
+    /// use std::collections::HashMap;
+    /// use rosy::Hash;
+    ///
+    /// let mut map = HashMap::new();
+    /// map.insert("is_working", true);
+    ///
+    /// let hash = Hash::from_map(&map);
+    /// assert_eq!(hash.get("is_working"), true);
+    /// ```
+    ///
+    /// [`HashMap`]: https://doc.rust-lang.org/std/collections/struct.HashMap.html
+    #[inline]
+    pub fn from_map<'a, I, K, V>(map: I) -> Self
+    where
+        I: IntoIterator<Item = (&'a K, &'a V)>,
+        K: Copy + Into<AnyObject> + 'a,
+        V: Copy + Into<AnyObject> + 'a,
+    {
+        map.into_iter().map(|(&k, &v)| (k, v)).collect()
     }
 
     /// Creates a new hash table from `pairs`.
