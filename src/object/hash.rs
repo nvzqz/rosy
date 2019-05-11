@@ -45,6 +45,13 @@ impl fmt::Display for Hash {
     }
 }
 
+impl<K: Object, V: Object> From<&[(K, V)]> for Hash {
+    #[inline]
+    fn from(pairs: &[(K, V)]) -> Self {
+        Self::from_pairs(pairs)
+    }
+}
+
 impl<K: Into<AnyObject>, V: Into<AnyObject>> FromIterator<(K, V)> for Hash {
     #[inline]
     fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
