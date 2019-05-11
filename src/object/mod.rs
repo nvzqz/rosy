@@ -1,7 +1,7 @@
 use ruby::VALUE;
 use std::{
     fmt,
-    ffi::CStr,
+    ffi::{CStr, CString},
 };
 
 mod ty;
@@ -288,21 +288,40 @@ impl<O: Object> PartialEq<O> for AnyObject {
     }
 }
 
+// Implements `PartialEq` against all relevant convertible types
+macro_rules! impl_eq {
+    ($($t:ty, $convert:ident;)+) => { $(
+        impl PartialEq<$t> for AnyObject {
+            #[inline]
+            fn eq(&self, other: &$t) -> bool {
+                if let Some(value) = AnyObject::$convert(*self) {
+                    value == *other
+                } else {
+                    false
+                }
+            }
+        }
+
+        impl PartialEq<AnyObject> for $t {
+            #[inline]
+            fn eq(&self, obj: &AnyObject) -> bool {
+                obj == self
+            }
+        }
+    )+ }
+}
+
+impl_eq! {
+    [u8],                   to_string;
+    Vec<u8>,                to_string;
+    str,                    to_string;
+    std::string::String,    to_string;
+    CStr,                   to_string;
+    CString,                to_string;
+    bool,                   to_bool;
+}
+
 impl Eq for AnyObject {}
-
-impl PartialEq<bool> for AnyObject {
-    #[inline]
-    fn eq(&self, other: &bool) -> bool {
-        self.to_bool() == Some(*other)
-    }
-}
-
-impl PartialEq<AnyObject> for bool {
-    #[inline]
-    fn eq(&self, other: &AnyObject) -> bool {
-        other == self
-    }
-}
 
 impl fmt::Debug for AnyObject {
     #[inline]
