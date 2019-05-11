@@ -194,6 +194,23 @@ impl String {
         self._flags() & (RSTRING_NOEMBED as ruby::VALUE) == 0
     }
 
+    /// Returns a new instance from `s` encoded as `enc`.
+    ///
+    /// # Safety
+    ///
+    /// Care must be taken to ensure that the bytes are actually encoded this
+    /// way. Otherwise, Ruby may make incorrect assumptions about the underlying
+    /// data.
+    #[inline]
+    pub unsafe fn with_encoding(s: impl AsRef<[u8]>, enc: Encoding) -> Self {
+        let s = s.as_ref();
+        String::_new(ruby::rb_external_str_new_with_enc(
+            s.as_ptr() as *const _,
+            s.len() as _,
+            enc._enc(),
+        ))
+    }
+
     /// Returns how the bytes of `self` are encoded.
     ///
     /// # Examples
