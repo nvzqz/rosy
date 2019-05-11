@@ -36,8 +36,11 @@ extern crate ruby_sys as ruby;
 #[doc(inline)]
 pub use ruby::RUBY_VERSION;
 
-use std::error::Error;
-use std::fmt;
+use std::{
+    error::Error,
+    fmt,
+    mem,
+};
 
 mod util;
 mod object;
@@ -141,12 +144,12 @@ pub fn protected<F, O>(f: F) -> Result<O, AnyException>
     unsafe {
         // Required to prevent stack unwinding (if there's a `panic!` in `f()`)
         // from dropping `out`, which is uninitialized memory until `f()`
-        use std::mem::ManuallyDrop;
+        use mem::ManuallyDrop;
 
         // These shenanigans allow us to pass in a pointer to `f`, with a
         // pointer to its uninitialized output, into `rb_protect` to make them
         // accessible from `wrapper`
-        let mut out = ManuallyDrop::new(std::mem::uninitialized::<O>());
+        let mut out = ManuallyDrop::new(mem::uninitialized::<O>());
         let mut ctx = (Some(f), &mut *out);
         let ctx = &mut ctx as *mut (Option<F>, &mut O) as ruby::VALUE;
 
