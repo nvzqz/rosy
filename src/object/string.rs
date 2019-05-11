@@ -6,10 +6,11 @@ use std::{
     cmp::Ordering,
     convert::{TryFrom, TryInto},
     error::Error,
-    ffi::{CStr, FromBytesWithNulError},
+    ffi::{CStr, CString, FromBytesWithNulError},
     fmt,
     os::raw::{c_char, c_int, c_long},
     str::Utf8Error,
+    string,
 };
 
 mod util {
@@ -101,47 +102,56 @@ impl<'r, O: Object> PartialEq<O> for String {
     }
 }
 
-impl PartialEq<[u8]> for String {
-    #[inline]
-    fn eq(&self, other: &[u8]) -> bool {
-        // Safe because no other thread can access the bytes
-        unsafe { self.as_bytes() == other }
-    }
+// Implements `PartialEq` against all relevant string-related types
+macro_rules! impl_eq {
+    ($($t:ty, $bytes:ident;)+) => { $(
+        impl PartialEq<$t> for String {
+            #[inline]
+            fn eq(&self, other: &$t) -> bool {
+                // Safe because no other thread can access the bytes
+                unsafe { self.as_bytes() == other.$bytes() }
+            }
+        }
+
+        // Needed to prevent conflict with `PartialEq<impl Object>`
+        impl PartialEq<&$t> for String {
+            #[inline]
+            fn eq(&self, other: &&$t) -> bool {
+                *self == **other
+            }
+        }
+
+        impl PartialEq<String> for $t {
+            #[inline]
+            fn eq(&self, other: &String) -> bool {
+                other == self
+            }
+        }
+
+        impl PartialEq<String> for &$t {
+            #[inline]
+            fn eq(&self, other: &String) -> bool {
+                other == self
+            }
+        }
+    )+ }
 }
 
-impl PartialEq<&[u8]> for String {
-    #[inline]
-    fn eq(&self, other: &&[u8]) -> bool {
-        *self == **other
-    }
+impl_eq! {
+    [u8],           as_ref;
+    Vec<u8>,        as_slice;
+    str,            as_bytes;
+    string::String, as_bytes;
+    CStr,           to_bytes;
+    CString,        to_bytes;
 }
 
-impl PartialEq<String> for [u8] {
+impl<S: ?Sized + Clone> PartialEq<Cow<'_, S>> for String
+    where String: PartialEq<S>
+{
     #[inline]
-    fn eq(&self, other: &String) -> bool {
-        other == self
-    }
-}
-
-impl PartialEq<str> for String {
-    #[inline]
-    fn eq(&self, other: &str) -> bool {
-        self == other.as_bytes()
-    }
-}
-
-// Needed for dumb reasons
-impl PartialEq<&str> for String {
-    #[inline]
-    fn eq(&self, other: &&str) -> bool {
-        self == other.as_bytes()
-    }
-}
-
-impl PartialEq<String> for str {
-    #[inline]
-    fn eq(&self, other: &String) -> bool {
-        other == self
+    fn eq(&self, other: &Cow<'_, S>) -> bool {
+        self == AsRef::<S>::as_ref(other)
     }
 }
 
