@@ -17,6 +17,16 @@ use std::{
 #[repr(transparent)]
 pub struct Symbol(AnyObject);
 
+impl AsRef<AnyObject> for Symbol {
+    #[inline]
+    fn as_ref(&self) -> &AnyObject { &self.0 }
+}
+
+impl From<Symbol> for AnyObject {
+    #[inline]
+    fn from(object: Symbol) -> AnyObject { object.0 }
+}
+
 unsafe impl Object for Symbol {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
@@ -37,18 +47,8 @@ unsafe impl Object for Symbol {
 impl fmt::Display for Symbol {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.as_any().fmt(f)
+        self.as_any_object().fmt(f)
     }
-}
-
-impl AsRef<AnyObject> for Symbol {
-    #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
-}
-
-impl From<Symbol> for AnyObject {
-    #[inline]
-    fn from(object: Symbol) -> AnyObject { object.0 }
 }
 
 impl From<String> for Symbol {

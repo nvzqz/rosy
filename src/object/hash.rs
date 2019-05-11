@@ -12,6 +12,16 @@ use std::{
 #[repr(transparent)]
 pub struct Hash(AnyObject);
 
+impl AsRef<AnyObject> for Hash {
+    #[inline]
+    fn as_ref(&self) -> &AnyObject { &self.0 }
+}
+
+impl From<Hash> for AnyObject {
+    #[inline]
+    fn from(object: Hash) -> AnyObject { object.0 }
+}
+
 unsafe impl Object for Hash {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
@@ -32,18 +42,8 @@ unsafe impl Object for Hash {
 impl fmt::Display for Hash {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.as_any().fmt(f)
+        self.as_any_object().fmt(f)
     }
-}
-
-impl AsRef<AnyObject> for Hash {
-    #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
-}
-
-impl From<Hash> for AnyObject {
-    #[inline]
-    fn from(object: Hash) -> AnyObject { object.0 }
 }
 
 impl<K: Into<AnyObject>, V: Into<AnyObject>> FromIterator<(K, V)> for Hash {

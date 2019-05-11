@@ -16,6 +16,16 @@ use std::fmt;
 #[repr(transparent)]
 pub struct Module(AnyObject);
 
+impl AsRef<AnyObject> for Module {
+    #[inline]
+    fn as_ref(&self) -> &AnyObject { &self.0 }
+}
+
+impl From<Module> for AnyObject {
+    #[inline]
+    fn from(object: Module) -> AnyObject { object.0 }
+}
+
 unsafe impl Object for Module {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
@@ -38,18 +48,8 @@ impl crate::util::Sealed for Module {}
 impl fmt::Display for Module {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.as_any().fmt(f)
+        self.as_any_object().fmt(f)
     }
-}
-
-impl AsRef<AnyObject> for Module {
-    #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
-}
-
-impl From<Module> for AnyObject {
-    #[inline]
-    fn from(object: Module) -> AnyObject { object.0 }
 }
 
 impl<O: Object> PartialEq<O> for Module {

@@ -280,8 +280,8 @@ impl DefMixinError {
     pub fn existing_object(&self) -> AnyObject {
         use DefMixinError::*;
         match *self {
-            ExistingModule(m) => m.into_any(),
-            ExistingClass(c)  => c.into_any(),
+            ExistingModule(m) => m.into_any_object(),
+            ExistingClass(c)  => c.into_any_object(),
             ExistingConst(c)  => c,
         }
     }

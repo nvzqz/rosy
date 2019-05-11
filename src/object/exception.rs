@@ -68,6 +68,16 @@ pub unsafe trait Exception: Object {
 #[repr(transparent)]
 pub struct AnyException(AnyObject);
 
+impl AsRef<AnyObject> for AnyException {
+    #[inline]
+    fn as_ref(&self) -> &AnyObject { &self.0 }
+}
+
+impl From<AnyException> for AnyObject {
+    #[inline]
+    fn from(obj: AnyException) -> Self { obj.0 }
+}
+
 unsafe impl Object for AnyException {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
@@ -82,7 +92,7 @@ unsafe impl Object for AnyException {
 impl fmt::Display for AnyException {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.as_any().fmt(f)
+        self.as_any_object().fmt(f)
     }
 }
 

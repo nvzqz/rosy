@@ -31,7 +31,7 @@ pub use self::{
 ///
 /// All types that implement this trait _must_ be light wrappers around an
 /// [`AnyObject`](struct.AnyObject.html) and thus have the same size and layout.
-pub unsafe trait Object: Copy {
+pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> {
     /// Attempts to create an instance by casting `obj`.
     #[inline]
     #[allow(unused)]
@@ -47,23 +47,21 @@ pub unsafe trait Object: Copy {
 
     /// Returns `self` as an `AnyObject`.
     #[inline]
-    fn into_any(self) -> AnyObject { *self.as_any() }
+    fn into_any_object(self) -> AnyObject { self.into() }
 
     /// Returns a reference to `self` as an `AnyObject`.
     #[inline]
-    fn as_any(&self) -> &AnyObject {
-        unsafe { &*(self as *const Self as *const AnyObject) }
-    }
+    fn as_any_object(&self) -> &AnyObject { self.as_ref() }
 
     /// Returns `self` as a reference to a single-element slice.
     #[inline]
     fn as_any_slice(&self) -> &[AnyObject] {
-        std::slice::from_ref(self.as_any())
+        std::slice::from_ref(self.as_any_object())
     }
 
     /// Returns the raw object pointer.
     fn raw(self) -> VALUE {
-        self.as_any().raw()
+        self.as_any_object().raw()
     }
 
     /// Casts `self` to `O` without checking whether it is one.
@@ -85,7 +83,7 @@ pub unsafe trait Object: Copy {
     /// Returns the virtual type of `self`.
     #[inline]
     fn ty(self) -> Ty {
-        self.as_any().ty()
+        self.as_any_object().ty()
     }
 
     /// Returns whether the virtual type of `self` is `ty`.
@@ -258,10 +256,15 @@ pub unsafe trait Object: Copy {
 #[repr(transparent)]
 pub struct AnyObject(ruby::VALUE);
 
+impl AsRef<AnyObject> for AnyObject {
+    #[inline]
+    fn as_ref(&self) -> &Self { self }
+}
+
 unsafe impl Object for AnyObject {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
-        Some(obj.into_any())
+        Some(obj.into_any_object())
     }
 
     fn ty(self) -> ty::Ty {
@@ -274,10 +277,10 @@ unsafe impl Object for AnyObject {
     }
 
     #[inline]
-    fn as_any(&self) -> &Self { &self }
+    fn as_any_object(&self) -> &Self { &self }
 
     #[inline]
-    fn into_any(self) -> Self { self }
+    fn into_any_object(self) -> Self { self }
 }
 
 impl<O: Object> PartialEq<O> for AnyObject {
@@ -340,7 +343,7 @@ impl fmt::Display for AnyObject {
 impl<O: Object> From<Option<O>> for AnyObject {
     #[inline]
     fn from(option: Option<O>) -> Self {
-        option.map(Object::into_any).unwrap_or(AnyObject::nil())
+        option.map(Object::into_any_object).unwrap_or(AnyObject::nil())
     }
 }
 
@@ -348,8 +351,8 @@ impl<O: Object, E: Object> From<Result<O, E>> for AnyObject {
     #[inline]
     fn from(result: Result<O, E>) -> Self {
         match result {
-            Ok(obj) => obj.into_any(),
-            Err(err) => err.into_any(),
+            Ok(obj) => obj.into_any_object(),
+            Err(err) => err.into_any_object(),
         }
     }
 }

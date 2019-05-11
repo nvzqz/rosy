@@ -13,6 +13,16 @@ use std::{
 #[repr(transparent)]
 pub struct Array(AnyObject);
 
+impl AsRef<AnyObject> for Array {
+    #[inline]
+    fn as_ref(&self) -> &AnyObject { &self.0 }
+}
+
+impl From<Array> for AnyObject {
+    #[inline]
+    fn from(object: Array) -> AnyObject { object.0 }
+}
+
 unsafe impl Object for Array {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
@@ -33,18 +43,8 @@ unsafe impl Object for Array {
 impl fmt::Display for Array {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.as_any().fmt(f)
+        self.as_any_object().fmt(f)
     }
-}
-
-impl AsRef<AnyObject> for Array {
-    #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
-}
-
-impl From<Array> for AnyObject {
-    #[inline]
-    fn from(object: Array) -> AnyObject { object.0 }
 }
 
 // Safe because this is part of the contract of implementing `Object`.
@@ -125,7 +125,7 @@ impl Array {
 
     #[inline]
     pub(crate) fn _rarray(self) -> *mut ruby::RArray {
-        self.as_any()._ptr() as _
+        self.as_any_object()._ptr() as _
     }
 
     #[inline]

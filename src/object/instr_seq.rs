@@ -14,6 +14,16 @@ use std::{
 #[repr(transparent)]
 pub struct InstrSeq(AnyObject);
 
+impl AsRef<AnyObject> for InstrSeq {
+    #[inline]
+    fn as_ref(&self) -> &AnyObject { &self.0 }
+}
+
+impl From<InstrSeq> for AnyObject {
+    #[inline]
+    fn from(obj: InstrSeq) -> Self { obj.0 }
+}
+
 unsafe impl Object for InstrSeq {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
@@ -28,7 +38,7 @@ unsafe impl Object for InstrSeq {
 impl fmt::Display for InstrSeq {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.as_any().fmt(f)
+        self.as_any_object().fmt(f)
     }
 }
 

@@ -190,7 +190,7 @@ impl String {
 
     #[inline]
     pub(crate) fn _rstring(self) -> *mut ruby::RString {
-        self.as_any()._ptr() as _
+        self.as_any_object()._ptr() as _
     }
 
     #[inline]
@@ -466,6 +466,16 @@ impl String {
 #[repr(transparent)]
 pub struct Encoding(AnyObject);
 
+impl AsRef<AnyObject> for Encoding {
+    #[inline]
+    fn as_ref(&self) -> &AnyObject { &self.0 }
+}
+
+impl From<Encoding> for AnyObject {
+    #[inline]
+    fn from(object: Encoding) -> AnyObject { object.0 }
+}
+
 unsafe impl Object for Encoding {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
@@ -480,7 +490,7 @@ unsafe impl Object for Encoding {
 impl fmt::Display for Encoding {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.as_any().fmt(f)
+        self.as_any_object().fmt(f)
     }
 }
 
@@ -492,16 +502,6 @@ impl PartialEq for Encoding {
 }
 
 impl Eq for Encoding {}
-
-impl AsRef<AnyObject> for Encoding {
-    #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
-}
-
-impl From<Encoding> for AnyObject {
-    #[inline]
-    fn from(object: Encoding) -> AnyObject { object.0 }
-}
 
 impl TryFrom<&CStr> for Encoding {
     type Error = EncodingLookupError;
@@ -553,7 +553,7 @@ impl Encoding {
 
     #[inline]
     pub(crate) fn _rdata(self) -> *mut ruby::RData {
-        self.as_any()._ptr() as _
+        self.as_any_object()._ptr() as _
     }
 
     #[inline]
