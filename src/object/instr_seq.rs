@@ -1,6 +1,14 @@
 //! Ruby instruction sequences.
 
-use crate::object::{Object, AnyObject, AnyException, Class, Hash, String};
+use crate::object::{
+    AnyException,
+    AnyObject,
+    Class,
+    Hash,
+    NonNullObject,
+    Object,
+    String,
+};
 use std::{
     fmt,
     io,
@@ -12,23 +20,23 @@ use std::{
 /// portable and should not be used in another version or architecture of Ruby.
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
-pub struct InstrSeq(AnyObject);
+pub struct InstrSeq(NonNullObject);
 
 impl AsRef<AnyObject> for InstrSeq {
     #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
+    fn as_ref(&self) -> &AnyObject { self.0.as_ref() }
 }
 
 impl From<InstrSeq> for AnyObject {
     #[inline]
-    fn from(obj: InstrSeq) -> Self { obj.0 }
+    fn from(obj: InstrSeq) -> Self { obj.0.into() }
 }
 
 unsafe impl Object for InstrSeq {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
         if obj.class().inherits(Class::instr_seq()) {
-            Some(Self::_new(obj.raw()))
+            unsafe { Some(Self::cast_unchecked(obj)) }
         } else {
             None
         }
@@ -44,14 +52,10 @@ impl fmt::Display for InstrSeq {
 
 impl InstrSeq {
     #[inline]
-    pub(crate) fn _new(raw: ruby::VALUE) -> Self {
-        Self(AnyObject(raw))
-    }
-
-    #[inline]
     fn _compile(args: &[AnyObject]) -> Result<Self, AnyException> {
-        let class = Class::instr_seq();
-        class.call_with("compile", args).map(Self)
+        Class::instr_seq().call_with("compile", args).map(|obj| unsafe {
+            Self::cast_unchecked(obj)
+        })
     }
 
     /// Compiles `script` into an instruction sequence.
@@ -71,8 +75,9 @@ impl InstrSeq {
 
     #[inline]
     fn _compile_file(args: &[AnyObject]) -> Result<Self, AnyException> {
-        let class = Class::instr_seq();
-        class.call_with("compile_file", args).map(Self)
+        Class::instr_seq().call_with("compile_file", args).map(|obj| unsafe {
+            Self::cast_unchecked(obj)
+        })
     }
 
     /// Compiles the contents of a file at `path` into an instruction sequence.
@@ -117,8 +122,10 @@ impl InstrSeq {
     /// ```
     #[inline]
     pub unsafe fn from_binary(binary: impl Into<String>) -> Self {
-        let class = Class::instr_seq();
-        Self(class.call_with_unchecked("load_from_binary", &[binary.into()]))
+        Self::cast_unchecked(Class::instr_seq().call_with_unchecked(
+            "load_from_binary",
+            &[binary.into()]
+        ))
     }
 
     /// Evaluates `self` and returns the result.
@@ -145,7 +152,7 @@ impl InstrSeq {
     /// Returns the serialized binary data.
     #[inline]
     pub fn to_binary(&self) -> String {
-        unsafe { String::_new(self.call_unchecked("to_binary").raw()) }
+        unsafe { String::cast_unchecked(self.call_unchecked("to_binary")) }
     }
 
     /// Writes the serialized binary data of `self` to `w`.
@@ -163,20 +170,26 @@ impl InstrSeq {
     /// Returns a human-readable form of `self`.
     #[inline]
     pub fn disassemble(&self) -> String {
-        unsafe { String::_new(self.call_unchecked("disasm").raw()) }
+        unsafe { String::cast_unchecked(self.call_unchecked("disasm")) }
     }
 
     /// Returns the file path of `self`, or `<compiled>` if it was compiled from
     /// a string.
     #[inline]
     pub fn path(&self) -> String {
-        unsafe { String::_new(self.call_unchecked("path").raw()) }
+        unsafe { String::cast_unchecked(self.call_unchecked("path")) }
     }
 
     /// Returns the absolute path of `self` if it was compiled from a file.
     #[inline]
     pub fn absolute_path(&self) -> Option<String> {
-        let path = unsafe { self.call_unchecked("absolute_path") };
-        if path.is_nil() { None } else { Some(String::_new(path.raw())) }
+        unsafe {
+            let path = self.call_unchecked("absolute_path");
+            if path.is_nil() {
+                None
+            } else {
+                Some(String::cast_unchecked(path))
+            }
+        }
     }
 }

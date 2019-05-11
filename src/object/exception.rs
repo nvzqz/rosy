@@ -1,6 +1,6 @@
 //! Ruby exceptions.
 
-use crate::object::{Object, AnyObject, Array, Class, String};
+use crate::object::{Object, AnyObject, Array, NonNullObject, Class, String};
 use std::fmt;
 
 /// Some concrete Ruby exception.
@@ -51,38 +51,50 @@ pub unsafe trait Exception: Object {
     /// The array contains strings.
     #[inline]
     fn backtrace(&self) -> Option<Array> {
-        let value = unsafe { self.call_unchecked("backtrace") };
-        if value.is_nil() { None } else { Some(Array::_new(value.raw())) }
+        unsafe {
+            let obj = self.call_unchecked("backtrace");
+            if obj.is_nil() {
+                None
+            } else {
+                Some(Array::cast_unchecked(obj))
+            }
+        }
     }
 
     /// The underlying exception that caused `self`.
     #[inline]
     fn cause(&self) -> Option<AnyException> {
-        let cause = unsafe { self.call_unchecked("cause") };
-        if cause.is_nil() { None } else { Some(AnyException(cause)) }
+        unsafe {
+            let obj = self.call_unchecked("cause");
+            if obj.is_nil() {
+                None
+            } else {
+                Some(AnyException::cast_unchecked(obj))
+            }
+        }
     }
 }
 
 /// Any Ruby exception.
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
-pub struct AnyException(AnyObject);
+pub struct AnyException(NonNullObject);
 
 impl AsRef<AnyObject> for AnyException {
     #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
+    fn as_ref(&self) -> &AnyObject { self.0.as_ref() }
 }
 
 impl From<AnyException> for AnyObject {
     #[inline]
-    fn from(obj: AnyException) -> Self { obj.0 }
+    fn from(obj: AnyException) -> Self { obj.0.into() }
 }
 
 unsafe impl Object for AnyException {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
         if obj.class().inherits(Class::exception()) {
-            Some(Self::_new(obj.raw()))
+            unsafe { Some(Self::from_raw(obj.raw())) }
         } else {
             None
         }
@@ -110,17 +122,12 @@ impl<E: Exception> PartialEq<E> for AnyException {
 impl Eq for AnyException {}
 
 impl AnyException {
-    #[inline]
-    pub(crate) fn _new(raw: ruby::VALUE) -> Self {
-        Self(AnyObject(raw))
-    }
-
     // Returns the current exception without checking, clearing it globally
     #[inline]
     pub(crate) unsafe fn _take_current() -> AnyException {
         let exc = ruby::rb_errinfo();
         ruby::rb_set_errinfo(crate::util::NIL_VALUE);
-        AnyException::_new(exc)
+        AnyException::from_raw(exc)
     }
 
     /// Creates a new instance of `Exception` with `message`.
@@ -137,15 +144,17 @@ impl AnyException {
         class: impl Into<Class>,
         message: impl Into<String>,
     ) -> Self {
-        Self(class.into().new_instance(&[message.into()]))
+        Self::cast_unchecked(class.into().new_instance(&[message.into()]))
     }
 
     /// Returns the current pending exception.
     #[inline]
     pub fn current() -> Option<AnyException> {
-        match unsafe { ruby::rb_errinfo() } {
-            crate::util::NIL_VALUE => None,
-            raw => Some(AnyException::_new(raw)),
+        unsafe {
+            match ruby::rb_errinfo() {
+                crate::util::NIL_VALUE => None,
+                raw => Some(AnyException::from_raw(raw))
+            }
         }
     }
 

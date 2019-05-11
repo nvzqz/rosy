@@ -3,6 +3,7 @@
 use crate::object::{
     AnyObject,
     mixin::{Mixin, DefMixinError},
+    NonNullObject,
     Object,
     String,
     SymbolId,
@@ -46,23 +47,23 @@ use std::{
 /// ```
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
-pub struct Class(AnyObject);
+pub struct Class(NonNullObject);
 
 impl AsRef<AnyObject> for Class {
     #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
+    fn as_ref(&self) -> &AnyObject { self.0.as_ref() }
 }
 
 impl From<Class> for AnyObject {
     #[inline]
-    fn from(object: Class) -> AnyObject { object.0 }
+    fn from(object: Class) -> AnyObject { object.0.into() }
 }
 
 unsafe impl Object for Class {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
         if obj.is_ty(Ty::Class) {
-            Some(Self::_new(obj.raw()))
+            unsafe { Some(Self::cast_unchecked(obj)) }
         } else {
             None
         }
@@ -129,23 +130,19 @@ impl PartialOrd for Class {
 }
 
 impl Class {
-    #[inline]
-    pub(crate) fn _new(raw: ruby::VALUE) -> Self {
-        Self(AnyObject(raw))
-    }
-
     pub(crate) fn _def_under(
         m: ruby::VALUE,
-        sc: Class,
+        superclass: Class,
         name: SymbolId,
     ) -> Result<Class, DefMixinError> {
         if let Some(err) = DefMixinError::_get(m, name) {
             return Err(err);
         }
-        let name = name.raw();
-        let sc = sc.raw();
-        let raw = unsafe { ruby::rb_define_class_id_under(m, name, sc) };
-        Ok(Class::_new(raw))
+        unsafe { Ok(Class::from_raw(ruby::rb_define_class_id_under(
+            m,
+            name.raw(),
+            superclass.raw(),
+        ))) }
     }
 
     /// Defines a new top-level class with `name`.
@@ -204,7 +201,7 @@ impl Class {
     /// Returns the parent class of `self`.
     #[inline]
     pub fn superclass(self) -> Class {
-        unsafe { Class::_new(ruby::rb_class_superclass(self.raw())) }
+        unsafe { Class::from_raw(ruby::rb_class_superclass(self.raw())) }
     }
 
     /// Defines a new subclass of `self` with `name`.
@@ -246,7 +243,7 @@ impl Class {
     /// Returns the name of `self`.
     #[inline]
     pub fn name(self) -> String {
-        unsafe { String::_new(ruby::rb_class_name(self.raw())) }
+        unsafe { String::from_raw(ruby::rb_class_name(self.raw())) }
     }
 }
 
@@ -291,7 +288,7 @@ macro_rules! built_in_classes {
             ///` class.
             #[inline]
             pub fn $method() -> Self {
-                Self::_new(unsafe { ruby::$konst })
+                unsafe { Self::from_raw(ruby::$konst) }
             }
         )+}
     }

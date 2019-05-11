@@ -4,6 +4,7 @@ use std::{
     ffi::{CStr, CString},
 };
 
+mod non_null;
 mod ty;
 pub mod array;
 pub mod exception;
@@ -12,6 +13,8 @@ pub mod instr_seq;
 pub mod mixin;
 pub mod string;
 pub mod symbol;
+
+use non_null::NonNullObject;
 
 #[doc(inline)]
 pub use self::{
@@ -32,6 +35,22 @@ pub use self::{
 /// All types that implement this trait _must_ be light wrappers around an
 /// [`AnyObject`](struct.AnyObject.html) and thus have the same size and layout.
 pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> {
+    /// Creates a new object from `raw` without checking.
+    ///
+    /// # Safety
+    ///
+    /// The following invariants must be upheld:
+    /// - The value came from the Ruby VM
+    /// - The value is a valid representation of `Self`
+    ///
+    /// Not following this will lead to
+    /// [nasal demons](https://en.wikipedia.org/wiki/Nasal_demons). You've been
+    /// warned.
+    #[inline]
+    unsafe fn from_raw(raw: ruby::VALUE) -> Self {
+        Self::cast_unchecked(AnyObject(raw))
+    }
+
     /// Attempts to create an instance by casting `obj`.
     #[inline]
     #[allow(unused)]
@@ -95,14 +114,14 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> {
     /// Returns the `Class` for `self`.
     #[inline]
     fn class(self) -> Class {
-        unsafe { Class::_new(ruby::rb_obj_class(self.raw())) }
+        unsafe { Class::from_raw(ruby::rb_obj_class(self.raw())) }
     }
 
     /// Returns the singleton `Class` of `self`, creating one if it doesn't
     /// exist already.
     #[inline]
     fn singleton_class(self) -> Class {
-        unsafe { Class::_new(ruby::rb_singleton_class(self.raw())) }
+        unsafe { Class::from_raw(ruby::rb_singleton_class(self.raw())) }
     }
 
     /// Calls `method` on `self` and returns the result.
@@ -220,13 +239,13 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> {
     /// ```
     #[inline]
     fn inspect(self) -> String {
-        unsafe { String::_new(ruby::rb_inspect(self.raw())) }
+        unsafe { String::from_raw(ruby::rb_inspect(self.raw())) }
     }
 
     /// Returns the result of calling the `to_s` method on `self`.
     #[inline]
     fn to_s(self) -> String {
-        unsafe { String::_new(ruby::rb_obj_as_string(self.raw())) }
+        unsafe { String::from_raw(ruby::rb_obj_as_string(self.raw())) }
     }
 
     /// Returns whether modifications can be made to `self`.
@@ -406,13 +425,6 @@ impl AnyObject {
         AnyObject(crate::util::NIL_VALUE)
     }
 
-    /// Creates a new object from `raw` without checking whether it came from
-    /// the Ruby VM.
-    #[inline]
-    pub unsafe fn from_raw(raw: VALUE) -> Self {
-        AnyObject(raw)
-    }
-
     /// Returns whether `self` is `nil`.
     #[inline]
     pub fn is_nil(self) -> bool {
@@ -468,7 +480,11 @@ impl AnyObject {
     /// Returns `self` as a `String` if it is one.
     #[inline]
     pub fn to_string(self) -> Option<String> {
-        if self.is_string() { Some(String::_new(self.raw())) } else { None }
+        if self.is_string() {
+            unsafe { Some(String::cast_unchecked(self)) }
+        } else {
+            None
+        }
     }
 
     /// Returns whether `self` is a `Symbol`.
@@ -480,7 +496,11 @@ impl AnyObject {
     /// Returns `self` as a `Symbol` if it is one.
     #[inline]
     pub fn to_symbol(self) -> Option<Symbol> {
-        if self.is_symbol() { Some(Symbol::_new(self.raw())) } else { None }
+        if self.is_symbol() {
+            unsafe { Some(Symbol::cast_unchecked(self)) }
+        } else {
+            None
+        }
     }
 
     /// Returns whether `self` is a `Array`.
@@ -492,7 +512,11 @@ impl AnyObject {
     /// Returns `self` as an `Array` if it is one.
     #[inline]
     pub fn to_array(self) -> Option<Array> {
-        if self.is_array() { Some(Array::_new(self.raw())) } else { None }
+        if self.is_array() {
+            unsafe { Some(Array::cast_unchecked(self)) }
+        } else {
+            None
+        }
     }
 
     /// Returns whether `self` is a `Class`.
@@ -504,7 +528,11 @@ impl AnyObject {
     /// Returns `self` as a `Class` if it is one.
     #[inline]
     pub fn to_class(self) -> Option<Class> {
-        if self.is_class() { Some(Class::_new(self.raw())) } else { None }
+        if self.is_class() {
+            unsafe { Some(Class::cast_unchecked(self)) }
+        } else {
+            None
+        }
     }
 
     /// Returns whether `self` is a `Module`.
@@ -516,7 +544,11 @@ impl AnyObject {
     /// Returns `self` as a `Module` if it is one.
     #[inline]
     pub fn to_module(self) -> Option<Module> {
-        if self.is_module() { Some(Module::_new(self.raw())) } else { None }
+        if self.is_module() {
+            unsafe { Some(Module::cast_unchecked(self)) }
+        } else {
+            None
+        }
     }
 
     /// Returns whether `self` is an `Exception`.
@@ -529,7 +561,7 @@ impl AnyObject {
     #[inline]
     pub fn to_exception(self) -> Option<AnyException> {
         if self.is_exception() {
-            Some(AnyException::_new(self.raw()))
+            unsafe { Some(AnyException::cast_unchecked(self)) }
         } else {
             None
         }

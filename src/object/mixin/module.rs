@@ -30,7 +30,7 @@ unsafe impl Object for Module {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
         if obj.is_ty(Ty::Module) {
-            Some(Self::_new(obj.raw()))
+            unsafe { Some(Self::cast_unchecked(obj)) }
         } else {
             None
         }
@@ -62,20 +62,15 @@ impl<O: Object> PartialEq<O> for Module {
 impl Eq for Module {}
 
 impl Module {
-    #[inline]
-    pub(crate) fn _new(raw: ruby::VALUE) -> Self {
-        Self(AnyObject(raw))
-    }
-
     pub(crate) fn _def_under(
         m: ruby::VALUE,
         name: SymbolId,
-    ) -> Result<Module, DefMixinError> {
+    ) -> Result<Self, DefMixinError> {
         if let Some(err) = DefMixinError::_get(m, name) {
             return Err(err);
         }
-        let raw = unsafe { ruby::rb_define_module_id_under(m, name.raw()) };
-        Ok(Module::_new(raw))
+        let name = name.raw();
+        unsafe { Ok(Self::from_raw(ruby::rb_define_module_id_under(m, name))) }
     }
 
     /// Extends `object` with the contents of `self`.
@@ -132,18 +127,18 @@ impl Module {
     /// Returns the name of `self` or `nil` if anonymous.
     #[inline]
     pub fn name(self) -> Option<String> {
-        let raw = unsafe { ruby::rb_mod_name(self.raw()) };
-        if raw == crate::util::NIL_VALUE {
-            None
-        } else {
-            Some(String::_new(raw))
+        unsafe {
+            match ruby::rb_mod_name(self.raw()) {
+                crate::util::NIL_VALUE => None,
+                raw => Some(String::from_raw(raw)),
+            }
         }
     }
 
     /// Returns the ancestors of this module, including itself.
     #[inline]
     pub fn ancestors(self) -> Array {
-        unsafe { Array::_new(ruby::rb_mod_ancestors(self.raw())) }
+        unsafe { Array::from_raw(ruby::rb_mod_ancestors(self.raw())) }
     }
 }
 
@@ -156,7 +151,7 @@ macro_rules! built_in_modules {
             ///` module.
             #[inline]
             pub fn $method() -> Self {
-                Self::_new(unsafe { ruby::$konst })
+                unsafe { Self::from_raw(ruby::$konst) }
             }
         )+}
     }

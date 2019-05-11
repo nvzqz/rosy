@@ -1,6 +1,6 @@
 //! Ruby arrays.
 
-use crate::object::{Object, AnyObject, Ty, String};
+use crate::object::{Object, AnyObject, NonNullObject, Ty, String};
 use std::{
     cmp::Ordering,
     fmt,
@@ -11,23 +11,23 @@ use std::{
 /// An instance of Ruby's `Array` class.
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
-pub struct Array(AnyObject);
+pub struct Array(NonNullObject);
 
 impl AsRef<AnyObject> for Array {
     #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
+    fn as_ref(&self) -> &AnyObject { self.0.as_ref() }
 }
 
 impl From<Array> for AnyObject {
     #[inline]
-    fn from(object: Array) -> AnyObject { object.0 }
+    fn from(object: Array) -> AnyObject { object.0.into() }
 }
 
 unsafe impl Object for Array {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
         if obj.is_ty(Ty::Array) {
-            Some(Self::_new(obj.raw()))
+            unsafe { Some(Self::from_raw(obj.raw())) }
         } else {
             None
         }
@@ -53,7 +53,7 @@ impl<'r, O: Object> From<&[O]> for Array {
     fn from(slice: &[O]) -> Self {
         let ptr = slice.as_ptr() as *const ruby::VALUE;
         let len = slice.len();
-        unsafe { Array::_new(ruby::rb_ary_new_from_values(len as _, ptr)) }
+        unsafe { Array::from_raw(ruby::rb_ary_new_from_values(len as _, ptr)) }
     }
 }
 
@@ -107,11 +107,6 @@ impl Add for Array {
 
 impl Array {
     #[inline]
-    pub(crate) fn _new(raw: ruby::VALUE) -> Self {
-        Self(AnyObject(raw))
-    }
-
-    #[inline]
     pub(crate) fn _ptr(self) -> *const ruby::VALUE {
         unsafe {
             if self._is_embedded() {
@@ -149,7 +144,7 @@ impl Array {
     /// Creates a new instance with `capacity` amount of storage.
     #[inline]
     pub fn with_capacity(capacity: usize) -> Self {
-        unsafe { Self::_new(ruby::rb_ary_new_capa(capacity as _)) }
+        unsafe { Self::from_raw(ruby::rb_ary_new_capa(capacity as _)) }
     }
 
     /// Returns the number of elements in `self`.
@@ -227,7 +222,7 @@ impl Array {
     /// Returns the result of performing `self + other`.
     #[inline]
     pub fn plus(self, other: Self) -> Self {
-        unsafe { Array::_new(ruby::rb_ary_plus(self.raw(), other.raw())) }
+        unsafe { Array::from_raw(ruby::rb_ary_plus(self.raw(), other.raw())) }
     }
 
     /// Pushes `obj` onto the end of `self`.
@@ -296,7 +291,7 @@ impl Array {
     #[inline]
     #[must_use]
     pub fn sorted(self) -> Self {
-        unsafe { Array::_new(ruby::rb_ary_sort(self.raw())) }
+        unsafe { Array::from_raw(ruby::rb_ary_sort(self.raw())) }
     }
 
     /// Sorts the contents of `self` in-place.
@@ -320,7 +315,7 @@ impl Array {
     /// ```
     #[inline]
     pub fn join(self, separator: impl Into<String>) -> String {
-        let separator = separator.into();
-        unsafe { String::_new(ruby::rb_ary_join(self.raw(), separator.raw())) }
+        let separator = separator.into().raw();
+        unsafe { String::from_raw(ruby::rb_ary_join(self.raw(), separator)) }
     }
 }

@@ -47,7 +47,7 @@ pub trait Mixin: Object + Sealed {
     /// Returns an array of the modules included in `self`.
     #[inline]
     fn included_modules(self) -> Array {
-        unsafe { Array::_new(ruby::rb_mod_included_modules(self.raw())) }
+        unsafe { Array::from_raw(ruby::rb_mod_included_modules(self.raw())) }
     }
 
     /// Prepends `module` in `self`.
@@ -241,9 +241,13 @@ impl DefMixinError {
         let existing = _get_const(m, name)?;
         let raw = existing.raw();
         let err = match crate::util::value_built_in_type(raw) {
-            Some(RUBY_T_MODULE) => ExistingModule(Module::_new(raw)),
-            Some(RUBY_T_CLASS)  => ExistingClass(Class::_new(raw)),
-            Some(_) | None      => ExistingConst(existing),
+            Some(RUBY_T_MODULE) => unsafe {
+                ExistingModule(Module::from_raw(raw))
+            },
+            Some(RUBY_T_CLASS) => unsafe {
+                ExistingClass(Class::from_raw(raw))
+            },
+            Some(_) | None => ExistingConst(existing),
         };
         Some(err)
     }

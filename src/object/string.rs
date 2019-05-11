@@ -1,6 +1,6 @@
 //! Ruby strings.
 
-use crate::object::{Object, AnyObject, Class, Ty};
+use crate::object::{Object, AnyObject, Class, NonNullObject, Ty};
 use std::{
     borrow::Cow,
     cmp::Ordering,
@@ -22,7 +22,7 @@ mod util {
 /// An instance of Ruby's `String` class.
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
-pub struct String(AnyObject);
+pub struct String(NonNullObject);
 
 impl fmt::Display for String {
     #[inline]
@@ -46,21 +46,21 @@ unsafe impl Object for String {
 
 impl AsRef<AnyObject> for String {
     #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
+    fn as_ref(&self) -> &AnyObject { self.0.as_ref() }
 }
 
 impl From<String> for AnyObject {
     #[inline]
-    fn from(object: String) -> AnyObject { object.0 }
+    fn from(object: String) -> AnyObject { object.0.into() }
 }
 
 impl From<&str> for String {
     #[inline]
     fn from(s: &str) -> String {
-        let ptr = s.as_ptr();
-        let len = s.len();
-        let raw = unsafe { ruby::rb_utf8_str_new(ptr as _, len as _) };
-        String::_new(raw)
+        unsafe { String::from_raw(ruby::rb_utf8_str_new(
+            s.as_ptr() as *const _,
+            s.len() as _,
+        )) }
     }
 }
 
@@ -76,7 +76,7 @@ impl From<&[u8]> for String {
     fn from(bytes: &[u8]) -> String {
         let ptr = bytes.as_ptr();
         let len = bytes.len();
-        unsafe { String::_new(ruby::rb_str_new(ptr as _, len as _)) }
+        unsafe { String::from_raw(ruby::rb_str_new(ptr as *const _, len as _)) }
     }
 }
 
@@ -173,11 +173,6 @@ impl Ord for String {
 
 impl String {
     #[inline]
-    pub(crate) fn _new(raw: ruby::VALUE) -> Self {
-        Self(AnyObject(raw))
-    }
-
-    #[inline]
     pub(crate) fn _ptr(self) -> *const c_char {
         unsafe {
             if self._is_embedded() {
@@ -214,7 +209,7 @@ impl String {
     #[inline]
     pub unsafe fn with_encoding(s: impl AsRef<[u8]>, enc: Encoding) -> Self {
         let s = s.as_ref();
-        String::_new(ruby::rb_external_str_new_with_enc(
+        String::from_raw(ruby::rb_external_str_new_with_enc(
             s.as_ptr() as *const _,
             s.len() as _,
             enc._enc(),
@@ -381,7 +376,7 @@ impl String {
     /// Duplicates the contents of `self` into a new instance.
     #[inline]
     pub fn duplicate(self) -> Self {
-        unsafe { String::_new(ruby::rb_str_dup(self.raw())) }
+        unsafe { Self::from_raw(ruby::rb_str_dup(self.raw())) }
     }
 
     /// Returns the contents of `self` with an ellipsis (three dots) if it's
@@ -403,7 +398,7 @@ impl String {
             return self.duplicate();
         }
         let len = len as c_long;
-        unsafe { String::_new(ruby::rb_str_ellipsize(self.raw(), len)) }
+        unsafe { Self::from_raw(ruby::rb_str_ellipsize(self.raw(), len)) }
     }
 
     /// Returns whether the string is locked by the VM.
@@ -480,7 +475,7 @@ unsafe impl Object for Encoding {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
         if obj.class().inherits(Class::encoding()) {
-            Some(Self::_new(obj.raw()))
+            unsafe { Some(Self::cast_unchecked(obj)) }
         } else {
             None
         }
@@ -537,13 +532,8 @@ impl TryFrom<&str> for Encoding {
 
 impl Encoding {
     #[inline]
-    pub(crate) fn _new(raw: ruby::VALUE) -> Self {
-        Self(AnyObject(raw))
-    }
-
-    #[inline]
     pub(crate) fn _from_enc(enc: *mut ruby::rb_encoding) -> Self {
-        unsafe { Self::_new(ruby::rb_enc_from_encoding(enc)) }
+        unsafe { Self::from_raw(ruby::rb_enc_from_encoding(enc)) }
     }
 
     #[inline]

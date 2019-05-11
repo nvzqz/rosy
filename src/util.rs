@@ -1,6 +1,6 @@
 use std::os::raw::{c_int, c_long};
 use ruby::{VALUE, ruby_value_type::{self, *}, ruby_special_consts::*};
-use crate::{AnyObject, Ty};
+use crate::{AnyObject, Object, Ty};
 
 extern "C" {
     // Defined in `wrapper.h`

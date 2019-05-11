@@ -31,7 +31,7 @@ unsafe impl Object for Symbol {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
         if obj.is_ty(Ty::Symbol) {
-            Some(Self::_new(obj.raw()))
+            unsafe { Some(Self::cast_unchecked(obj)) }
         } else {
             None
         }
@@ -84,11 +84,6 @@ impl TryFrom<Symbol> for std::string::String {
 }
 
 impl Symbol {
-    #[inline]
-    pub(crate) fn _new(raw: ruby::VALUE) -> Self {
-        Self(AnyObject(raw))
-    }
-
     #[inline]
     pub(crate) fn _id(self) -> ruby::ID {
         unsafe { ruby::rb_sym2id(self.raw()) }
@@ -182,7 +177,7 @@ impl From<Symbol> for SymbolId {
 impl From<SymbolId> for Symbol {
     #[inline]
     fn from(id: SymbolId) -> Symbol {
-        unsafe { Symbol::_new(ruby::rb_id2sym(id.raw())) }
+        unsafe { Symbol::from_raw(ruby::rb_id2sym(id.raw())) }
     }
 }
 

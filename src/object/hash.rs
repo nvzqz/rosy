@@ -1,6 +1,6 @@
 //! Ruby hash tables.
 
-use crate::object::{Object, AnyObject, Ty};
+use crate::object::{Object, AnyObject, NonNullObject, Ty};
 use std::{
     fmt,
     iter::FromIterator,
@@ -9,23 +9,23 @@ use std::{
 /// An instance of Ruby's `Hash` class.
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
-pub struct Hash(AnyObject);
+pub struct Hash(NonNullObject);
 
 impl AsRef<AnyObject> for Hash {
     #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
+    fn as_ref(&self) -> &AnyObject { self.0.as_ref() }
 }
 
 impl From<Hash> for AnyObject {
     #[inline]
-    fn from(object: Hash) -> AnyObject { object.0 }
+    fn from(object: Hash) -> AnyObject { object.0.into() }
 }
 
 unsafe impl Object for Hash {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
         if obj.is_ty(Ty::Hash) {
-            Some(Self::_new(obj.raw()))
+            unsafe { Some(Self::from_raw(obj.raw())) }
         } else {
             None
         }
@@ -70,15 +70,10 @@ impl<K: Into<AnyObject>, V: Into<AnyObject>> Extend<(K, V)> for Hash {
 }
 
 impl Hash {
-    #[inline]
-    pub(crate) fn _new(raw: ruby::VALUE) -> Self {
-        Self(AnyObject(raw))
-    }
-
     /// Creates a new hash table.
     #[inline]
     pub fn new() -> Self {
-        unsafe { Self::_new(ruby::rb_hash_new()) }
+        unsafe { Self::from_raw(ruby::rb_hash_new()) }
     }
 
     /// Creates an instance from the key-value pairs in `map`.
