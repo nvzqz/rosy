@@ -20,7 +20,6 @@ pub use crate::{
     array::Array,
     exception::{AnyException, Exception},
     hash::Hash,
-    instr_seq::InstrSeq,
     mixin::{Mixin, Class, Module},
     object::{AnyObject, Object},
     string::String,

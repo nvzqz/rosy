@@ -1,4 +1,4 @@
-//! Ruby instruction sequences.
+//! Interacting with the Ruby VM directly.
 
 use std::{fmt, io};
 use crate::{
@@ -103,7 +103,7 @@ impl InstrSeq {
     ///
     /// ```
     /// # rosy::init().unwrap();
-    /// use rosy::{InstrSeq, String};
+    /// use rosy::{vm::InstrSeq, String};
     ///
     /// let script = "'hi' * 3";
     ///
@@ -127,7 +127,7 @@ impl InstrSeq {
     /// This is equivalent to calling `eval` in a protected context:
     ///
     /// ```
-    /// use rosy::{InstrSeq, String};
+    /// use rosy::{vm::InstrSeq, String};
     /// # rosy::init().unwrap();
     ///
     /// let script = "'hi' * 3";

@@ -47,19 +47,18 @@ pub mod array;
 pub mod exception;
 pub mod gc;
 pub mod hash;
-pub mod instr_seq;
 pub mod mixin;
 pub mod object;
 pub mod prelude;
 pub mod string;
 pub mod symbol;
+pub mod vm;
 
 #[doc(inline)]
 pub use self::{
     array::Array,
     exception::{AnyException, Exception},
     hash::Hash,
-    instr_seq::InstrSeq,
     mixin::{Mixin, Class, Module},
     object::{AnyObject, Object},
     string::String,
