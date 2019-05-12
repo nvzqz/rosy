@@ -8,21 +8,21 @@ matrix:
   - os: linux
   - os: linux
     env:
-    - FEATURES: "--features static"
+    - FEATURES: "--features=static"
   - os: osx
   - os: osx
     env:
-    - FEATURES: "--features static"
+    - FEATURES: "--features=static"
   - os: osx
     osx_image: xcode8.0 # macOS 10.11 "El Capitan"
   - os: osx
     osx_image: xcode8.0 # macOS 10.11 "El Capitan"
     env:
-    - FEATURES: "--features static"
+    - FEATURES: "--features=static"
   - os: windows
   - os: windows
     env:
-    - FEATURES: "--features static"
+    - FEATURES: "--features=static"
 
 env:
   global:
