@@ -462,16 +462,16 @@ impl String {
 /// An encoding for `String`.
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
-pub struct Encoding(AnyObject);
+pub struct Encoding(NonNullObject);
 
 impl AsRef<AnyObject> for Encoding {
     #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
+    fn as_ref(&self) -> &AnyObject { self.0.as_ref() }
 }
 
 impl From<Encoding> for AnyObject {
     #[inline]
-    fn from(object: Encoding) -> AnyObject { object.0 }
+    fn from(object: Encoding) -> AnyObject { object.0.into() }
 }
 
 unsafe impl Object for Encoding {

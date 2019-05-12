@@ -6,7 +6,7 @@ use std::{
     fmt,
 };
 use crate::{
-    object::Ty,
+    object::{NonNullObject, Ty},
     prelude::*,
     string::Encoding,
 };
@@ -14,16 +14,16 @@ use crate::{
 /// An instance of Ruby's `Symbol` class.
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
-pub struct Symbol(AnyObject);
+pub struct Symbol(NonNullObject);
 
 impl AsRef<AnyObject> for Symbol {
     #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
+    fn as_ref(&self) -> &AnyObject { self.0.as_ref() }
 }
 
 impl From<Symbol> for AnyObject {
     #[inline]
-    fn from(object: Symbol) -> AnyObject { object.0 }
+    fn from(object: Symbol) -> AnyObject { object.0.into() }
 }
 
 unsafe impl Object for Symbol {

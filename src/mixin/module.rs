@@ -4,22 +4,22 @@ use std::fmt;
 use crate::{
     mixin::DefMixinError,
     prelude::*,
-    object::Ty,
+    object::{NonNullObject, Ty},
 };
 
 /// An instance of Ruby's `Module` type.
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
-pub struct Module(AnyObject);
+pub struct Module(NonNullObject);
 
 impl AsRef<AnyObject> for Module {
     #[inline]
-    fn as_ref(&self) -> &AnyObject { &self.0 }
+    fn as_ref(&self) -> &AnyObject { self.0.as_ref() }
 }
 
 impl From<Module> for AnyObject {
     #[inline]
-    fn from(object: Module) -> AnyObject { object.0 }
+    fn from(object: Module) -> AnyObject { object.0.into() }
 }
 
 unsafe impl Object for Module {
