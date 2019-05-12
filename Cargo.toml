@@ -23,6 +23,6 @@ aloxide = { version = "0.0.4", default-features = false }
 cc = "1"
 
 [features]
-default = ["static-ruby"]
+default = ["static"]
 download = ["rosy-ruby-sys/download", "aloxide/download"]
-static-ruby = ["rosy-ruby-sys/static"]
+static = ["rosy-ruby-sys/static"]
