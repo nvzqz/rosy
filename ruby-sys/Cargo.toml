@@ -16,7 +16,7 @@ name = "ruby_sys"
 path = "src/lib.rs"
 
 [build-dependencies]
-aloxide = { version = "0.0.4", default-features = false }
+aloxide = { version = "0.0.5", default-features = false }
 bindgen = "0.49"
 
 [features]
