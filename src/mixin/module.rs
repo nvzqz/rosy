@@ -1,15 +1,11 @@
 //! Ruby modules.
 
-use crate::object::{
-    AnyObject,
-    Array,
-    mixin::{Mixin, Class, DefMixinError},
-    Object,
-    String,
-    SymbolId,
-    Ty,
-};
 use std::fmt;
+use crate::{
+    mixin::DefMixinError,
+    prelude::*,
+    object::Ty,
+};
 
 /// An instance of Ruby's `Module` type.
 #[derive(Clone, Copy, Debug)]

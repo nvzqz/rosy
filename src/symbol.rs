@@ -1,15 +1,14 @@
 //! Ruby symbols.
 
-use crate::object::{
-    Object,
-    AnyObject,
-    string::{String, Encoding},
-    Ty,
-};
 use std::{
     convert::TryFrom,
     ffi::CStr,
     fmt,
+};
+use crate::{
+    object::Ty,
+    prelude::*,
+    string::Encoding,
 };
 
 /// An instance of Ruby's `Symbol` class.

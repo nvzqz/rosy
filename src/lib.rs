@@ -43,10 +43,28 @@ use std::{
 };
 
 mod util;
-mod object;
+pub mod array;
+pub mod exception;
 pub mod gc;
+pub mod hash;
+pub mod instr_seq;
+pub mod mixin;
+pub mod object;
+pub mod prelude;
+pub mod string;
+pub mod symbol;
 
-pub use object::*;
+#[doc(inline)]
+pub use self::{
+    array::Array,
+    exception::{AnyException, Exception},
+    hash::Hash,
+    instr_seq::InstrSeq,
+    mixin::{Mixin, Class, Module},
+    object::{AnyObject, Object},
+    string::String,
+    symbol::{Symbol, SymbolId},
+};
 
 /// Initializes the Ruby VM, returning an error code if it failed.
 #[inline]
@@ -185,74 +203,5 @@ impl Error for InitError {
     #[inline]
     fn description(&self) -> &str {
         "Failed to initialize Ruby"
-    }
-}
-
-/// A type that can be used as one or more arguments for evaluating code within
-/// the context of a [`Mixin`](trait.Mixin.html).
-///
-/// See the documentation of [its implementors](#foreign-impls) for much more
-/// detailed information.
-pub trait EvalArgs: Sized {
-    /// Evaluates `self` in the context of `mixin`, returning any thrown
-    /// exceptions.
-    #[inline]
-    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject, AnyException> {
-        crate::protected(|| unsafe { self.eval_in_unchecked(mixin) })
-    }
-
-    /// Evaluates `self` in the context of `mixin`.
-    ///
-    /// # Safety
-    ///
-    /// If an exception is thrown due to an argument error or from evaluating
-    /// the script itself, it should be caught.
-    unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject;
-}
-
-/// Unchecked arguments directly to the evaluation function.
-impl<O: Object> EvalArgs for &[O] {
-    #[inline]
-    unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
-        let raw = ruby::rb_mod_module_eval(
-            self.len() as _,
-            self.as_ptr() as *const ruby::VALUE,
-            mixin.raw(),
-        );
-        AnyObject::from_raw(raw)
-    }
-}
-
-/// The script argument without any extra information.
-impl EvalArgs for String {
-    #[inline]
-    unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
-        self.as_any_slice().eval_in_unchecked(mixin)
-    }
-}
-
-/// The script argument as a UTF-8 string, without any extra information.
-// TODO: Impl for `Into<String>` when specialization stabilizes
-impl EvalArgs for &str {
-    #[inline]
-    unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
-        String::from(self).eval_in_unchecked(mixin)
-    }
-}
-
-/// The script and filename arguments.
-impl<S: Into<String>, F: Into<String>> EvalArgs for (S, F) {
-    #[inline]
-    unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
-        let (s, f) = self;
-        [s.into(), f.into()].eval_in_unchecked(mixin)
-    }
-}
-
-/// The script, filename, and line number arguments.
-impl<S: Into<String>, F: Into<String>, L: Into<u32>> EvalArgs for (S, F, L) {
-    #[inline]
-    unsafe fn eval_in_unchecked(self, _mixin: impl Mixin) -> AnyObject {
-        unimplemented!("TODO: Convert u32 to object");
     }
 }

@@ -1,10 +1,7 @@
 //! Ruby hash tables.
 
+use std::{fmt, iter::FromIterator};
 use crate::object::{Object, AnyObject, NonNullObject, Ty};
-use std::{
-    fmt,
-    iter::FromIterator,
-};
 
 /// An instance of Ruby's `Hash` class.
 #[derive(Clone, Copy, Debug)]

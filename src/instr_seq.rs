@@ -1,17 +1,9 @@
 //! Ruby instruction sequences.
 
-use crate::object::{
-    AnyException,
-    AnyObject,
-    Class,
-    Hash,
-    NonNullObject,
-    Object,
-    String,
-};
-use std::{
-    fmt,
-    io,
+use std::{fmt, io};
+use crate::{
+    object::NonNullObject,
+    prelude::*,
 };
 
 /// An instance of Ruby's `RubyVM::InstructionSequence` class.

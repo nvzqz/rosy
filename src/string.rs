@@ -1,6 +1,5 @@
 //! Ruby strings.
 
-use crate::object::{Object, AnyObject, Class, NonNullObject, Ty};
 use std::{
     borrow::Cow,
     cmp::Ordering,
@@ -11,6 +10,10 @@ use std::{
     os::raw::{c_char, c_int, c_long},
     str::Utf8Error,
     string,
+};
+use crate::{
+    object::{NonNullObject, Ty},
+    prelude::*,
 };
 
 mod util {

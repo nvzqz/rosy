@@ -1,11 +1,14 @@
 //! Ruby arrays.
 
-use crate::object::{Object, AnyObject, NonNullObject, Ty, String};
 use std::{
     cmp::Ordering,
     fmt,
     iter::FromIterator,
     ops::Add,
+};
+use crate::{
+    object::{NonNullObject, Ty},
+    prelude::*,
 };
 
 /// An instance of Ruby's `Array` class.

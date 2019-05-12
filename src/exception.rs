@@ -1,7 +1,10 @@
 //! Ruby exceptions.
 
-use crate::object::{Object, AnyObject, Array, NonNullObject, Class, String};
 use std::fmt;
+use crate::{
+    object::NonNullObject,
+    prelude::*,
+};
 
 /// Some concrete Ruby exception.
 ///

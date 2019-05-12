@@ -1,28 +1,16 @@
-use ruby::VALUE;
+//! General functionality over Ruby objects.
+
+use crate::prelude::*;
 
 mod any;
 mod non_null;
 mod ty;
-pub mod array;
-pub mod exception;
-pub mod hash;
-pub mod instr_seq;
-pub mod mixin;
-pub mod string;
-pub mod symbol;
 
-use non_null::NonNullObject;
+pub(crate) use non_null::NonNullObject;
 
 #[doc(inline)]
 pub use self::{
     any::AnyObject,
-    array::Array,
-    exception::{Exception, AnyException},
-    hash::Hash,
-    instr_seq::InstrSeq,
-    mixin::{Mixin, Class, Module},
-    string::String,
-    symbol::{Symbol, SymbolId},
     ty::Ty,
 };
 
@@ -77,7 +65,7 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> {
     }
 
     /// Returns the raw object pointer.
-    fn raw(self) -> VALUE {
+    fn raw(self) -> ruby::VALUE {
         self.as_any_object().raw()
     }
 

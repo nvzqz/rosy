@@ -1,18 +1,14 @@
 //! Ruby classes.
 
-use crate::object::{
-    AnyObject,
-    mixin::{Mixin, DefMixinError},
-    NonNullObject,
-    Object,
-    String,
-    SymbolId,
-    Ty,
-};
 use std::{
     cmp::Ordering,
     fmt,
     os::raw::c_int,
+};
+use crate::{
+    mixin::DefMixinError,
+    object::{NonNullObject, Ty},
+    prelude::*,
 };
 
 /// An instance of Ruby's `Class` type.

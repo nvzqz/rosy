@@ -21,7 +21,7 @@ fn ruby() -> Ruby {
 fn main() {
     // Ruby is already linked via `ruby-sys`
     let ruby = ruby();
-    let src = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
+    let src = Path::new(env!("CARGO_MANIFEST_DIR")).join("src").join("c");
 
     let ext_c = src.join("ruby_ext.c");
     let ext_h = src.join("ruby_ext.h");

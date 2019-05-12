@@ -3,17 +3,11 @@ use std::{
     ffi::{CStr, CString},
 };
 use crate::{
-    AnyException,
-    Array,
-    Class,
-    Module,
-    Object,
-    String,
-    Symbol,
-    Ty,
+    object::Ty,
+    prelude::*,
 };
 
-/// Any Ruby object.
+/// An instance of any Ruby object.
 #[derive(Clone, Copy)]
 #[repr(transparent)]
 pub struct AnyObject(ruby::VALUE);
