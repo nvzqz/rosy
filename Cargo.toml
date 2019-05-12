@@ -19,7 +19,7 @@ members = ["ruby-sys"]
 rosy-ruby-sys = { path = "ruby-sys", default-features = false }
 
 [build-dependencies]
-aloxide = { version = "0.0.3", default-features = false }
+aloxide = { version = "0.0.4", default-features = false }
 cc = "1"
 
 [features]
