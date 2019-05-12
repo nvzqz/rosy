@@ -193,9 +193,11 @@ impl Class {
     /// Creates a new instance from `args` to pass into `#initialize`.
     #[inline]
     pub fn new_instance(self, args: &[impl Object]) -> AnyObject {
-        let len = args.len() as c_int;
-        let ptr = args.as_ptr() as *const ruby::VALUE;
-        unsafe { AnyObject(ruby::rb_class_new_instance(len, ptr, self.raw())) }
+        unsafe { AnyObject::from_raw(ruby::rb_class_new_instance(
+            args.len() as c_int,
+            args.as_ptr() as *const ruby::VALUE,
+            self.raw(),
+        )) }
     }
 
     /// Returns the parent class of `self`.

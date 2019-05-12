@@ -14,7 +14,7 @@ pub use self::{class::*, module::*};
 fn _get_const(m: ruby::VALUE, name: SymbolId) -> Option<AnyObject> {
     unsafe {
         if ruby::rb_const_defined(m, name.raw()) != 0 {
-            Some(AnyObject(ruby::rb_const_get(m, name.raw())))
+            Some(AnyObject::from_raw(ruby::rb_const_get(m, name.raw())))
         } else {
             None
         }
@@ -120,7 +120,8 @@ pub trait Mixin: Object + Sealed {
     /// `protected` closure.
     #[inline]
     fn get_const(self, name: impl Into<SymbolId>) -> AnyObject {
-        unsafe { AnyObject(ruby::rb_const_get(self.raw(), name.into().raw())) }
+        let name = name.into().raw();
+        unsafe { AnyObject::from_raw(ruby::rb_const_get(self.raw(), name)) }
     }
 
     /// Sets the value a constant for `name` in `self` to `val`.
@@ -137,7 +138,7 @@ pub trait Mixin: Object + Sealed {
     #[inline]
     fn remove_const(self, name: impl Into<SymbolId>) -> AnyObject {
         let name = name.into().raw();
-        unsafe { AnyObject(ruby::rb_const_remove(self.raw(), name)) }
+        unsafe { AnyObject::from_raw(ruby::rb_const_remove(self.raw(), name)) }
     }
 
     /// Returns whether the class-level `var` is defined in `self`.

@@ -228,7 +228,7 @@ impl Array {
     /// Pushes `obj` onto the end of `self`.
     #[inline]
     pub fn push(self, obj: impl Object) -> AnyObject {
-        unsafe { AnyObject(ruby::rb_ary_push(self.raw(), obj.raw())) }
+        unsafe { AnyObject::from_raw(ruby::rb_ary_push(self.raw(), obj.raw())) }
     }
 
     /// Pops the last element from `self`.
@@ -247,7 +247,7 @@ impl Array {
     /// ```
     #[inline]
     pub fn pop(self) -> AnyObject {
-        unsafe { AnyObject(ruby::rb_ary_pop(self.raw())) }
+        unsafe { AnyObject::from_raw(ruby::rb_ary_pop(self.raw())) }
     }
 
     /// Returns whether `self` contains `obj`.
@@ -276,7 +276,10 @@ impl Array {
     /// This is equivalent to the `delete` method.
     #[inline]
     pub fn remove_all(self, obj: impl Object) -> AnyObject {
-        unsafe { AnyObject(ruby::rb_ary_delete(self.raw(), obj.raw())) }
+        unsafe { AnyObject::from_raw(ruby::rb_ary_delete(
+            self.raw(),
+            obj.raw(),
+        )) }
     }
 
     /// Reverses the contents of `self` in-palace.
