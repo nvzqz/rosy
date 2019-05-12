@@ -158,7 +158,7 @@ pub trait Mixin: Object + Sealed {
     ///
     /// ```
     /// use rosy::{Class, Object, Mixin, protected};
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     ///
     /// let class = Class::array();
     /// let error = protected(|| class.get_class_var("@@hello")).unwrap_err();

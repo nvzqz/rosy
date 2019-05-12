@@ -1,5 +1,3 @@
-//! Interacting with the Ruby VM directly.
-
 use std::{fmt, io};
 use crate::{
     object::NonNullObject,
@@ -102,7 +100,7 @@ impl InstrSeq {
     /// `RubyVM::InstructionSequence.load_from_binary`:
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::{vm::InstrSeq, String};
     ///
     /// let script = "'hi' * 3";
@@ -128,7 +126,7 @@ impl InstrSeq {
     ///
     /// ```
     /// use rosy::{vm::InstrSeq, String};
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     ///
     /// let script = "'hi' * 3";
     /// let instr_seq = InstrSeq::compile(script).expect("Invalid script");

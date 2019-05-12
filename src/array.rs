@@ -155,7 +155,7 @@ impl Array {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::{Array, String};
     ///
     /// let s = String::from("hi");
@@ -239,7 +239,7 @@ impl Array {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::{Array, String};
     ///
     /// let s = String::from("Hi");
@@ -260,7 +260,7 @@ impl Array {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::{Array, String};
     ///
     /// let s = String::from("hi");
@@ -311,7 +311,7 @@ impl Array {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::{Array, String};
     ///
     /// let s = String::from("-");

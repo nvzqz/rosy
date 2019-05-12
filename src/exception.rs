@@ -36,7 +36,7 @@ pub unsafe trait Exception: Object {
     /// Using `protected` ensures that calling this method is indeed safe:
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::{AnyException, Exception, protected};
     ///
     /// let exc = AnyException::new("Oh noes, something happened!");

@@ -224,7 +224,7 @@ impl String {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// let string = rosy::String::from("¡Hola!");
     /// assert!(string.encoding().is_utf8());
     /// ```
@@ -243,7 +243,7 @@ impl String {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// let rs = "Hey, I just met you, and this is crazy;
     ///           but here's my number, so call me maybe.";
     /// let rb = rosy::String::from(rs);
@@ -273,7 +273,7 @@ impl String {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// let rs = "Somebody once told me the world is gonna roll me...";
     /// let rb = rosy::String::from(rs);
     ///
@@ -321,7 +321,7 @@ impl String {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// let s1 = "Í'm in Rüby!";
     /// let s2 = "I'm in Ruby!";
     /// let s3 = rosy::String::from(s1);
@@ -351,7 +351,7 @@ impl String {
     /// This is a [Unicode](https://en.wikipedia.org/wiki/Unicode)-aware method:
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// let s1 = "Í'm in Rüby!";
     /// let s2 = "I'm in Ruby!";
     /// let s3 = rosy::String::from(s1);
@@ -388,7 +388,7 @@ impl String {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// let s1 = rosy::String::from("Hello, there!");
     /// let s2 = s1.ellipsized(8);
     ///
@@ -416,7 +416,7 @@ impl String {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// let s = rosy::String::from("Hello!");
     /// let result = s.with_lock(|s| s.is_locked());
     ///
@@ -572,7 +572,7 @@ impl Encoding {
     /// ```
     /// use rosy::string::{String, Encoding};
     ///
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// let bytes: &[u8] = &[b'a', b'z', 0, 255];
     /// let string = String::from(bytes);
     ///
@@ -588,7 +588,7 @@ impl Encoding {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::string::Encoding;
     ///
     /// let utf8 = Encoding::find("UTF-8\0").unwrap();
@@ -604,7 +604,7 @@ impl Encoding {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::string::Encoding;
     ///
     /// let ascii = Encoding::find("US-ASCII\0").unwrap();
@@ -625,7 +625,7 @@ impl Encoding {
     /// embedding nul bytes in its UTF-8 strings:
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::string::Encoding;
     ///
     /// let utf8 = Encoding::find("UTF-8\0").unwrap();
@@ -645,7 +645,7 @@ impl Encoding {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::string::Encoding;
     ///
     /// assert_eq!(Encoding::utf8().name().to_bytes(), b"UTF-8");

@@ -81,7 +81,7 @@ impl Hash {
     /// common use case would probably be interacting with Rust's [`HashMap`].
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use std::collections::HashMap;
     /// use rosy::Hash;
     ///
@@ -114,7 +114,7 @@ impl Hash {
     /// to allow the compiler to infer types more easily:
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::{Hash, String};
     ///
     /// let hash = Hash::from_pairs::<String, String>(&[
@@ -139,7 +139,7 @@ impl Hash {
     /// Rust types can automagically be converted to keys and values:
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::{Hash, Object};
     ///
     /// let hash = Hash::new();
@@ -188,7 +188,7 @@ impl Hash {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// let hash = rosy::Hash::new();
     /// assert!(hash.remove("not_here").is_nil());
     ///

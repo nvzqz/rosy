@@ -19,7 +19,7 @@ use crate::{
 ///
 /// ```
 /// use rosy::Class;
-/// # rosy::init().unwrap();
+/// # rosy::vm::init().unwrap();
 ///
 /// assert!(Class::object()    < Class::basic_object());
 /// assert!(Class::exception() < Class::object());
@@ -148,7 +148,7 @@ impl Class {
     /// Defining a new class is straightforward:
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// let my_object = rosy::Class::def("MyObject").unwrap();
     /// ```
     ///
@@ -156,7 +156,7 @@ impl Class {
     ///
     /// ```
     /// use rosy::Class;
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     ///
     /// let array = Class::def("Array").unwrap_err().existing_object();
     /// assert_eq!(Class::array(), array);

@@ -93,7 +93,7 @@ impl Symbol {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::Symbol;
     ///
     /// assert!(Symbol::is_valid("@hello"));

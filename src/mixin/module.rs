@@ -82,7 +82,7 @@ impl Module {
     /// Defining a new module is straightforward:
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// let my_mod = rosy::Module::def("MyMod").unwrap();
     /// ```
     ///
@@ -90,7 +90,7 @@ impl Module {
     ///
     /// ```
     /// use rosy::Module;
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     ///
     /// let math = Module::def("Math").unwrap_err().existing_object();
     /// assert_eq!(Module::math(), math);

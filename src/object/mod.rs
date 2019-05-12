@@ -217,7 +217,7 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> {
     /// # Examples
     ///
     /// ```
-    /// # rosy::init().unwrap();
+    /// # rosy::vm::init().unwrap();
     /// use rosy::{Object, Class};
     ///
     /// let a = Class::array();

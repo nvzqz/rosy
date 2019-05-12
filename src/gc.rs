@@ -66,7 +66,7 @@ unsafe fn _stat(key: impl Object) -> usize {
 /// The number of available heap slots can be retrieved as such:
 ///
 /// ```
-/// # rosy::init().unwrap();
+/// # rosy::vm::init().unwrap();
 /// let slots = rosy::gc::stat("heap_available_slots").unwrap();
 /// assert_ne!(slots, 0);
 /// ```
