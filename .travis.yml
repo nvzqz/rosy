@@ -6,15 +6,23 @@ matrix:
   - os: windows
   include:
   - os: linux
+  - os: linux
+    env:
+    - FEATURES: "--features static"
   - os: osx
-    osx_image: xcode10.0 # OS X 10.13 High Sierra
   - os: osx
-    osx_image: xcode9.0 # OS X 10.12 Sierra
+    env:
+    - FEATURES: "--features static"
   - os: osx
-    osx_image: xcode8.0 # OS X 10.11 El Capitan
+    osx_image: xcode8.0 # macOS 10.11 "El Capitan"
   - os: osx
-    osx_image: xcode6.4 # OS X 10.10 Yosemite
+    osx_image: xcode8.0 # macOS 10.11 "El Capitan"
+    env:
+    - FEATURES: "--features static"
   - os: windows
+  - os: windows
+    env:
+    - FEATURES: "--features static"
 
 env:
   global:
@@ -30,4 +38,4 @@ before_script:
 - rustc -Vv
 - ruby --version
 script:
-- cargo test --no-default-features
+- cargo test --no-default-features "$FEATURES"
