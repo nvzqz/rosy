@@ -36,6 +36,6 @@ cache:
 before_script:
 - cargo -Vv
 - rustc -Vv
-- ruby --version
+- ruby -e "require 'pp'; pp RbConfig::CONFIG"
 script:
 - cargo test --no-default-features "$FEATURES"
