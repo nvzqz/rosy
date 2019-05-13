@@ -14,7 +14,7 @@ include = ["Cargo.toml", "**/*.rs", "README.md", "CHANGELOG.md", "LICENSE*"]
 path = "src/lib.rs"
 
 [build-dependencies]
-aloxide = { version = "0.0.5", default-features = false }
+aloxide = { version = "0.0.6", default-features = false }
 
 [features]
 default = ["static"]
