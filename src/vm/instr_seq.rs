@@ -151,7 +151,7 @@ impl InstrSeq {
     /// [`File`](https://doc.rust-lang.org/std/fs/struct.File.html) or any other
     /// common I/O type.
     #[inline]
-    pub fn write_binary(&self, w: &mut impl io::Write) -> io::Result<()> {
+    pub fn write_binary(&self, mut w: impl io::Write) -> io::Result<()> {
         let binary = self.to_binary();
         let bytes = unsafe { binary.as_bytes() };
         w.write_all(bytes)
