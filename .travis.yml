@@ -20,22 +20,35 @@ matrix:
     env:
     - FEATURES: "--features=static"
   - os: windows
+    env:
+    - ROSY_RUBY: ruby
+    - ROSY_RUBY_VERSION: "$RUBY_VERSION"
   - os: windows
     env:
+    - ROSY_RUBY: ruby
+    - ROSY_RUBY_VERSION: "$RUBY_VERSION"
     - FEATURES: "--features=static"
 
 env:
   global:
   - RUSTFLAGS: "-Dwarnings"
   - RUST_BACKTRACE: "full"
+  - ROSY_RUBY: rvm
+  matrix:
+  - ROSY_RUBY_VERSION: 2.6.3
+  - ROSY_RUBY_VERSION: 2.5.5
+  - ROSY_RUBY_VERSION: 2.4.6
 
 cache:
   directories:
   - $HOME/.cargo
+  - $HOME/.rvm
 
+install:
+- ./scripts/travis/install_ruby.sh
 before_script:
 - cargo -Vv
 - rustc -Vv
-- ruby -e "require 'pp'; pp RbConfig::CONFIG"
+- ./scripts/travis/print_ruby_config.sh
 script:
 - cargo test --no-default-features "$FEATURES"
