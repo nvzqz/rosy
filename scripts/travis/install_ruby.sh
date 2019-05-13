@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 function error() {
     >&2 echo "$@"
     exit 1
