@@ -16,7 +16,6 @@ fn rerun_if_env_changed(key: impl Display) {
 }
 
 fn main() {
-    // Ruby is already linked via `ruby-sys`
     let ruby = ruby::get();
     ruby::print_config(&ruby);
     ruby.link(LINK_STATIC).unwrap();
