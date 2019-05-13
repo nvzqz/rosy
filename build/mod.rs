@@ -2,7 +2,6 @@ extern crate aloxide;
 
 use std::{env, fmt::Display, path::PathBuf};
 
-#[path = "build/ruby.rs"]
 mod ruby;
 
 const LINK_STATIC: bool = cfg!(feature = "static");

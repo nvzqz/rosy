@@ -7,6 +7,7 @@ description = "Ruby bindings for Rust."
 license = "MIT/Apache-2.0"
 keywords = ["ruby"]
 categories = ["api-bindings"]
+build = "build/mod.rs"
 include = ["Cargo.toml", "**/*.rs", "README.md", "CHANGELOG.md", "LICENSE*"]
 
 [lib]
