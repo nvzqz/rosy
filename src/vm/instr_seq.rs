@@ -135,13 +135,13 @@ impl InstrSeq {
     /// assert_eq!(String::from("hihihi"), result);
     /// ```
     #[inline]
-    pub fn eval(&self) -> Result<AnyObject, AnyException> {
+    pub fn eval(self) -> Result<AnyObject, AnyException> {
         self.call("eval")
     }
 
     /// Returns the serialized binary data.
     #[inline]
-    pub fn to_binary(&self) -> String {
+    pub fn to_binary(self) -> String {
         unsafe { String::cast_unchecked(self.call_unchecked("to_binary")) }
     }
 
@@ -151,7 +151,7 @@ impl InstrSeq {
     /// [`File`](https://doc.rust-lang.org/std/fs/struct.File.html) or any other
     /// common I/O type.
     #[inline]
-    pub fn write_binary(&self, mut w: impl io::Write) -> io::Result<()> {
+    pub fn write_binary(self, mut w: impl io::Write) -> io::Result<()> {
         let binary = self.to_binary();
         let bytes = unsafe { binary.as_bytes() };
         w.write_all(bytes)
@@ -159,20 +159,20 @@ impl InstrSeq {
 
     /// Returns a human-readable form of `self`.
     #[inline]
-    pub fn disassemble(&self) -> String {
+    pub fn disassemble(self) -> String {
         unsafe { String::cast_unchecked(self.call_unchecked("disasm")) }
     }
 
     /// Returns the file path of `self`, or `<compiled>` if it was compiled from
     /// a string.
     #[inline]
-    pub fn path(&self) -> String {
+    pub fn path(self) -> String {
         unsafe { String::cast_unchecked(self.call_unchecked("path")) }
     }
 
     /// Returns the absolute path of `self` if it was compiled from a file.
     #[inline]
-    pub fn absolute_path(&self) -> Option<String> {
+    pub fn absolute_path(self) -> Option<String> {
         unsafe {
             let path = self.call_unchecked("absolute_path");
             if path.is_nil() {
