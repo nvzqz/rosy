@@ -15,6 +15,10 @@ fn rerun_if_env_changed(key: impl Display) {
 }
 
 fn main() {
+    rerun_if_env_changed("ROSY_RUBY");
+    rerun_if_env_changed("ROSY_RUBY_VERSION");
+    rerun_if_env_changed("ROSY_PRINT_RUBY_CONFIG");
+
     let ruby = ruby::get();
     ruby::print_config(&ruby);
     ruby.link(LINK_STATIC).unwrap();

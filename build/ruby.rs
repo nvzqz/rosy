@@ -78,7 +78,6 @@ impl Driver {
 }
 
 fn version() -> Option<Version> {
-    super::rerun_if_env_changed("ROSY_RUBY_VERSION");
     Some(env::var_os("ROSY_RUBY_VERSION")?
         .to_str()
         .expect("'ROSY_RUBY_VERSION' is not UTF-8")
@@ -113,7 +112,6 @@ fn download() -> Ruby {
 }
 
 pub fn print_config(ruby: &Ruby) {
-    super::rerun_if_env_changed("ROSY_PRINT_RUBY_CONFIG");
     if env::var_os("ROSY_PRINT_RUBY_CONFIG").is_some() {
         println!("{}", ruby.run("require 'pp'; pp RbConfig::CONFIG").unwrap());
     }
