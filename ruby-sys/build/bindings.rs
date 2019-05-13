@@ -5,7 +5,7 @@ use std::{
 use aloxide::Ruby;
 
 fn should_rustfmt() -> bool {
-    env::var_os("TRAVIS") == Some("true")
+    super::env_eq("TRAVIS", "true")
 }
 
 pub fn write(ruby: &Ruby, out_dir: &Path) {

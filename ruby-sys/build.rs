@@ -4,6 +4,7 @@ extern crate bindgen;
 use std::{
     env,
     fmt::Display,
+    ffi::OsStr,
     path::PathBuf,
 };
 use aloxide::Ruby;
@@ -28,6 +29,15 @@ fn print_config(ruby: &Ruby) {
     if env::var_os("ROSY_PRINT_RUBY_CONFIG").is_some() {
         println!("{}", ruby.run("require 'pp'; pp RbConfig::CONFIG").unwrap());
     }
+}
+
+fn env_eq<K, V>(key: K, val: &V) -> bool
+where
+    K: AsRef<OsStr>,
+    V: ?Sized,
+    OsStr: PartialEq<V>,
+{
+    env::var_os(key).map(|var| var.as_os_str().eq(val)).unwrap_or(false)
 }
 
 fn main() {
