@@ -87,7 +87,7 @@ impl InstrSeq {
     }
 
     /// Loads an instruction sequence from a binary formatted string created by
-    /// [`to_binary`}(#method.to_binary).
+    /// [`to_binary`](#method.to_binary).
     ///
     /// # Safety
     ///
