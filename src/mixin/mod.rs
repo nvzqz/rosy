@@ -2,6 +2,7 @@
 
 use crate::{
     prelude::*,
+    ruby,
     util::Sealed,
 };
 
@@ -304,16 +305,16 @@ pub enum DefMixinError {
 impl DefMixinError {
     #[inline]
     fn _get(m: ruby::VALUE, name: SymbolId) -> Option<Self> {
-        use ruby::ruby_value_type::*;
+        use ruby::value_type::*;
         use DefMixinError::*;
 
         let existing = _get_const(m, name)?;
         let raw = existing.raw();
         let err = match crate::util::value_built_in_type(raw) {
-            Some(RUBY_T_MODULE) => unsafe {
+            Some(MODULE) => unsafe {
                 ExistingModule(Module::from_raw(raw))
             },
-            Some(RUBY_T_CLASS) => unsafe {
+            Some(CLASS) => unsafe {
                 ExistingClass(Class::from_raw(raw))
             },
             Some(_) | None => ExistingConst(existing),

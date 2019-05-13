@@ -7,20 +7,15 @@ use std::{
     error::Error,
     ffi::{CStr, CString, FromBytesWithNulError},
     fmt,
-    os::raw::{c_char, c_int, c_long},
+    os::raw::{c_int, c_long},
     str::Utf8Error,
     string,
 };
 use crate::{
     object::{NonNullObject, Ty},
     prelude::*,
+    ruby,
 };
-
-mod util {
-    use ruby::*;
-
-    pub const STR_TMPLOCK: VALUE = ruby_fl_type::RUBY_FL_USER7 as VALUE;
-}
 
 /// An instance of Ruby's `String` class.
 #[derive(Clone, Copy, Debug)]
@@ -176,30 +171,8 @@ impl Ord for String {
 
 impl String {
     #[inline]
-    pub(crate) fn _ptr(self) -> *const c_char {
-        unsafe {
-            if self._is_embedded() {
-                (*self._rstring()).as_.ary.as_ptr()
-            } else {
-                (*self._rstring()).as_.heap.ptr
-            }
-        }
-    }
-
-    #[inline]
     pub(crate) fn _rstring(self) -> *mut ruby::RString {
         self.as_any_object()._ptr() as _
-    }
-
-    #[inline]
-    pub(crate) fn _flags(self) -> ruby::VALUE {
-        unsafe { (*self._rstring()).basic.flags }
-    }
-
-    #[inline]
-    pub(crate) fn _is_embedded(self) -> bool {
-        use ruby::ruby_rstring_flags::*;
-        self._flags() & (RSTRING_NOEMBED as ruby::VALUE) == 0
     }
 
     /// Returns a new instance from `s` encoded as `enc`.
@@ -252,7 +225,7 @@ impl String {
     /// ```
     #[inline]
     pub unsafe fn as_bytes(&self) -> &[u8] {
-        let ptr = self._ptr() as *const u8;
+        let ptr = (*self._rstring()).start() as *const u8;
         std::slice::from_raw_parts(ptr, self.len())
     }
 
@@ -331,17 +304,7 @@ impl String {
     /// ```
     #[inline]
     pub fn len(self) -> usize {
-        use ruby::ruby_rstring_flags::*;
-        unsafe {
-            let rstring = &*self._rstring();
-            if self._is_embedded() {
-                let mask = (RSTRING_EMBED_LEN_MASK >> RSTRING_EMBED_LEN_SHIFT) as ruby::VALUE;
-                let flags = rstring.basic.flags;
-                ((flags >> RSTRING_EMBED_LEN_SHIFT) & mask) as usize
-            } else {
-                rstring.as_.heap.len as usize
-            }
-        }
+        unsafe { (*self._rstring()).len() }
     }
 
     /// Returns the number of characters in `self`.
@@ -407,7 +370,7 @@ impl String {
     /// Returns whether the string is locked by the VM.
     #[inline]
     pub fn is_locked(self) -> bool {
-        self._flags() & util::STR_TMPLOCK != 0
+        unsafe { (*self._rstring()).is_locked() }
     }
 
     /// Attempts to call `f` if a lock on `self` can be acquired, returning its

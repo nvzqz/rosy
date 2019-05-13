@@ -1,6 +1,9 @@
 //! General functionality over Ruby objects.
 
-use crate::prelude::*;
+use crate::{
+    prelude::*,
+    ruby,
+};
 
 mod any;
 mod non_null;

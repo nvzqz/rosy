@@ -1,38 +1,28 @@
 extern crate aloxide;
-extern crate cc;
 
-use std::path::Path;
-use aloxide::Ruby;
+use std::{env, fmt::Display, path::PathBuf};
 
-fn rerun_if_changed(path: &Path) {
-    println!("cargo:rerun-if-changed={}", path.display());
+#[path = "build/ruby.rs"]
+mod ruby;
+
+const LINK_STATIC: bool = cfg!(feature = "static");
+
+fn set_rustc_env(key: impl Display, val: impl Display) {
+    println!("cargo:rustc-env={}={}", key, val);
 }
 
-#[cfg(feature = "download")]
-fn ruby() -> Ruby {
-    unimplemented!()
-}
-
-#[cfg(not(feature = "download"))]
-fn ruby() -> Ruby {
-    Ruby::current().unwrap()
+fn rerun_if_env_changed(key: impl Display) {
+    println!("cargo:rerun-if-env-changed={}", key);
 }
 
 fn main() {
     // Ruby is already linked via `ruby-sys`
-    let ruby = ruby();
-    let src = Path::new(env!("CARGO_MANIFEST_DIR")).join("src").join("c");
+    let ruby = ruby::get();
+    ruby::print_config(&ruby);
+    ruby.link(LINK_STATIC).unwrap();
 
-    let ext_c = src.join("ruby_ext.c");
-    let ext_h = src.join("ruby_ext.h");
+    let out_dir = env::var_os("OUT_DIR").expect("Couldn't get 'OUT_DIR'");
+    let out_dir = PathBuf::from(out_dir);
 
-    rerun_if_changed(&ext_c);
-    rerun_if_changed(&ext_h);
-
-    cc::Build::new()
-        .file(&ext_c)
-        .include(&ruby.header_dir().unwrap())
-        .include(&ruby.arch_header_dir().unwrap())
-        .warnings(false)
-        .compile("ruby_ext");
+    ruby::write_version_const(ruby.version(), &out_dir);
 }

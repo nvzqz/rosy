@@ -1,7 +1,9 @@
 //! Ruby's garbage collector.
 
-use ruby::VALUE;
-use crate::{Object, AnyObject, AnyException, Hash, String, Symbol};
+use crate::{
+    prelude::*,
+    ruby::{self, VALUE},
+};
 
 /// Starts the garbage collector.
 #[inline]

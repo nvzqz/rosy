@@ -9,6 +9,7 @@ use crate::{
     object::{NonNullObject, Ty},
     prelude::*,
     string::Encoding,
+    ruby,
 };
 
 /// An instance of Ruby's `Symbol` class.

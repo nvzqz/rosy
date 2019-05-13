@@ -9,6 +9,7 @@ use std::{
 use crate::{
     object::{NonNullObject, Ty},
     prelude::*,
+    ruby,
 };
 
 /// An instance of Ruby's `Array` class.
@@ -110,30 +111,8 @@ impl Add for Array {
 
 impl Array {
     #[inline]
-    pub(crate) fn _ptr(self) -> *const ruby::VALUE {
-        unsafe {
-            if self._is_embedded() {
-                (*self._rarray()).as_.ary.as_ptr()
-            } else {
-                (*self._rarray()).as_.heap.ptr
-            }
-        }
-    }
-
-    #[inline]
     pub(crate) fn _rarray(self) -> *mut ruby::RArray {
         self.as_any_object()._ptr() as _
-    }
-
-    #[inline]
-    pub(crate) fn _flags(self) -> ruby::VALUE {
-        unsafe { (*self._rarray()).basic.flags }
-    }
-
-    #[inline]
-    pub(crate) fn _is_embedded(self) -> bool {
-        use ruby::ruby_rstring_flags::*;
-        self._flags() & (RSTRING_NOEMBED as ruby::VALUE) == 0
     }
 
     /// Creates a new instance from the elements in `slice`.
@@ -165,17 +144,7 @@ impl Array {
     /// ```
     #[inline]
     pub fn len(self) -> usize {
-        use ruby::{ruby_rarray_flags::*, VALUE};
-        unsafe {
-            let rarray = &*self._rarray();
-            let flags = rarray.basic.flags;
-            if flags & (RARRAY_EMBED_FLAG as VALUE) == 0 {
-                rarray.as_.heap.len as usize
-            } else {
-                let mask = RARRAY_EMBED_LEN_MASK >> RARRAY_EMBED_LEN_SHIFT;
-                ((flags >> RARRAY_EMBED_LEN_SHIFT) & mask as VALUE) as usize
-            }
-        }
+        unsafe { (*self._rarray()).len() }
     }
 
     /// Returns whether `self` is empty.
@@ -192,7 +161,7 @@ impl Array {
     /// through the VM or otherwise.
     #[inline]
     pub unsafe fn as_slice(&self) -> &[AnyObject] {
-        let ptr = self._ptr() as *const AnyObject;
+        let ptr = (*self._rarray()).start() as *const AnyObject;
         std::slice::from_raw_parts(ptr, self.len())
     }
 
@@ -204,7 +173,7 @@ impl Array {
     /// through the VM or otherwise.
     #[inline]
     pub unsafe fn as_slice_mut(&mut self) -> &mut [AnyObject] {
-        let ptr = self._ptr() as *mut AnyObject;
+        let ptr = (*self._rarray()).start_mut() as *mut AnyObject;
         std::slice::from_raw_parts_mut(ptr, self.len())
     }
 

@@ -31,12 +31,12 @@
 
 #![deny(missing_docs)]
 
-extern crate ruby_sys as ruby;
-
-#[doc(inline)]
-pub use ruby::RUBY_VERSION;
+include!(env!("ROSY_RUBY_VERSION_CONST"));
 
 use std::mem;
+
+#[path = "ruby_bindings/mod.rs"]
+mod ruby;
 
 mod util;
 pub mod array;

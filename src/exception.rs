@@ -4,6 +4,7 @@ use std::fmt;
 use crate::{
     object::NonNullObject,
     prelude::*,
+    ruby,
 };
 
 /// Some concrete Ruby exception.

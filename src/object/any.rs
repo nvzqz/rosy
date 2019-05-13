@@ -5,6 +5,7 @@ use std::{
 use crate::{
     object::Ty,
     prelude::*,
+    ruby,
 };
 
 /// An instance of any Ruby object.

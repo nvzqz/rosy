@@ -112,6 +112,13 @@ fn download() -> Ruby {
     panic!("Enable 'download' feature in 'Cargo.toml' to download Ruby");
 }
 
+pub fn print_config(ruby: &Ruby) {
+    super::rerun_if_env_changed("ROSY_PRINT_RUBY_CONFIG");
+    if env::var_os("ROSY_PRINT_RUBY_CONFIG").is_some() {
+        println!("{}", ruby.run("require 'pp'; pp RbConfig::CONFIG").unwrap());
+    }
+}
+
 pub fn get() -> Ruby {
     if let Some(driver) = Driver::get() {
         driver.ruby()

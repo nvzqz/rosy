@@ -9,6 +9,7 @@ use crate::{
     mixin::DefMixinError,
     object::{NonNullObject, Ty},
     prelude::*,
+    ruby,
 };
 
 /// An instance of Ruby's `Class` type.

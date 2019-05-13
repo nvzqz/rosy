@@ -3,8 +3,9 @@
 use std::fmt;
 use crate::{
     mixin::DefMixinError,
-    prelude::*,
     object::{NonNullObject, Ty},
+    prelude::*,
+    ruby,
 };
 
 /// An instance of Ruby's `Module` type.

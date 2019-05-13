@@ -1,23 +1,22 @@
-use std::os::raw::{c_int, c_long};
-use ruby::{
-    VALUE,
-    ruby_value_type::{self, *},
-    ruby_special_consts::*,
+use std::os::raw::c_long;
+use crate::{
+    object::{AnyObject, Object, Ty},
+    ruby::{
+        self,
+        RBasic,
+        VALUE,
+        value_type,
+        special_consts::*,
+    }
 };
-use crate::object::{AnyObject, Object, Ty};
 
-extern "C" {
-    // Defined in `wrapper.h`
-    fn rb_float_type_p(v: VALUE) -> c_int;
-}
-
-pub const NIL_VALUE:   VALUE = RUBY_Qnil   as VALUE;
-pub const TRUE_VALUE:  VALUE = RUBY_Qtrue  as VALUE;
-pub const FALSE_VALUE: VALUE = RUBY_Qfalse as VALUE;
-pub const UNDEF_VALUE: VALUE = RUBY_Qundef as VALUE;
+pub const NIL_VALUE:   VALUE = Qnil   as VALUE;
+pub const TRUE_VALUE:  VALUE = Qtrue  as VALUE;
+pub const FALSE_VALUE: VALUE = Qfalse as VALUE;
+pub const UNDEF_VALUE: VALUE = Qundef as VALUE;
 
 pub const MAX_VALUE: VALUE = !0;
-pub const MAX_VALUE_SHIFTED: VALUE = MAX_VALUE << RUBY_SPECIAL_SHIFT;
+pub const MAX_VALUE_SHIFTED: VALUE = MAX_VALUE << SPECIAL_SHIFT;
 
 #[inline]
 pub fn test_value(v: VALUE) -> bool {
@@ -41,18 +40,18 @@ pub fn value_is_ty(v: VALUE, ty: Ty) -> bool {
     }
 }
 
-pub fn value_type(v: VALUE) -> ruby_value_type {
+pub fn value_type(v: VALUE) -> value_type {
     match v {
-        NIL_VALUE => RUBY_T_NIL,
-        TRUE_VALUE => RUBY_T_TRUE,
-        FALSE_VALUE => RUBY_T_FALSE,
-        UNDEF_VALUE => RUBY_T_UNDEF,
+        NIL_VALUE => value_type::NIL,
+        TRUE_VALUE => value_type::TRUE,
+        FALSE_VALUE => value_type::FALSE,
+        UNDEF_VALUE => value_type::UNDEF,
         _ => if value_is_sym(v) {
-            RUBY_T_SYMBOL
+            value_type::SYMBOL
         } else if value_is_float(v) {
-            RUBY_T_FLOAT
+            value_type::FLOAT
         } else if value_is_fixnum(v) {
-            RUBY_T_FIXNUM
+            value_type::FIXNUM
         } else if let Some(built_in) = value_built_in_type(v) {
             built_in
         } else {
@@ -62,23 +61,23 @@ pub fn value_type(v: VALUE) -> ruby_value_type {
                 unsafe { AnyObject::from_raw(v) },
                 v,
             );
-            RUBY_T_NONE
+            value_type::NONE
         }
     }
 }
 
 #[inline]
 pub unsafe fn value_flags(v: VALUE) -> VALUE {
-    (*(v as *const ruby::RBasic)).flags
+    (*(v as *const RBasic)).flags
 }
 
 #[inline]
-pub unsafe fn value_built_in_type_unchecked(v: VALUE) -> ruby_value_type {
-    std::mem::transmute((value_flags(v) & RUBY_T_MASK as VALUE) as u32)
+pub unsafe fn value_built_in_type_unchecked(v: VALUE) -> value_type {
+    std::mem::transmute((value_flags(v) & value_type::MASK as VALUE) as u32)
 }
 
 #[inline]
-pub fn value_built_in_type(v: VALUE) -> Option<ruby_value_type> {
+pub fn value_built_in_type(v: VALUE) -> Option<value_type> {
     if value_is_special_const(v) {
         None
     } else {
@@ -92,7 +91,7 @@ pub fn value_is_built_in_ty(v: VALUE, ty: Ty) -> bool {
 }
 
 #[inline]
-pub fn value_is_built_in_type(v: VALUE, t: ruby_value_type) -> bool {
+pub fn value_is_built_in_type(v: VALUE, t: value_type) -> bool {
     value_built_in_type(v) == Some(t)
 }
 
@@ -103,22 +102,22 @@ pub fn value_flag(v: VALUE) -> VALUE {
 
 #[inline]
 pub fn value_to_fixnum(v: VALUE) -> c_long {
-    ((v & !(RUBY_FIXNUM_FLAG as VALUE)) >> 1) as c_long
+    ((v & !(FIXNUM_FLAG as VALUE)) >> 1) as c_long
 }
 
 #[inline]
 pub fn value_is_fixnum(v: VALUE) -> bool {
-    v & RUBY_FIXNUM_FLAG as VALUE != 0
+    v & FIXNUM_FLAG as VALUE != 0
 }
 
 #[inline]
 pub fn value_is_float(v: VALUE) -> bool {
-    unsafe { rb_float_type_p(v) != 0 }
+    ruby::rb_flonum_p(v) || value_is_built_in_type(v, value_type::FLOAT)
 }
 
 #[inline]
 pub fn value_is_immediate(v: VALUE) -> bool {
-    v & RUBY_IMMEDIATE_MASK as VALUE != 0
+    v & IMMEDIATE_MASK as VALUE != 0
 }
 
 #[inline]
@@ -128,12 +127,12 @@ pub fn value_is_special_const(v: VALUE) -> bool {
 
 #[inline]
 pub fn value_is_static_sym(v: VALUE) -> bool {
-    value_flag(v) == RUBY_SYMBOL_FLAG as VALUE
+    value_flag(v) == SYMBOL_FLAG as VALUE
 }
 
 #[inline]
 pub fn value_is_dyn_sym(v: VALUE) -> bool {
-    value_is_built_in_type(v, RUBY_T_SYMBOL)
+    value_is_built_in_type(v, value_type::SYMBOL)
 }
 
 #[inline]
@@ -143,12 +142,12 @@ pub fn value_is_sym(v: VALUE) -> bool {
 
 #[inline]
 pub fn value_is_class(v: VALUE) -> bool {
-    value_is_built_in_type(v, RUBY_T_CLASS)
+    value_is_built_in_type(v, value_type::CLASS)
 }
 
 #[inline]
 pub fn value_is_module(v: VALUE) -> bool {
-    value_is_built_in_type(v, RUBY_T_MODULE)
+    value_is_built_in_type(v, value_type::MODULE)
 }
 
 pub trait Sealed {}

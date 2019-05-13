@@ -1,6 +1,7 @@
 //! Interacting with the Ruby VM directly.
 
 use std::{error::Error, fmt};
+use crate::ruby;
 
 mod instr_seq;
 pub use instr_seq::*;
