@@ -4,6 +4,10 @@ use std::{
 };
 use aloxide::Ruby;
 
+fn should_rustfmt() -> bool {
+    env::var_os("TRAVIS") == Some("true")
+}
+
 pub fn write(ruby: &Ruby, out_dir: &Path) {
     let path = out_dir.join(format!("ruby-{}.rs", ruby.version()));
     super::set_rustc_env("ROSY_BINDINGS_PATH", path.display());
@@ -25,6 +29,7 @@ pub fn write(ruby: &Ruby, out_dir: &Path) {
         ])
         .default_enum_style(bindgen::EnumVariation::ModuleConsts)
         .rustified_enum("ruby_value_type")
+        .rustfmt_bindings(should_rustfmt())
         .generate()
         .expect("Generate bindings")
         .write_to_file(&path)
