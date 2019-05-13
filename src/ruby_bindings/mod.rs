@@ -71,15 +71,15 @@ mod USE_FLONUM { // false
 }
 
 pub mod fl_type {
-    pub const FL_WB_PROTECTED: usize = (1 << 5);
-    pub const FL_PROMOTED0:    usize = (1 << 5);
-    pub const FL_PROMOTED1:    usize = (1 << 6);
+    pub const FL_WB_PROTECTED: usize = 1 << 5;
+    pub const FL_PROMOTED0:    usize = 1 << 5;
+    pub const FL_PROMOTED1:    usize = 1 << 6;
     pub const FL_PROMOTED:     usize = FL_PROMOTED0 | FL_PROMOTED1;
-    pub const FL_FINALIZE:     usize = (1 << 7);
-    pub const FL_TAINT:        usize = (1 << 8);
+    pub const FL_FINALIZE:     usize = 1 << 7;
+    pub const FL_TAINT:        usize = 1 << 8;
     pub const FL_UNTRUSTED:    usize = FL_TAINT;
-    pub const FL_EXIVAR:       usize = (1 << 10);
-    pub const FL_FREEZE:       usize = (1 << 11);
+    pub const FL_EXIVAR:       usize = 1 << 10;
+    pub const FL_FREEZE:       usize = 1 << 11;
 
     pub const FL_USHIFT: usize = 12;
 
