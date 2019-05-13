@@ -83,29 +83,29 @@ pub mod fl_type {
 
     pub const FL_USHIFT: usize = 12;
 
-    macro_rules! fl_user {
-        ($n:expr) => (1 << (FL_USHIFT + $n))
+    const fn fl_user(n: usize) -> usize {
+        1 << (FL_USHIFT + n)
     }
 
-    pub const FL_USER_0:  usize = fl_user!(0);
-    pub const FL_USER_1:  usize = fl_user!(1);
-    pub const FL_USER_2:  usize = fl_user!(2);
-    pub const FL_USER_3:  usize = fl_user!(3);
-    pub const FL_USER_4:  usize = fl_user!(4);
-    pub const FL_USER_5:  usize = fl_user!(5);
-    pub const FL_USER_6:  usize = fl_user!(6);
-    pub const FL_USER_7:  usize = fl_user!(7);
-    pub const FL_USER_8:  usize = fl_user!(8);
-    pub const FL_USER_9:  usize = fl_user!(9);
-    pub const FL_USER_10: usize = fl_user!(10);
-    pub const FL_USER_11: usize = fl_user!(11);
-    pub const FL_USER_12: usize = fl_user!(12);
-    pub const FL_USER_13: usize = fl_user!(13);
-    pub const FL_USER_14: usize = fl_user!(14);
-    pub const FL_USER_15: usize = fl_user!(15);
-    pub const FL_USER_16: usize = fl_user!(16);
-    pub const FL_USER_17: usize = fl_user!(17);
-    pub const FL_USER_18: usize = fl_user!(18);
+    pub const FL_USER_0:  usize = fl_user(0);
+    pub const FL_USER_1:  usize = fl_user(1);
+    pub const FL_USER_2:  usize = fl_user(2);
+    pub const FL_USER_3:  usize = fl_user(3);
+    pub const FL_USER_4:  usize = fl_user(4);
+    pub const FL_USER_5:  usize = fl_user(5);
+    pub const FL_USER_6:  usize = fl_user(6);
+    pub const FL_USER_7:  usize = fl_user(7);
+    pub const FL_USER_8:  usize = fl_user(8);
+    pub const FL_USER_9:  usize = fl_user(9);
+    pub const FL_USER_10: usize = fl_user(10);
+    pub const FL_USER_11: usize = fl_user(11);
+    pub const FL_USER_12: usize = fl_user(12);
+    pub const FL_USER_13: usize = fl_user(13);
+    pub const FL_USER_14: usize = fl_user(14);
+    pub const FL_USER_15: usize = fl_user(15);
+    pub const FL_USER_16: usize = fl_user(16);
+    pub const FL_USER_17: usize = fl_user(17);
+    pub const FL_USER_18: usize = fl_user(18);
 }
 
 pub use self::{
