@@ -1,5 +1,34 @@
 //! This crate provides high-level bindings to the [Ruby] virtual machine.
 //!
+//! # Installation
+//!
+//! This crate is available [on crates.io][crate] and can be used by adding the
+//! following to your project's [`Cargo.toml`]:
+//!
+//! ```toml
+//! [dependencies]
+//! rosy = "0.0.0"
+//! ```
+//!
+//! Rosy has functionality that is only available for certain Ruby versions. The
+//! following features can currently be enabled:
+//!
+//! - `ruby_2_6`
+//!
+//! For example:
+//!
+//! ```
+//! [dependencies.rosy]
+//! version = "0.0.0"
+//! features = ["ruby_2_6"]
+//! ```
+//!
+//! Finally add this to your crate root (`main.rs` or `lib.rs`):
+//!
+//! ```
+//! extern crate rosy;
+//! ```
+//!
 //! # Initialization
 //!
 //! The Ruby virtual machine is initialized via [`vm::init`]:
@@ -33,8 +62,8 @@
 //! Not catching an exception from Rust will result in a segmentation fault at
 //! best. As a result, every function that throws an exception is annotated as
 //! [`unsafe`] in Rust-land. If a function is found to not uphold this
-//! invariant, please report it at [issue #4][4] or file a pull request to fix
-//! this.
+//! invariant, please report it at [issue #4][issue4] or file a pull request to
+//! fix this.
 //!
 //! ```
 //! # rosy::vm::init().unwrap();
@@ -50,11 +79,13 @@
 //! assert_eq!(value, 5);
 //! ```
 //!
+//! [`Cargo.toml`]: https://doc.rust-lang.org/cargo/reference/manifest.html
+//! [crate]: https://crates.io/crates/rosy
 //! [Ruby]: https://www.ruby-lang.org
 //! [`vm::init`]: vm/fn.init.html
 //! [`vm::destroy`]: vm/fn.destroy.html
 //! [`unsafe`]: https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html
-//! [4]: https://github.com/oceanpkg/rosy/issues/4
+//! [issue4]: https://github.com/oceanpkg/rosy/issues/4
 
 #![cfg_attr(nightly, feature(doc_cfg))]
 #![deny(missing_docs)]
