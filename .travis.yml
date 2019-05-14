@@ -25,11 +25,13 @@ env:
   - RUST_BACKTRACE: "full"
   - ROSY_RUBY: rvm
   matrix:
-  - ROSY_RUBY_VERSION: 2.6.3
-  - ROSY_RUBY_VERSION: 2.5.5
-  - ROSY_RUBY_VERSION: 2.4.6
-  - FEATURES: "static"
-  - FEATURES: ""
+  - ROSY_RUBY_VERSION="2.6.3"
+  - ROSY_RUBY_VERSION="2.6.3" FEATURES="static"
+  - ROSY_RUBY_VERSION="2.6.3" FEATURES="ruby_2_6"
+  - ROSY_RUBY_VERSION="2.5.5"
+  - ROSY_RUBY_VERSION="2.5.5" FEATURES="static"
+  - ROSY_RUBY_VERSION="2.4.6"
+  - ROSY_RUBY_VERSION="2.4.6" FEATURES="static"
 
 cache:
   directories:
