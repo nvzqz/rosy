@@ -1,6 +1,9 @@
 //! Ruby exceptions.
 
-use std::fmt;
+use std::{
+    fmt,
+    error::Error,
+};
 use crate::{
     object::NonNullObject,
     prelude::*,
@@ -14,7 +17,7 @@ use crate::{
 /// The implementing object type _must_ be an exception type. Otherwise, methods
 /// like [`backtrace`](#method.backtrace) and [`cause`](#method.cause) will
 /// cause a segmentation fault.
-pub unsafe trait Exception: Object {
+pub unsafe trait Exception: Object + Error {
     /// Returns `self` as an [`AnyException`](struct.AnyException.html).
     #[inline]
     fn into_any_exception(self) -> AnyException { *self.as_any_exception() }
@@ -111,6 +114,8 @@ impl fmt::Display for AnyException {
         self.as_any_object().fmt(f)
     }
 }
+
+impl Error for AnyException {}
 
 unsafe impl Exception for AnyException {
 
