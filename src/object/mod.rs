@@ -68,16 +68,19 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> {
     }
 
     /// Returns the raw object pointer.
+    #[inline]
     fn raw(self) -> ruby::VALUE {
         self.as_any_object().raw()
     }
 
     /// Casts `self` to `O` without checking whether it is one.
+    #[inline]
     unsafe fn as_unchecked<O: Object>(&self) -> &O {
         &*(self as *const _ as *const _)
     }
 
     /// Converts `self` to `O` without checking whether it is one.
+    #[inline]
     unsafe fn into_unchecked<O: Object>(self) -> O {
         *self.as_unchecked()
     }
