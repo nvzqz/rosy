@@ -25,9 +25,36 @@
 //! }
 //! ```
 //!
+//! # Catching Ruby Exceptions
+//!
+//! With Rosy, your Rust code can be [`protected`](fn.protected.html) from Ruby
+//! exceptions when calling unchecked functions that may throw.
+//!
+//! Not catching an exception from Rust will result in a segmentation fault at
+//! best. As a result, every function that throws an exception is annotated as
+//! [`unsafe`] in Rust-land. If a function is found to not uphold this
+//! invariant, please report it at [issue #4][4] or file a pull request to fix
+//! this.
+//!
+//! ```
+//! # rosy::vm::init().unwrap();
+//! use rosy::{Object, String};
+//!
+//! let string = String::from("hello\r\n");
+//!
+//! let value: usize = rosy::protected(|| unsafe {
+//!     string.call_unchecked("chomp!");
+//!     string.len()
+//! }).unwrap();
+//!
+//! assert_eq!(value, 5);
+//! ```
+//!
 //! [Ruby]: https://www.ruby-lang.org
 //! [`vm::init`]: vm/fn.init.html
 //! [`vm::destroy`]: vm/fn.destroy.html
+//! [`unsafe`]: https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html
+//! [4]: https://github.com/oceanpkg/rosy/issues/4
 
 #![cfg_attr(nightly, feature(doc_cfg))]
 #![deny(missing_docs)]
