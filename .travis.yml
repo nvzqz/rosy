@@ -10,14 +10,9 @@ matrix:
   - os: windows
   include:
   - os: windows
-    env:
-    - ROSY_RUBY: ruby
-    - ROSY_RUBY_VERSION: "$RUBY_VERSION"
   - os: windows
     env:
-    - ROSY_RUBY: ruby
-    - ROSY_RUBY_VERSION: "$RUBY_VERSION"
-    - FEATURES: "--features=static"
+    - FEATURES: "static"
 
 env:
   global:
