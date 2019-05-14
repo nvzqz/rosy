@@ -1,8 +1,9 @@
 //! Ruby exceptions.
 
 use std::{
-    fmt,
+    convert::Infallible,
     error::Error,
+    fmt,
 };
 use crate::{
     object::NonNullObject,
@@ -119,6 +120,13 @@ impl Error for AnyException {}
 
 unsafe impl Exception for AnyException {
 
+}
+
+impl From<Infallible> for AnyException {
+    #[inline]
+    fn from(error: Infallible) -> Self {
+        match error {}
+    }
 }
 
 impl<E: Exception> PartialEq<E> for AnyException {
