@@ -116,6 +116,17 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> {
         unsafe { Class::from_raw(ruby::rb_singleton_class(self.raw())) }
     }
 
+    /// Forces the garbage collector to free the contents of `self`.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` does not have ownership over any
+    /// currently-referenced memory.
+    #[inline]
+    unsafe fn force_recycle(self) {
+        crate::gc::force_recycle(self);
+    }
+
     /// Calls `method` on `self` and returns the result.
     ///
     /// # Safety

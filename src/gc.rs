@@ -50,9 +50,14 @@ pub fn disabled<F, O>(f: F) -> O
 }
 
 /// Forces `obj` to be garbage-collected.
+///
+/// # Safety
+///
+/// The caller must ensure that `obj` does not have ownership over any
+/// currently-referenced memory.
 #[inline]
-pub fn force_recycle(obj: impl Object) {
-    unsafe { ruby::rb_gc_force_recycle(obj.raw()) };
+pub unsafe fn force_recycle(obj: impl Object) {
+    ruby::rb_gc_force_recycle(obj.raw());
 }
 
 // Only safely usable with `Symbol` and `Hash`
