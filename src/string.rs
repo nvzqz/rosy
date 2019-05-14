@@ -171,7 +171,7 @@ impl Ord for String {
 
 impl String {
     #[inline]
-    pub(crate) fn _rstring(self) -> *mut ruby::RString {
+    pub(crate) fn rstring(self) -> *mut ruby::RString {
         self.as_any_object()._ptr() as _
     }
 
@@ -225,7 +225,7 @@ impl String {
     /// ```
     #[inline]
     pub unsafe fn as_bytes(&self) -> &[u8] {
-        let ptr = (*self._rstring()).start() as *const u8;
+        let ptr = (*self.rstring()).start() as *const u8;
         std::slice::from_raw_parts(ptr, self.len())
     }
 
@@ -304,7 +304,7 @@ impl String {
     /// ```
     #[inline]
     pub fn len(self) -> usize {
-        unsafe { (*self._rstring()).len() }
+        unsafe { (*self.rstring()).len() }
     }
 
     /// Returns the number of characters in `self`.
@@ -370,7 +370,7 @@ impl String {
     /// Returns whether the string is locked by the VM.
     #[inline]
     pub fn is_locked(self) -> bool {
-        unsafe { (*self._rstring()).is_locked() }
+        unsafe { (*self.rstring()).is_locked() }
     }
 
     /// Attempts to call `f` if a lock on `self` can be acquired, returning its

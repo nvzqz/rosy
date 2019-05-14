@@ -111,7 +111,7 @@ impl Add for Array {
 
 impl Array {
     #[inline]
-    pub(crate) fn _rarray(self) -> *mut ruby::RArray {
+    pub(crate) fn rarray(self) -> *mut ruby::RArray {
         self.as_any_object()._ptr() as _
     }
 
@@ -144,7 +144,7 @@ impl Array {
     /// ```
     #[inline]
     pub fn len(self) -> usize {
-        unsafe { (*self._rarray()).len() }
+        unsafe { (*self.rarray()).len() }
     }
 
     /// Returns whether `self` is empty.
@@ -161,7 +161,7 @@ impl Array {
     /// through the VM or otherwise.
     #[inline]
     pub unsafe fn as_slice(&self) -> &[AnyObject] {
-        let ptr = (*self._rarray()).start() as *const AnyObject;
+        let ptr = (*self.rarray()).start() as *const AnyObject;
         std::slice::from_raw_parts(ptr, self.len())
     }
 
@@ -173,7 +173,7 @@ impl Array {
     /// through the VM or otherwise.
     #[inline]
     pub unsafe fn as_slice_mut(&mut self) -> &mut [AnyObject] {
-        let ptr = (*self._rarray()).start_mut() as *mut AnyObject;
+        let ptr = (*self.rarray()).start_mut() as *mut AnyObject;
         std::slice::from_raw_parts_mut(ptr, self.len())
     }
 
