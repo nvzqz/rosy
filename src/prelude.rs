@@ -21,7 +21,8 @@ pub use crate::{
     exception::{AnyException, Exception},
     hash::Hash,
     mixin::{Mixin, Class, Module},
-    object::{AnyObject, Object},
+    object::{AnyObject, Object, RosyObject},
+    rosy::Rosy,
     string::String,
     symbol::{Symbol, SymbolId},
 };

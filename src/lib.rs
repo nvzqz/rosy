@@ -97,6 +97,7 @@ use std::mem;
 #[path = "ruby_bindings/mod.rs"]
 mod ruby;
 
+mod rosy;
 mod util;
 pub mod array;
 pub mod exception;
@@ -115,7 +116,8 @@ pub use self::{
     exception::{AnyException, Exception},
     hash::Hash,
     mixin::{Mixin, Class, Module},
-    object::{AnyObject, Object},
+    object::{AnyObject, Object, RosyObject},
+    rosy::Rosy,
     string::String,
     symbol::{Symbol, SymbolId},
 };

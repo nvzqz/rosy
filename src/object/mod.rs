@@ -7,6 +7,7 @@ use crate::{
 
 mod any;
 mod non_null;
+mod rosy;
 mod ty;
 
 pub(crate) use non_null::NonNullObject;
@@ -14,6 +15,7 @@ pub(crate) use non_null::NonNullObject;
 #[doc(inline)]
 pub use self::{
     any::AnyObject,
+    rosy::RosyObject,
     ty::Ty,
 };
 
