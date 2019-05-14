@@ -17,7 +17,7 @@
 //!
 //! For example:
 //!
-//! ```
+//! ```toml
 //! [dependencies.rosy]
 //! version = "0.0.0"
 //! features = ["ruby_2_6"]
