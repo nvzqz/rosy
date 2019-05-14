@@ -11,9 +11,10 @@ matrix:
   include:
   - os: windows
     env:
-    - FEATURES: ""
+    - ROSY_RUBY: ruby
   - os: windows
     env:
+    - ROSY_RUBY: ruby
     - FEATURES: "static"
 
 env:
