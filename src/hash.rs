@@ -46,6 +46,7 @@ impl fmt::Display for Hash {
     }
 }
 
+#[cfg(feature = "gte_ruby_2_6")]
 impl<K: Object, V: Object> From<&[(K, V)]> for Hash {
     #[inline]
     fn from(pairs: &[(K, V)]) -> Self {
@@ -109,6 +110,8 @@ impl Hash {
 
     /// Creates a new hash table from `pairs`.
     ///
+    #[cfg_attr(not(nightly), doc = "**Requires:** Ruby 2.6+")]
+    ///
     /// # Examples
     ///
     /// Although this may insert the objects efficiently, it requires a bit more
@@ -129,6 +132,8 @@ impl Hash {
     /// assert_eq!(hash.get("user"), "nvzqz");
     /// assert_eq!(hash.get("name"), "Nikolai Vazquez");
     /// ```
+    #[cfg(feature = "gte_ruby_2_6")]
+    #[cfg_attr(nightly, doc(cfg(feature = "ruby_2_6")))]
     #[inline]
     pub fn from_pairs<K: Object, V: Object>(pairs: &[(K, V)]) -> Self {
         let hash = Self::new();
@@ -159,6 +164,8 @@ impl Hash {
     }
 
     /// Inserts `pairs` into `self` in bulk.
+    #[cfg(feature = "gte_ruby_2_6")]
+    #[cfg_attr(nightly, doc(cfg(feature = "ruby_2_6")))]
     #[inline]
     pub fn insert_pairs<K: Object, V: Object>(self, pairs: &[(K, V)]) {
         unsafe { ruby::rb_hash_bulk_insert_into_st_table(

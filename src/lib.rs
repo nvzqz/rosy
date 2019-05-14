@@ -29,6 +29,7 @@
 //! [`vm::init`]: vm/fn.init.html
 //! [`vm::destroy`]: vm/fn.destroy.html
 
+#![cfg_attr(nightly, feature(doc_cfg))]
 #![deny(missing_docs)]
 
 include!(env!("ROSY_RUBY_VERSION_CONST"));

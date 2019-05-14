@@ -16,7 +16,14 @@ path = "src/lib.rs"
 [build-dependencies]
 aloxide = { version = "0.0.6", default-features = false }
 
+# Used to enable `cfg(nightly)`
+rustc_version = { version = "0.2", optional = true }
+
 [features]
 default = ["static"]
 download = ["aloxide/download"]
 static = []
+
+# Conditionally enable functionality
+ruby_2_6 = ["gte_ruby_2_6"]
+gte_ruby_2_6 = []

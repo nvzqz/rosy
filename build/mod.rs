@@ -19,6 +19,14 @@ fn main() {
     rerun_if_env_changed("ROSY_RUBY_VERSION");
     rerun_if_env_changed("ROSY_PRINT_RUBY_CONFIG");
 
+    #[cfg(feature = "rustc_version")]
+    {
+        use rustc_version::*;
+        if version_meta().unwrap().channel == Channel::Nightly {
+            println!("cargo:rustc-cfg=nightly");
+        }
+    }
+
     let ruby = ruby::get();
     ruby::print_config(&ruby);
     ruby.link(LINK_STATIC).unwrap();
