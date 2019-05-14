@@ -27,3 +27,6 @@ static = []
 # Conditionally enable functionality
 ruby_2_6 = ["gte_ruby_2_6"]
 gte_ruby_2_6 = []
+
+[package.metadata.docs.rs]
+features = ["rustc_version", "ruby_2_6"]
