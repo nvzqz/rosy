@@ -10,6 +10,8 @@ matrix:
   - os: windows
   include:
   - os: windows
+    env:
+    - FEATURES: ""
   - os: windows
     env:
     - FEATURES: "static"
