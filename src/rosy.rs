@@ -63,7 +63,7 @@ pub unsafe trait Rosy: Sized {
     ///
     /// # Safety
     ///
-    /// The implementor
+    /// The implementor must ensure that no new Ruby objects are allocated.
     #[inline]
     fn free(self: Box<Self>) {
         drop(self);
