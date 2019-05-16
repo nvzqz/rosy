@@ -14,17 +14,17 @@ use crate::{
 ///
 /// See the documentation for `Rosy` for more information.
 #[repr(transparent)]
-pub struct RosyObject<R: Rosy> {
+pub struct RosyObject<R> {
     inner: NonNullObject,
     _marker: PhantomData<R>,
 }
 
-impl<R: Rosy> Clone for RosyObject<R> {
+impl<R> Clone for RosyObject<R> {
     #[inline]
     fn clone(&self) -> Self { *self }
 }
 
-impl<R: Rosy> Copy for RosyObject<R> {}
+impl<R> Copy for RosyObject<R> {}
 
 impl<R: Rosy> AsRef<AnyObject> for RosyObject<R> {
     #[inline]
