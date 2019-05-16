@@ -24,7 +24,7 @@ use crate::prelude::*;
 ///         Class::get_or_def("RosyFlag").unwrap()
 ///     }
 ///
-///     fn mark(&mut self) {}
+///     fn mark(&self) {}
 ///
 ///     fn free(self: Box<Self>) {
 ///         *self.did_free = true;
@@ -57,7 +57,7 @@ pub unsafe trait Rosy: Sized {
     /// This method is called during garbage collection and it is required that:
     /// - _All_ live Ruby objects are properly marked
     /// - No new Ruby objects are allocated
-    fn mark(&mut self);
+    fn mark(&self);
 
     /// Runs destructors and frees `self`.
     ///
