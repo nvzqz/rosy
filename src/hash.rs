@@ -53,7 +53,7 @@ impl fmt::Display for Hash {
     }
 }
 
-#[cfg(feature = "gte_ruby_2_6")]
+#[cfg(feature = "ruby_2_6")]
 impl<K: Object, V: Object> From<&[(K, V)]> for Hash {
     #[inline]
     fn from(pairs: &[(K, V)]) -> Self {
@@ -139,7 +139,7 @@ impl Hash {
     /// assert_eq!(hash.get("user"), "nvzqz");
     /// assert_eq!(hash.get("name"), "Nikolai Vazquez");
     /// ```
-    #[cfg(feature = "gte_ruby_2_6")]
+    #[cfg(feature = "ruby_2_6")]
     #[cfg_attr(nightly, doc(cfg(feature = "ruby_2_6")))]
     #[inline]
     pub fn from_pairs<K: Object, V: Object>(pairs: &[(K, V)]) -> Self {
@@ -171,7 +171,7 @@ impl Hash {
     }
 
     /// Inserts `pairs` into `self` in bulk.
-    #[cfg(feature = "gte_ruby_2_6")]
+    #[cfg(feature = "ruby_2_6")]
     #[cfg_attr(nightly, doc(cfg(feature = "ruby_2_6")))]
     #[inline]
     pub fn insert_pairs<K: Object, V: Object>(self, pairs: &[(K, V)]) {
