@@ -140,6 +140,12 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
     }
 
     /// Calls `method` on `self` and returns the result.
+    #[inline]
+    fn call(self, method: impl Into<SymbolId>) -> Result<AnyObject, AnyException> {
+        crate::protected(|| unsafe { self.call_unchecked(method) })
+    }
+
+    /// Calls `method` on `self` and returns the result.
     ///
     /// # Safety
     ///
@@ -150,10 +156,14 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
         self.call_with_unchecked(method, args)
     }
 
-    /// Calls `method` on `self` and returns the result.
+    /// Calls `method` on `self` with `args` and returns the result.
     #[inline]
-    fn call(self, method: impl Into<SymbolId>) -> Result<AnyObject, AnyException> {
-        crate::protected(|| unsafe { self.call_unchecked(method) })
+    fn call_with(
+        self,
+        method: impl Into<SymbolId>,
+        args: &[impl Object]
+    ) -> Result<AnyObject, AnyException> {
+        crate::protected(|| unsafe { self.call_with_unchecked(method, args) })
     }
 
     /// Calls `method` on `self` with `args` and returns the result.
@@ -175,14 +185,13 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
         ))
     }
 
-    /// Calls `method` on `self` with `args` and returns the result.
+    /// Calls the public `method` on `self` and returns the result.
     #[inline]
-    fn call_with(
+    fn call_public(
         self,
         method: impl Into<SymbolId>,
-        args: &[impl Object]
     ) -> Result<AnyObject, AnyException> {
-        crate::protected(|| unsafe { self.call_with_unchecked(method, args) })
+        crate::protected(|| unsafe { self.call_public_unchecked(method) })
     }
 
     /// Calls the public `method` on `self` and returns the result.
@@ -200,13 +209,16 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
         self.call_public_with_unchecked(method, args)
     }
 
-    /// Calls the public `method` on `self` and returns the result.
+    /// Calls the public `method` on `self` with `args` and returns the result.
     #[inline]
-    fn call_public(
+    fn call_public_with(
         self,
         method: impl Into<SymbolId>,
+        args: &[impl Object]
     ) -> Result<AnyObject, AnyException> {
-        crate::protected(|| unsafe { self.call_public_unchecked(method) })
+        crate::protected(|| unsafe {
+            self.call_public_with_unchecked(method, args)
+        })
     }
 
     /// Calls the public `method` on `self` with `args` and returns the result.
@@ -227,18 +239,6 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
             args.len() as _,
             args.as_ptr() as _,
         ))
-    }
-
-    /// Calls the public `method` on `self` with `args` and returns the result.
-    #[inline]
-    fn call_public_with(
-        self,
-        method: impl Into<SymbolId>,
-        args: &[impl Object]
-    ) -> Result<AnyObject, AnyException> {
-        crate::protected(|| unsafe {
-            self.call_public_with_unchecked(method, args)
-        })
     }
 
     /// Returns a printable string representation of `self`.
