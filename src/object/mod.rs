@@ -120,6 +120,12 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
         unsafe { Class::from_raw(ruby::rb_singleton_class(self.raw())) }
     }
 
+    /// Marks `self` for Ruby to avoid garbage collecting it.
+    #[inline]
+    fn mark(self) {
+        crate::gc::mark(self);
+    }
+
     /// Forces the garbage collector to free the contents of `self`.
     ///
     /// # Safety
