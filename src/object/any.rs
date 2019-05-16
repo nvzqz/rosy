@@ -197,6 +197,13 @@ impl AnyObject {
         AnyObject(crate::util::NIL_VALUE)
     }
 
+    /// Returns an instance from a boolean.
+    #[inline]
+    pub const fn from_bool(b: bool) -> AnyObject {
+        // `false` uses 0 in Ruby
+        AnyObject(crate::util::TRUE_VALUE * b as ruby::VALUE)
+    }
+
     /// Returns whether `self` is `nil`.
     #[inline]
     pub fn is_nil(self) -> bool {
