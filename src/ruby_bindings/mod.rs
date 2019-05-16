@@ -11,6 +11,7 @@ mod prelude {
 mod array;
 mod data;
 mod exception;
+mod float;
 mod gc;
 mod hash;
 mod mixin;
@@ -112,6 +113,7 @@ pub use self::{
     array::*,
     data::*,
     exception::*,
+    float::*,
     gc::*,
     hash::*,
     mixin::*,

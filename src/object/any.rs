@@ -132,6 +132,20 @@ impl<O: Object, E: Object> From<Result<O, E>> for AnyObject {
     }
 }
 
+impl From<f32> for AnyObject {
+    #[inline]
+    fn from(f: f32) -> Self {
+        (f as f64).into()
+    }
+}
+
+impl From<f64> for AnyObject {
+    #[inline]
+    fn from(f: f64) -> Self {
+        unsafe { AnyObject(ruby::rb_float_new(f)) }
+    }
+}
+
 impl From<bool> for AnyObject {
     #[inline]
     fn from(b: bool) -> Self {
