@@ -380,15 +380,44 @@ impl Inheritance {
 macro_rules! built_in_classes {
     ($($vm_name:expr, $method:ident, $konst:ident;)+) => {
         /// Built-in classes.
-        impl Class {$(
-            /// The `
-            #[doc = $vm_name]
-            ///` class.
+        impl Class {
+            /// Returns the `RustObject` class.
+            ///
+            /// This class can be used when simply wrapping Rust data.
             #[inline]
-            pub fn $method() -> Self {
-                unsafe { Self::from_raw(ruby::$konst) }
+            pub fn rust_object() -> Self {
+                // A static function pointer that will get swapped out the first
+                // time it's called and will simply return `RUST_OBJECT` on
+                // all subsequent calls without branching
+                static mut GET_RUST_OBJECT: fn() -> Class = || unsafe {
+                    static mut RUST_OBJECT: AnyObject = unsafe {
+                        AnyObject::from_raw(0)
+                    };
+
+                    let class = Class::get_or_def("RustObject")
+                        .expect("Failed to create 'RustObject'");
+
+                    RUST_OBJECT = class.into();
+                    GET_RUST_OBJECT = || Class::cast_unchecked(RUST_OBJECT);
+
+                    crate::gc::register(&RUST_OBJECT);
+
+                    class
+                };
+
+                unsafe { GET_RUST_OBJECT() }
             }
-        )+}
+
+            $(
+                /// The `
+                #[doc = $vm_name]
+                ///` class.
+                #[inline]
+                pub fn $method() -> Self {
+                    unsafe { Self::from_raw(ruby::$konst) }
+                }
+            )+
+        }
     }
 }
 
