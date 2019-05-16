@@ -47,7 +47,14 @@ pub unsafe trait Rosy: Sized {
     const ID: *const c_char;
 
     /// Returns the class defined for this type.
-    fn class() -> Class;
+    ///
+    /// The default is `RustObject`, however other implementors of this trait
+    /// should consider using a different class to define methods or properties
+    /// on.
+    #[inline]
+    fn class() -> Class {
+        Class::rust_object()
+    }
 
     /// Called during Ruby's mark phase of garbage collection to determine which
     /// Ruby references in `self` are live and should not be swept.
