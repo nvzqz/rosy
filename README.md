@@ -1,5 +1,8 @@
 # Rosy
 
+[![Build status](https://travis-ci.com/oceanpkg/rosy.svg?branch=master)](https://travis-ci.com/oceanpkg/rosy)
+![Lines of code](https://tokei.rs/b1/github/oceanpkg/rosy?category=code)
+
 High-level bindings of Ruby's C API for Rust.
 
 ## License
