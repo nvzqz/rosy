@@ -122,6 +122,12 @@ impl Array {
         self.as_any_object()._ptr() as _
     }
 
+    /// Creates a new empty instance.
+    #[inline]
+    pub fn new() -> Self {
+        unsafe { Self::from_raw(ruby::rb_ary_new()) }
+    }
+
     /// Creates a new instance from the elements in `slice`.
     #[inline]
     pub fn from_slice<'s, T>(slice: &'s [T]) -> Self
