@@ -30,6 +30,12 @@ fn _attr(m: ruby::VALUE, name: SymbolId, read: bool, write: bool) {
 /// A type that supports mixins (see [`Class`](struct.Class.html) and
 /// [`Module`](struct.Module.html)).
 pub trait Mixin: Object + Sealed {
+    /// Returns `self` as a `Class` if it is one or a `Module` otherwise.
+    fn to_class(self) -> Result<Class, Module>;
+
+    /// Returns `self` as a `Module` if it is one or a `Class` otherwise.
+    fn to_module(self) -> Result<Module, Class>;
+
     /// Embeds the contents of `module` in `self`.
     #[inline]
     fn include(self, module: Module) {
@@ -219,9 +225,29 @@ pub trait Mixin: Object + Sealed {
     }
 }
 
-impl Mixin for Class {}
+impl Mixin for Class {
+    #[inline]
+    fn to_class(self) -> Result<Class, Module> {
+        Ok(self)
+    }
 
-impl Mixin for Module {}
+    #[inline]
+    fn to_module(self) -> Result<Module, Class> {
+        Err(self)
+    }
+}
+
+impl Mixin for Module {
+    #[inline]
+    fn to_class(self) -> Result<Class, Module> {
+        Err(self)
+    }
+
+    #[inline]
+    fn to_module(self) -> Result<Module, Class> {
+        Ok(self)
+    }
+}
 
 /// A type that can be used as one or more arguments for evaluating code within
 /// the context of a [`Mixin`](trait.Mixin.html).
