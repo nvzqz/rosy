@@ -7,8 +7,9 @@ use crate::{
 };
 
 mod class;
+mod method;
 mod module;
-pub use self::{class::*, module::*};
+pub use self::{class::*, method::*, module::*};
 
 #[inline]
 fn _get_const(m: ruby::VALUE, name: SymbolId) -> Option<AnyObject> {

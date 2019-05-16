@@ -116,6 +116,14 @@ extern "C" {
     // void rb_cvar_set(VALUE klass, ID id, VALUE val)
     pub fn rb_cvar_set(klass: VALUE, id: ID, val: VALUE);
 
+    // void rb_define_method_id(VALUE klass, ID mid, VALUE (*func)(ANYARGS), int argc)
+    pub fn rb_define_method_id(
+        klass: VALUE,
+        mid: ID,
+        func: Option<unsafe extern "C" fn() -> VALUE>,
+        argc: c_int,
+    );
+
     // VALUE rb_define_class_id_under(VALUE outer, ID id, VALUE super)
     pub fn rb_define_class_id_under(outer: VALUE, id: ID, sup: VALUE) -> VALUE;
     // VALUE rb_define_class_id_under(VALUE outer, ID id)

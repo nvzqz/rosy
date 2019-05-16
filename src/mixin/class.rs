@@ -6,7 +6,7 @@ use std::{
     os::raw::c_int,
 };
 use crate::{
-    mixin::DefMixinError,
+    mixin::{DefMixinError, MethodFn},
     object::{NonNullObject, Ty},
     prelude::*,
     ruby,
@@ -243,6 +243,105 @@ impl Class {
     #[inline]
     pub fn name(self) -> String {
         unsafe { String::from_raw(ruby::rb_class_name(self.raw())) }
+    }
+
+    /// Defines a method for `name` on `self` that calls `f` when invoked.
+    ///
+    /// Unfortunately, because `MethodFn` is defined on `extern "C" fn` types
+    /// and these function declarations don't implicitly resolve to those types,
+    /// an `as` cast is required for `f`.
+    ///
+    /// # Examples
+    ///
+    /// Every method takes `this` (equivalent of `self`) as the first argument,
+    /// which can then be followed with up to 15 arguments:
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use rosy::prelude::*;
+    ///
+    /// let class = Class::array();
+    /// let array = Array::from_slice(&[String::from("hello")]);
+    ///
+    /// extern "C" fn my_eq(this: AnyObject, that: AnyObject) -> AnyObject {
+    ///     AnyObject::from(this == that)
+    /// }
+    ///
+    /// class.def_method("my_eq?", my_eq as extern fn(_, _) -> _);
+    ///
+    /// assert!(array.call_with("my_eq?", &[array]).unwrap().is_true());
+    /// ```
+    ///
+    /// Passing in the wrong number of arguments will result in an
+    /// `ArgumentError` exception being raised:
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// # use rosy::prelude::*;
+    /// # extern "C" fn my_eq(this: AnyObject, that: AnyObject) -> AnyObject {
+    /// #     AnyObject::from(this == that)
+    /// # }
+    /// # let class = Class::array();
+    /// # let array = Array::from_slice(&[String::from("hello")]);
+    /// # class.def_method("my_eq?", my_eq as extern fn(_, _) -> _);
+    /// assert!(array.call("my_eq?").unwrap_err().is_arg_error());
+    /// ```
+    ///
+    /// ## Variable Arguments
+    ///
+    /// There are two ways of taking in a variable number of arguments.
+    ///
+    /// The first is by taking a pointer and a length:
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use std::os::raw::c_int;
+    /// use std::slice::from_raw_parts;
+    /// use rosy::prelude::*;
+    ///
+    /// unsafe extern "C" fn eq_all(this: AnyObject, len: c_int, ptr: *const AnyObject) -> AnyObject {
+    ///     let slice = from_raw_parts(ptr, len as usize);
+    ///     for &obj in slice {
+    ///         if obj != this {
+    ///             return false.into();
+    ///         }
+    ///     }
+    ///     true.into()
+    /// }
+    ///
+    /// let class = Class::string();
+    /// let string = String::from("hellooo");
+    ///
+    /// class.def_method("eq_all?", eq_all as unsafe extern fn(_, _, _) -> _);
+    ///
+    /// let args = [string, String::from("byeee")];
+    /// assert!(string.call_with("eq_all?", &args).unwrap().is_false());
+    /// ```
+    ///
+    /// The second is by taking an `Array` as an argument:
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use rosy::prelude::*;
+    ///
+    /// let class = Class::array();
+    /// let value = String::from("hey");
+    /// let slice = &[value, value];
+    /// let array = Array::from_slice(slice);
+    ///
+    /// extern "C" fn eq_args(this: AnyObject, args: Array) -> AnyObject {
+    ///     AnyObject::from(this == args)
+    /// }
+    ///
+    /// class.def_method("eq_args?", eq_args as extern fn(_, _) -> _);
+    ///
+    /// assert!(array.call_with("eq_args?", slice).unwrap().is_true());
+    /// ```
+    #[inline]
+    pub fn def_method<F: MethodFn>(self, name: impl Into<SymbolId>, f: F) {
+        let name = name.into().raw();
+        let f = Some(f.raw_fn());
+        unsafe { ruby::rb_define_method_id(self.raw(), name, f, F::ARITY) }
     }
 }
 

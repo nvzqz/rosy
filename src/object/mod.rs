@@ -3,6 +3,7 @@
 use crate::{
     prelude::*,
     ruby,
+    mixin::MethodFn,
 };
 
 mod any;
@@ -127,6 +128,15 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
     #[inline]
     unsafe fn force_recycle(self) {
         crate::gc::force_recycle(self);
+    }
+
+    /// Defines a method for `name` on the singleton class of `self` that calls
+    /// `f` when invoked.
+    #[inline]
+    fn def_singleton_method<F>(self, name: impl Into<SymbolId>, f: F)
+        where F: MethodFn
+    {
+        self.singleton_class().def_method(name, f);
     }
 
     /// Calls `method` on `self` and returns the result.
