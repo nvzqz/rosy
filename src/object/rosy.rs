@@ -19,6 +19,25 @@ pub struct RosyObject<R> {
     _marker: PhantomData<R>,
 }
 
+#[cfg(test)]
+mod assertions {
+    use std::mem::align_of;
+    use static_assertions::*;
+    use super::*;
+
+    #[repr(align(512))]
+    struct AbsoluteUnit(u128, u128, u128, u128);
+
+    type AbsoluteObject = RosyObject<AbsoluteUnit>;
+
+    assert_eq_size!(size; AbsoluteObject, AnyObject);
+    const_assert_eq!(align;
+        align_of::<AbsoluteObject>(),
+        align_of::<ruby::VALUE>(),
+        align_of::<AnyObject>(),
+    );
+}
+
 impl<R> Clone for RosyObject<R> {
     #[inline]
     fn clone(&self) -> Self { *self }
