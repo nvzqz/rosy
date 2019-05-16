@@ -38,6 +38,7 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
     /// Not following this will lead to
     /// [nasal demons](https://en.wikipedia.org/wiki/Nasal_demons). You've been
     /// warned.
+    // TODO: Make a `const fn` once it stabilizes on trait items
     #[inline]
     unsafe fn from_raw(raw: ruby::VALUE) -> Self {
         Self::cast_unchecked(AnyObject::from_raw(raw))

@@ -191,6 +191,14 @@ impl AnyObject {
         AnyObject::from_raw(ruby::rb_call_super(len as _, ptr))
     }
 
+    /// An alternative to
+    /// [`Object::from_raw`](trait.Object.html#method.from_raw) that works in a
+    /// `const` context.
+    #[inline]
+    pub const unsafe fn from_raw(raw: ruby::VALUE) -> AnyObject {
+        AnyObject(raw)
+    }
+
     /// Returns a `nil` instance.
     #[inline]
     pub const fn nil() -> AnyObject {
