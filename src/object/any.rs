@@ -193,7 +193,7 @@ impl AnyObject {
 
     /// Returns a `nil` instance.
     #[inline]
-    pub fn nil() -> AnyObject {
+    pub const fn nil() -> AnyObject {
         AnyObject(crate::util::NIL_VALUE)
     }
 
