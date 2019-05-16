@@ -1,4 +1,7 @@
-use std::os::raw::c_char;
+use std::{
+    mem,
+    os::raw::c_char,
+};
 use crate::prelude::*;
 
 /// A Rust type that can be used as a object.
@@ -79,6 +82,72 @@ pub unsafe trait Rosy: Sized {
     /// Returns the estimated memory consumption of `self` in bytes.
     #[inline]
     fn size(&self) -> usize {
-        std::mem::size_of_val(self)
+        mem::size_of_val(self)
+    }
+}
+
+unsafe impl<R: Rosy> Rosy for &[R] {
+    const ID: *const c_char = b"rust_slice\0".as_ptr() as _;
+
+    #[inline]
+    fn mark(&self) {
+        self.iter().for_each(Rosy::mark);
+    }
+
+    #[inline]
+    fn size(&self) -> usize {
+        self.iter().fold(0, |cur, r| cur + r.size())
+    }
+}
+
+unsafe impl<R: Rosy> Rosy for &mut [R] {
+    const ID: *const c_char = b"rust_mut_slice\0".as_ptr() as _;
+
+    #[inline]
+    fn mark(&self) {
+        self.iter().for_each(Rosy::mark);
+    }
+
+    #[inline]
+    fn size(&self) -> usize {
+        self.iter().fold(0, |cur, r| cur + r.size())
+    }
+}
+
+unsafe impl<R: Rosy> Rosy for Vec<R> {
+    const ID: *const c_char = b"rust_vec\0".as_ptr() as _;
+
+    #[inline]
+    fn mark(&self) {
+        self.iter().for_each(Rosy::mark);
+    }
+
+    #[inline]
+    fn size(&self) -> usize {
+        self.iter().fold(0, |cur, r| cur + r.size())
+    }
+}
+
+unsafe impl Rosy for &str {
+    const ID: *const c_char = b"rust_str\0".as_ptr() as _;
+
+    #[inline]
+    fn mark(&self) {}
+
+    #[inline]
+    fn size(&self) -> usize {
+        mem::size_of_val(*self)
+    }
+}
+
+unsafe impl Rosy for std::string::String {
+    const ID: *const c_char = b"rust_string\0".as_ptr() as _;
+
+    #[inline]
+    fn mark(&self) {}
+
+    #[inline]
+    fn size(&self) -> usize {
+        self.as_str().size()
     }
 }
