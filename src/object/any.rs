@@ -135,8 +135,7 @@ impl<O: Object, E: Object> From<Result<O, E>> for AnyObject {
 impl From<bool> for AnyObject {
     #[inline]
     fn from(b: bool) -> Self {
-        use crate::util::*;
-        AnyObject(if b { TRUE_VALUE } else { FALSE_VALUE })
+        Self::from_bool(b)
     }
 }
 
