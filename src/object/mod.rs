@@ -25,7 +25,7 @@ pub use self::{
 ///
 /// All types that implement this trait _must_ be light wrappers around an
 /// [`AnyObject`](struct.AnyObject.html) and thus have the same size and layout.
-pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> {
+pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<AnyObject> {
     /// Creates a new object from `raw` without checking.
     ///
     /// # Safety

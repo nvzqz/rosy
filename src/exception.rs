@@ -118,6 +118,13 @@ impl fmt::Display for AnyException {
 
 impl Error for AnyException {}
 
+impl PartialEq<AnyObject> for AnyException {
+    #[inline]
+    fn eq(&self, obj: &AnyObject) -> bool {
+        self.as_any_object() == obj
+    }
+}
+
 unsafe impl Exception for AnyException {
 
 }

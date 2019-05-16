@@ -22,6 +22,13 @@ impl From<InstrSeq> for AnyObject {
     fn from(obj: InstrSeq) -> Self { obj.0.into() }
 }
 
+impl PartialEq<AnyObject> for InstrSeq {
+    #[inline]
+    fn eq(&self, obj: &AnyObject) -> bool {
+        self.as_any_object() == obj
+    }
+}
+
 unsafe impl Object for InstrSeq {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {

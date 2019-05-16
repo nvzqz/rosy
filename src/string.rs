@@ -437,6 +437,13 @@ impl From<Encoding> for AnyObject {
     fn from(object: Encoding) -> AnyObject { object.0.into() }
 }
 
+impl PartialEq<AnyObject> for Encoding {
+    #[inline]
+    fn eq(&self, obj: &AnyObject) -> bool {
+        self.as_any_object() == obj
+    }
+}
+
 unsafe impl Object for Encoding {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {

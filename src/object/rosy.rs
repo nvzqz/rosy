@@ -40,6 +40,13 @@ impl<R: Rosy> From<RosyObject<R>> for AnyObject {
     }
 }
 
+impl<R: Rosy> PartialEq<AnyObject> for RosyObject<R> {
+    #[inline]
+    fn eq(&self, obj: &AnyObject) -> bool {
+        self.as_any_object() == obj
+    }
+}
+
 unsafe impl<R: Rosy> Object for RosyObject<R> {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {

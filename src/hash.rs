@@ -22,6 +22,13 @@ impl From<Hash> for AnyObject {
     fn from(object: Hash) -> AnyObject { object.0.into() }
 }
 
+impl PartialEq<AnyObject> for Hash {
+    #[inline]
+    fn eq(&self, obj: &AnyObject) -> bool {
+        self.as_any_object() == obj
+    }
+}
+
 unsafe impl Object for Hash {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {

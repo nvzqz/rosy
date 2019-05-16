@@ -27,6 +27,13 @@ impl From<Array> for AnyObject {
     fn from(object: Array) -> AnyObject { object.0.into() }
 }
 
+impl PartialEq<AnyObject> for Array {
+    #[inline]
+    fn eq(&self, obj: &AnyObject) -> bool {
+        self.as_any_object() == obj
+    }
+}
+
 unsafe impl Object for Array {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {

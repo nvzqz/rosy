@@ -27,6 +27,13 @@ impl From<Symbol> for AnyObject {
     fn from(object: Symbol) -> AnyObject { object.0.into() }
 }
 
+impl PartialEq<AnyObject> for Symbol {
+    #[inline]
+    fn eq(&self, obj: &AnyObject) -> bool {
+        self.as_any_object() == obj
+    }
+}
+
 unsafe impl Object for Symbol {
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
