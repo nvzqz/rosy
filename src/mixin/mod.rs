@@ -12,10 +12,10 @@ mod module;
 pub use self::{class::*, method::*, module::*};
 
 #[inline]
-fn _get_const(m: ruby::VALUE, name: SymbolId) -> Option<AnyObject> {
+fn _get_const(m: impl Mixin, name: SymbolId) -> Option<AnyObject> {
     unsafe {
-        if ruby::rb_const_defined(m, name.raw()) != 0 {
-            Some(AnyObject::from_raw(ruby::rb_const_get(m, name.raw())))
+        if ruby::rb_const_defined(m.raw(), name.raw()) != 0 {
+            Some(AnyObject::from_raw(ruby::rb_const_get(m.raw(), name.raw())))
         } else {
             None
         }
@@ -69,7 +69,7 @@ pub trait Mixin: Object + Sealed {
         self,
         name: impl Into<SymbolId>,
     ) -> Result<Class, DefMixinError> {
-        Class::_def_under(self.raw(), Class::object(), name.into())
+        Class::_def_under(self, Class::object(), name.into())
     }
 
     /// Defines a new subclass of `superclass` under `self` with `name`.
@@ -79,7 +79,7 @@ pub trait Mixin: Object + Sealed {
         superclass: Class,
         name: impl Into<SymbolId>,
     ) -> Result<Class, DefMixinError> {
-        Class::_def_under(self.raw(), superclass, name.into())
+        Class::_def_under(self, superclass, name.into())
     }
 
     /// Returns the existing `Class` with `name` in `self`.
@@ -88,7 +88,7 @@ pub trait Mixin: Object + Sealed {
         self,
         name: impl Into<SymbolId>,
     ) -> Option<Class> {
-        _get_const(self.raw(), name.into())?.to_class()
+        _get_const(self, name.into())?.to_class()
     }
 
     /// Defines a new module under `self` with `name`.
@@ -97,7 +97,7 @@ pub trait Mixin: Object + Sealed {
         self,
         name: impl Into<SymbolId>,
     ) -> Result<Module, DefMixinError> {
-        Module::_def_under(self.raw(), name.into())
+        Module::_def_under(self, name.into())
     }
 
     /// Returns the existing `Module` with `name` in `self`.
@@ -106,7 +106,7 @@ pub trait Mixin: Object + Sealed {
         self,
         name: impl Into<SymbolId>,
     ) -> Option<Module> {
-        _get_const(self.raw(), name.into())?.to_module()
+        _get_const(self, name.into())?.to_module()
     }
 
     /// Returns whether a constant for `name` is defined in `self`, or in some
@@ -327,11 +327,24 @@ pub enum DefMixinError {
     ExistingModule(Module),
     /// Some other constant already exists.
     ExistingConst(AnyObject),
+    /// The given class is frozen and can't have items defined under it.
+    FrozenClass(Class),
+    /// The given module is frozen and can't have items defined under it.
+    FrozenModule(Module),
 }
 
 impl DefMixinError {
+    #[cold]
     #[inline]
-    fn _get(m: ruby::VALUE, name: SymbolId) -> Option<Self> {
+    pub(crate) fn _frozen(m: impl Mixin) -> Self {
+        match m.to_class() {
+            Ok(class) => DefMixinError::FrozenClass(class),
+            Err(module) => DefMixinError::FrozenModule(module),
+        }
+    }
+
+    #[inline]
+    fn _get(m: impl Mixin, name: SymbolId) -> Option<Self> {
         use ruby::value_type::*;
         use DefMixinError::*;
 
@@ -378,12 +391,13 @@ impl DefMixinError {
 
     /// Returns the existing object that was found.
     #[inline]
-    pub fn existing_object(&self) -> AnyObject {
+    pub fn existing_object(&self) -> Option<AnyObject> {
         use DefMixinError::*;
         match *self {
-            ExistingModule(m) => m.into_any_object(),
-            ExistingClass(c)  => c.into_any_object(),
-            ExistingConst(c)  => c,
+            ExistingModule(m) => Some(m.into_any_object()),
+            ExistingClass(c)  => Some(c.into_any_object()),
+            ExistingConst(c)  => Some(c),
+            _ => None,
         }
     }
 }

@@ -60,20 +60,35 @@ impl Eq for Module {}
 
 impl Module {
     pub(crate) fn _def_under(
-        m: ruby::VALUE,
+        m: impl Mixin,
         name: SymbolId,
     ) -> Result<Self, DefMixinError> {
         if let Some(err) = DefMixinError::_get(m, name) {
             return Err(err);
+        } else if m.is_frozen() {
+            return Err(DefMixinError::_frozen(m));
         }
-        let name = name.raw();
-        unsafe { Ok(Self::from_raw(ruby::rb_define_module_id_under(m, name))) }
+        unsafe {
+            let raw = ruby::rb_define_module_id_under(m.raw(), name.raw());
+            Ok(Self::from_raw(raw))
+        }
     }
 
     /// Extends `object` with the contents of `self`.
     #[inline]
-    pub fn extend(self, object: impl Object) {
-        unsafe { ruby::rb_extend_object(object.raw(), self.raw()) };
+    pub fn extend(self, object: impl Object) -> Result<(), AnyException> {
+        crate::protected(|| unsafe { self.extend_unchecked(object) })
+    }
+
+    /// Extends `object` with the contents of `self`.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
+    #[inline]
+    pub unsafe fn extend_unchecked(self, object: impl Object) {
+        ruby::rb_extend_object(object.raw(), self.raw());
     }
 
     /// Defines a new top-level module with `name`.
@@ -94,7 +109,7 @@ impl Module {
     /// # rosy::vm::init().unwrap();
     ///
     /// let math = Module::def("Math").unwrap_err().existing_object();
-    /// assert_eq!(Module::math(), math);
+    /// assert_eq!(Module::math(), math.unwrap());
     /// ```
     #[inline]
     pub fn def(name: impl Into<SymbolId>) -> Result<Self, DefMixinError> {

@@ -86,22 +86,15 @@ impl PartialOrd for Array {
     }
 }
 
-impl<'r, O: Object> Extend<O> for Array {
-    #[inline]
-    fn extend<T: IntoIterator<Item=O>>(&mut self, iter: T) {
-        for obj in iter {
-            self.push(obj);
-        }
-    }
-}
-
 impl<'r, O: Object> FromIterator<O> for Array {
     #[inline]
     fn from_iter<T: IntoIterator<Item=O>>(iter: T) -> Self {
         let iter = iter.into_iter();
         let (size, _) = iter.size_hint();
-        let mut array = Array::with_capacity(size);
-        array.extend(iter);
+        let array = Array::with_capacity(size);
+        for obj in iter {
+            unsafe { array.push(obj) };
+        }
         array
     }
 }
@@ -182,26 +175,38 @@ impl Array {
     ///
     /// # Safety
     ///
-    /// Care must be taken to ensure that the length of `self` is not changed
-    /// through the VM or otherwise.
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised. Care must also be taken to ensure that the
+    /// length of `self` is not changed through the VM or otherwise.
     #[inline]
     pub unsafe fn as_slice_mut(&mut self) -> &mut [AnyObject] {
+        ruby::rb_ary_modify(self.raw());
         let ptr = (*self.rarray()).start_mut() as *mut AnyObject;
         std::slice::from_raw_parts_mut(ptr, self.len())
     }
 
     /// Removes all elements from `self`.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
     #[inline]
-    pub fn clear(self) {
-        unsafe { ruby::rb_ary_clear(self.raw()) };
+    pub unsafe fn clear(self) {
+        ruby::rb_ary_clear(self.raw())
     }
 
     /// Appends all of the elements in `slice` to `self`.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
     #[inline]
-    pub fn append(self, slice: &[impl Object]) {
+    pub unsafe fn append(self, slice: &[impl Object]) {
         let ptr = slice.as_ptr() as *const ruby::VALUE;
         let len = slice.len();
-        unsafe { ruby::rb_ary_cat(self.raw(), ptr, len as _) };
+        ruby::rb_ary_cat(self.raw(), ptr, len as _);
     }
 
     /// Returns the result of performing `self + other`.
@@ -211,12 +216,22 @@ impl Array {
     }
 
     /// Pushes `obj` onto the end of `self`.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
     #[inline]
-    pub fn push(self, obj: impl Object) -> AnyObject {
-        unsafe { AnyObject::from_raw(ruby::rb_ary_push(self.raw(), obj.raw())) }
+    pub unsafe fn push(self, obj: impl Object) -> AnyObject {
+        AnyObject::from_raw(ruby::rb_ary_push(self.raw(), obj.raw()))
     }
 
     /// Pops the last element from `self`.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
     ///
     /// # Examples
     ///
@@ -227,12 +242,14 @@ impl Array {
     /// let s = String::from("Hi");
     /// let a = Array::from_slice(&[s]);
     ///
-    /// assert!(!a.pop().is_nil());
-    /// assert!(a.pop().is_nil());
+    /// unsafe {
+    ///     assert!(!a.pop().is_nil());
+    ///     assert!(a.pop().is_nil());
+    /// }
     /// ```
     #[inline]
-    pub fn pop(self) -> AnyObject {
-        unsafe { AnyObject::from_raw(ruby::rb_ary_pop(self.raw())) }
+    pub unsafe fn pop(self) -> AnyObject {
+        AnyObject::from_raw(ruby::rb_ary_pop(self.raw()))
     }
 
     /// Returns whether `self` contains `obj`.
@@ -259,20 +276,30 @@ impl Array {
     /// Removes _all_ items in `self` that are equal to `obj`.
     ///
     /// This is equivalent to the `delete` method.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
     #[inline]
-    pub fn remove_all(self, obj: impl Object) -> AnyObject {
-        unsafe { AnyObject::from_raw(ruby::rb_ary_delete(
+    pub unsafe fn remove_all_unchecked(self, obj: impl Object) -> AnyObject {
+        AnyObject::from_raw(ruby::rb_ary_delete(
             self.raw(),
             obj.raw(),
-        )) }
+        ))
     }
 
     /// Reverses the contents of `self` in-palace.
     ///
     /// This is equivalent to the `reverse!` method.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
     #[inline]
-    pub fn reverse(self) {
-        unsafe { ruby::rb_ary_reverse(self.raw()) };
+    pub unsafe fn reverse_unchecked(self) {
+        ruby::rb_ary_reverse(self.raw());
     }
 
     /// Returns an instance with its contents sorted.
@@ -282,10 +309,16 @@ impl Array {
         unsafe { Array::from_raw(ruby::rb_ary_sort(self.raw())) }
     }
 
-    /// Sorts the contents of `self` in-place.
+    /// Sorts the contents of `self` in-place without checking whether `self` is
+    /// frozen.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
     #[inline]
-    pub fn sort(self) {
-        unsafe { ruby::rb_ary_sort_bang(self.raw()) };
+    pub unsafe fn sort_unchecked(self) {
+        ruby::rb_ary_sort_bang(self.raw());
     }
 
     /// Joins the contents of `self` with `separator`.

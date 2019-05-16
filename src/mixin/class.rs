@@ -128,15 +128,17 @@ impl PartialOrd for Class {
 
 impl Class {
     pub(crate) fn _def_under(
-        m: ruby::VALUE,
+        m: impl Mixin,
         superclass: Class,
         name: SymbolId,
     ) -> Result<Class, DefMixinError> {
         if let Some(err) = DefMixinError::_get(m, name) {
             return Err(err);
+        } else if m.is_frozen() {
+            return Err(DefMixinError::_frozen(m));
         }
         unsafe { Ok(Class::from_raw(ruby::rb_define_class_id_under(
-            m,
+            m.raw(),
             name.raw(),
             superclass.raw(),
         ))) }
@@ -160,7 +162,7 @@ impl Class {
     /// # rosy::vm::init().unwrap();
     ///
     /// let array = Class::def("Array").unwrap_err().existing_object();
-    /// assert_eq!(Class::array(), array);
+    /// assert_eq!(Class::array(), array.unwrap());
     /// ```
     #[inline]
     pub fn def(name: impl Into<SymbolId>) -> Result<Self, DefMixinError> {
@@ -267,7 +269,7 @@ impl Class {
     ///     AnyObject::from(this == that)
     /// }
     ///
-    /// class.def_method("my_eq?", my_eq as extern fn(_, _) -> _);
+    /// class.def_method("my_eq?", my_eq as extern fn(_, _) -> _).unwrap();
     ///
     /// assert!(array.call_with("my_eq?", &[array]).unwrap().is_true());
     /// ```
@@ -283,7 +285,7 @@ impl Class {
     /// # }
     /// # let class = Class::array();
     /// # let array = Array::from_slice(&[String::from("hello")]);
-    /// # class.def_method("my_eq?", my_eq as extern fn(_, _) -> _);
+    /// # class.def_method("my_eq?", my_eq as extern fn(_, _) -> _).unwrap();
     /// assert!(array.call("my_eq?").unwrap_err().is_arg_error());
     /// ```
     ///
@@ -333,15 +335,33 @@ impl Class {
     ///     AnyObject::from(this == args)
     /// }
     ///
-    /// class.def_method("eq_args?", eq_args as extern fn(_, _) -> _);
+    /// class.def_method("eq_args?", eq_args as extern fn(_, _) -> _).unwrap();
     ///
     /// assert!(array.call_with("eq_args?", slice).unwrap().is_true());
     /// ```
+    pub fn def_method<N, F>(self, name: N, f: F) -> Result<(), AnyException>
+    where
+        N: Into<SymbolId>,
+        F: MethodFn,
+    {
+        crate::protected(|| unsafe { self.def_method_unchecked(name, f) })
+    }
+
+    /// Defines a method for `name` on `self` that calls `f` when invoked.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
     #[inline]
-    pub fn def_method<F: MethodFn>(self, name: impl Into<SymbolId>, f: F) {
+    pub unsafe fn def_method_unchecked<N, F>(self, name: N, f: F)
+    where
+        N: Into<SymbolId>,
+        F: MethodFn,
+    {
         let name = name.into().raw();
         let f = Some(f.raw_fn());
-        unsafe { ruby::rb_define_method_id(self.raw(), name, f, F::ARITY) }
+        ruby::rb_define_method_id(self.raw(), name, f, F::ARITY)
     }
 }
 
@@ -401,6 +421,7 @@ macro_rules! built_in_classes {
                     GET_RUST_OBJECT = || Class::cast_unchecked(RUST_OBJECT);
 
                     crate::gc::register(&RUST_OBJECT);
+                    class.freeze();
 
                     class
                 };

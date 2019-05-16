@@ -134,10 +134,12 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
     /// Defines a method for `name` on the singleton class of `self` that calls
     /// `f` when invoked.
     #[inline]
-    fn def_singleton_method<F>(self, name: impl Into<SymbolId>, f: F)
-        where F: MethodFn
+    fn def_singleton_method<N, F>(self, name: N, f: F) -> Result<(), AnyException>
+    where
+        N: Into<SymbolId>,
+        F: MethodFn
     {
-        self.singleton_class().def_method(name, f);
+        self.singleton_class().def_method(name, f)
     }
 
     /// Calls `method` on `self` and returns the result.

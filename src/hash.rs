@@ -64,17 +64,11 @@ impl<K: Object, V: Object> From<&[(K, V)]> for Hash {
 impl<K: Into<AnyObject>, V: Into<AnyObject>> FromIterator<(K, V)> for Hash {
     #[inline]
     fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
-        let mut hash = Hash::new();
-        hash.extend(iter);
-        hash
-    }
-}
-
-impl<K: Into<AnyObject>, V: Into<AnyObject>> Extend<(K, V)> for Hash {
-    fn extend<I: IntoIterator<Item = (K, V)>>(&mut self, iter: I) {
+        let hash = Hash::new();
         for (key, val) in iter {
-            self.insert(key, val);
+            unsafe { hash.insert(key, val) };
         }
+        hash
     }
 }
 
@@ -144,11 +138,16 @@ impl Hash {
     #[inline]
     pub fn from_pairs<K: Object, V: Object>(pairs: &[(K, V)]) -> Self {
         let hash = Self::new();
-        hash.insert_pairs(pairs);
+        unsafe { hash.insert_pairs(pairs) };
         hash
     }
 
     /// Associates `val` with `key`.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
     ///
     /// # Examples
     ///
@@ -159,27 +158,32 @@ impl Hash {
     /// use rosy::{Hash, Object};
     ///
     /// let hash = Hash::new();
-    /// hash.insert("should_eat", true);
+    /// unsafe { hash.insert("should_eat", true) };
     ///
     /// assert_eq!(hash.to_s(), r#"{"should_eat"=>true}"#);
     /// ```
     #[inline]
-    pub fn insert(self, key: impl Into<AnyObject>, val: impl Into<AnyObject>) {
+    pub unsafe fn insert(self, key: impl Into<AnyObject>, val: impl Into<AnyObject>) {
         let key = key.into().raw();
         let val = val.into().raw();
-        unsafe { ruby::rb_hash_aset(self.raw(), key, val) };
+        ruby::rb_hash_aset(self.raw(), key, val);
     }
 
     /// Inserts `pairs` into `self` in bulk.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
     #[cfg(feature = "ruby_2_6")]
     #[cfg_attr(nightly, doc(cfg(feature = "ruby_2_6")))]
     #[inline]
-    pub fn insert_pairs<K: Object, V: Object>(self, pairs: &[(K, V)]) {
-        unsafe { ruby::rb_hash_bulk_insert_into_st_table(
+    pub unsafe fn insert_pairs<K: Object, V: Object>(self, pairs: &[(K, V)]) {
+        ruby::rb_hash_bulk_insert_into_st_table(
             (pairs.len() * 2) as _,
             pairs.as_ptr() as *const _,
             self.raw(),
-        ) };
+        );
     }
 
     /// Returns the value for `key`.
@@ -203,25 +207,37 @@ impl Hash {
 
     /// Removes the value associated with `key` from `self` and returns it.
     ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
+    ///
     /// # Examples
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
     /// let hash = rosy::Hash::new();
-    /// assert!(hash.remove("not_here").is_nil());
     ///
-    /// hash.insert("is_here", true);
-    /// assert_eq!(hash.remove("is_here"), true);
+    /// unsafe {
+    ///     assert!(hash.remove("not_here").is_nil());
+    ///     hash.insert("is_here", true);
+    ///     assert_eq!(hash.remove("is_here"), true);
+    /// }
     /// ```
     #[inline]
-    pub fn remove(self, key: impl Into<AnyObject>) -> AnyObject {
+    pub unsafe fn remove(self, key: impl Into<AnyObject>) -> AnyObject {
         let key = key.into().raw();
-        unsafe { AnyObject::from_raw(ruby::rb_hash_delete(self.raw(), key)) }
+        AnyObject::from_raw(ruby::rb_hash_delete(self.raw(), key))
     }
 
     /// Removes all elements from `self` in-place.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
     #[inline]
-    pub fn clear(self) {
-        unsafe { ruby::rb_hash_clear(self.raw()) };
+    pub unsafe fn clear(self) {
+        ruby::rb_hash_clear(self.raw());
     }
 }

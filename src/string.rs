@@ -328,15 +328,25 @@ impl String {
     }
 
     /// Concatenates `c` to `self`.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
     #[inline]
-    pub fn push(self, c: char) {
+    pub unsafe fn push(self, c: char) {
         self.push_str(c.encode_utf8(&mut [0; 4]))
     }
 
     /// Concatenates `s` to `self`.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
     #[inline]
-    pub fn push_str(self, s: &str) {
-        unsafe { ruby::rb_str_cat(self.raw(), s.as_ptr() as _, s.len() as _) };
+    pub unsafe fn push_str(self, s: &str) {
+        ruby::rb_str_cat(self.raw(), s.as_ptr() as _, s.len() as _);
     }
 
     /// Duplicates the contents of `self` into a new instance.
