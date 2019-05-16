@@ -91,6 +91,9 @@ extern "C" {
     // void rb_attr(VALUE klass, ID id, int read, int write, int ex)
     pub fn rb_attr(klass: VALUE, id: ID, read: c_int, write: c_int, ex: c_int);
 
+    // VALUE rb_call_super(int argc, const VALUE *argv)
+    pub fn rb_call_super(argc: c_int, argv: *const VALUE) -> VALUE;
+
     // VALUE rb_class_inherited_p(VALUE mod, VALUE arg)
     pub fn rb_class_inherited_p(r#mod: VALUE, arg: VALUE) -> VALUE;
     // VALUE rb_class_name(VALUE klass)

@@ -160,6 +160,37 @@ impl AnyObject {
         self.raw() as usize as _
     }
 
+    /// Calls `super` on the current receiver without any arguments in the
+    /// context of a method.
+    #[inline]
+    pub fn call_super() -> Result<AnyObject, AnyException> {
+        crate::protected(|| unsafe { Self::call_super_unchecked() })
+    }
+
+    /// Calls `super` on the current receiver without any arguments in the
+    /// context of a method, without checking for an exception.
+    #[inline]
+    pub unsafe fn call_super_unchecked() -> AnyObject {
+        let args: &[AnyObject] = &[];
+        Self::call_super_with_unchecked(args)
+    }
+
+    /// Calls `super` on the current receiver with `args` in the context of a
+    /// method.
+    #[inline]
+    pub fn call_super_with(args: &[impl Object]) -> Result<AnyObject, AnyException> {
+        crate::protected(|| unsafe {  Self::call_super_with_unchecked(args) })
+    }
+
+    /// Calls `super` on the current receiver with `args` in the context of a
+    /// method, without checking for an exception.
+    #[inline]
+    pub unsafe fn call_super_with_unchecked(args: &[impl Object]) -> AnyObject {
+        let len = args.len();
+        let ptr = args.as_ptr() as *const ruby::VALUE;
+        AnyObject::from_raw(ruby::rb_call_super(len as _, ptr))
+    }
+
     /// Returns a `nil` instance.
     #[inline]
     pub fn nil() -> AnyObject {
