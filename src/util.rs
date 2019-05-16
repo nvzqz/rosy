@@ -1,6 +1,6 @@
 use std::os::raw::c_long;
 use crate::{
-    object::{AnyObject, Object, Ty},
+    object::{AnyObject, Ty},
     ruby::{
         self,
         RBasic,
