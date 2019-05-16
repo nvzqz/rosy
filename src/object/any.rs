@@ -115,19 +115,19 @@ impl fmt::Display for AnyObject {
     }
 }
 
-impl<O: Object> From<Option<O>> for AnyObject {
+impl<O: Into<AnyObject>> From<Option<O>> for AnyObject {
     #[inline]
     fn from(option: Option<O>) -> Self {
-        option.map(Object::into_any_object).unwrap_or(AnyObject::nil())
+        option.map(Into::into).unwrap_or(AnyObject::nil())
     }
 }
 
-impl<O: Object, E: Object> From<Result<O, E>> for AnyObject {
+impl<O: Into<AnyObject>, E: Into<AnyObject>> From<Result<O, E>> for AnyObject {
     #[inline]
     fn from(result: Result<O, E>) -> Self {
         match result {
-            Ok(obj) => obj.into_any_object(),
-            Err(err) => err.into_any_object(),
+            Ok(obj) => obj.into(),
+            Err(err) => err.into(),
         }
     }
 }
