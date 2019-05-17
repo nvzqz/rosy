@@ -59,6 +59,17 @@ pub unsafe trait Rosy: Sized {
         Class::rust_object()
     }
 
+    /// Attempts to create a `RosyObject` instance by casting `obj`.
+    ///
+    /// This could be implemented by checking against [`class`](#method.class)
+    /// but care must be taken to ensure that all instances of this type's class
+    /// refer to Rust data of type `Self`.
+    #[inline]
+    #[allow(unused_variables)]
+    fn cast(obj: impl Object) -> Option<RosyObject<Self>> {
+        None
+    }
+
     /// Called during Ruby's mark phase of garbage collection to determine which
     /// Ruby references in `self` are live and should not be swept.
     ///
