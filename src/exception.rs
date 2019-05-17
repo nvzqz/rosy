@@ -147,6 +147,7 @@ impl Eq for AnyException {}
 
 impl AnyException {
     // Returns the current exception without checking, clearing it globally
+    #[cold] // Exception is less likely than success
     #[inline]
     pub(crate) unsafe fn _take_current() -> AnyException {
         let exc = ruby::rb_errinfo();
