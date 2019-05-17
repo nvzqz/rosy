@@ -203,7 +203,7 @@ impl Array {
     /// The caller must ensure that `self` is not frozen or else a `FrozenError`
     /// exception will be raised.
     #[inline]
-    pub unsafe fn append(self, slice: &[impl Object]) {
+    pub unsafe fn extend_from_slice(self, slice: &[impl Object]) {
         let ptr = slice.as_ptr() as *const ruby::VALUE;
         let len = slice.len();
         ruby::rb_ary_cat(self.raw(), ptr, len as _);
