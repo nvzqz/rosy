@@ -14,6 +14,7 @@ mod exception;
 mod float;
 mod gc;
 mod hash;
+mod int;
 mod mixin;
 mod object;
 mod string;
@@ -116,6 +117,7 @@ pub use self::{
     float::*,
     gc::*,
     hash::*,
+    int::*,
     mixin::*,
     object::*,
     string::*,

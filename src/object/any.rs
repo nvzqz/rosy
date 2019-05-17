@@ -139,6 +139,62 @@ impl<O: Into<AnyObject>, E: Into<AnyObject>> From<Result<O, E>> for AnyObject {
     }
 }
 
+impl From<usize> for AnyObject {
+    #[inline]
+    fn from(int: usize) -> Self {
+        unsafe { Self::from_raw(ruby::rb_uint2inum(int)) }
+    }
+}
+
+impl From<u32> for AnyObject {
+    #[inline]
+    fn from(int: u32) -> Self {
+        (int as usize).into()
+    }
+}
+
+impl From<u16> for AnyObject {
+    #[inline]
+    fn from(int: u16) -> Self {
+        (int as usize).into()
+    }
+}
+
+impl From<u8> for AnyObject {
+    #[inline]
+    fn from(int: u8) -> Self {
+        (int as usize).into()
+    }
+}
+
+impl From<isize> for AnyObject {
+    #[inline]
+    fn from(int: isize) -> Self {
+        unsafe { Self::from_raw(ruby::rb_int2inum(int)) }
+    }
+}
+
+impl From<i32> for AnyObject {
+    #[inline]
+    fn from(int: i32) -> Self {
+        (int as isize).into()
+    }
+}
+
+impl From<i16> for AnyObject {
+    #[inline]
+    fn from(int: i16) -> Self {
+        (int as isize).into()
+    }
+}
+
+impl From<i8> for AnyObject {
+    #[inline]
+    fn from(int: i8) -> Self {
+        (int as isize).into()
+    }
+}
+
 impl From<f32> for AnyObject {
     #[inline]
     fn from(f: f32) -> Self {
