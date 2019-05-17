@@ -9,6 +9,12 @@ matrix:
   allow_failures:
   - os: windows
   include:
+  - os: linux
+    rust: nightly
+    env:
+    - ROSY_RUBY_VERSION="2.6.3" FEATURES="ruby_2_6,rustc_version"
+    script:
+    - cargo doc --all --no-deps --no-default-features --features="$FEATURES"
   - os: windows
     env:
     - ROSY_RUBY: ruby
