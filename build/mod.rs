@@ -30,7 +30,7 @@ fn main() {
 
     let ruby = ruby::get();
     ruby::print_config(&ruby);
-    ruby.link(LINK_STATIC).unwrap();
+    ruby.link(LINK_STATIC).expect("Failed to link Ruby");
 
     let out_dir = env::var_os("OUT_DIR").expect("Couldn't get 'OUT_DIR'");
     let out_dir = PathBuf::from(out_dir);
