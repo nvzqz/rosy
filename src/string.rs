@@ -320,6 +320,22 @@ impl String {
         unsafe { self.as_bytes().into() }
     }
 
+    /// Returns whether all bytes in `self` satisfy `f`.
+    #[inline]
+    pub fn bytes_all<F>(self, f: F) -> bool
+        where F: FnMut(u8) -> bool
+    {
+        unsafe { self.as_bytes().iter().cloned().all(f) }
+    }
+
+    /// Returns whether any bytes in `self` satisfy `f`.
+    #[inline]
+    pub fn bytes_any<F>(self, f: F) -> bool
+        where F: FnMut(u8) -> bool
+    {
+        unsafe { self.as_bytes().iter().cloned().any(f) }
+    }
+
     /// Returns a reference to the underlying UTF-8 encoded string in `self`.
     ///
     /// # Safety
@@ -436,6 +452,22 @@ impl String {
     #[inline]
     pub fn is_empty(self) -> bool {
         self.len() == 0
+    }
+
+    /// Returns whether `self` only contains whitespace.
+    pub fn is_whitespace(self) -> bool {
+        unsafe {
+            if let Ok(s) = self.to_str() {
+                s.chars().all(|ch| ch.is_whitespace())
+            } else {
+                self.is_ascii_whitespace()
+            }
+        }
+    }
+
+    /// Returns whether `self` only contains ASCII whitespace.
+    pub fn is_ascii_whitespace(self) -> bool {
+        self.bytes_all(|b| b.is_ascii_whitespace())
     }
 
     /// Concatenates `c` to `self`.
