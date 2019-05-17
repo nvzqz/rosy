@@ -14,7 +14,7 @@ following to your project's [`Cargo.toml`]:
 
 ```toml
 [dependencies]
-rosy = "0.0.1"
+rosy = "0.0.2"
 ```
 
 Rosy has functionality that is only available for certain Ruby versions. The
@@ -26,7 +26,7 @@ For example:
 
 ```toml
 [dependencies.rosy]
-version = "0.0.1"
+version = "0.0.2"
 features = ["ruby_2_6"]
 ```
 
