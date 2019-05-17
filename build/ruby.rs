@@ -2,6 +2,7 @@ use std::{
     env,
     fs::File,
     ffi::OsStr,
+    fmt::Display,
     io::Write,
     path::{Path, PathBuf},
 };
@@ -85,7 +86,7 @@ fn version() -> Option<Version> {
         .expect("Could not parse 'ROSY_RUBY_VERSION'"))
 }
 
-pub fn write_version_const(version: &Version, out_dir: &Path) {
+pub fn write_version_const(version: &dyn Display, out_dir: &Path) {
     let path = out_dir.join("ruby_version.rs");
     super::set_rustc_env("ROSY_RUBY_VERSION_CONST", path.display());
 

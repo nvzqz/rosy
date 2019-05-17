@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+### Added
+- `_skip_linking` feature flag to hopefully get https://docs.rs/rosy up
 
 ## 0.0.1 - 2019-05-17
 Initial release

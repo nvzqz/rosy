@@ -35,5 +35,8 @@ static = []
 # Conditionally enable functionality
 ruby_2_6 = []
 
+# Meant for getting docs to generate on docs.rs
+_skip_linking = []
+
 [package.metadata.docs.rs]
-features = ["rustc_version", "ruby_2_6"]
+features = ["ruby_2_6", "rustc_version", "_skip_linking"]

@@ -28,12 +28,20 @@ fn main() {
         }
     }
 
-    let ruby = ruby::get();
-    ruby::print_config(&ruby);
-    ruby.link(LINK_STATIC).expect("Failed to link Ruby");
-
     let out_dir = env::var_os("OUT_DIR").expect("Couldn't get 'OUT_DIR'");
     let out_dir = PathBuf::from(out_dir);
 
-    ruby::write_version_const(ruby.version(), &out_dir);
+    if cfg!(feature = "_skip_linking") {
+        let version = if cfg!(feature = "ruby_2_6") {
+            "2.6"
+        } else {
+            "unknown"
+        };
+        ruby::write_version_const(&version, &out_dir);
+    } else {
+        let ruby = ruby::get();
+        ruby::print_config(&ruby);
+        ruby.link(LINK_STATIC).expect("Failed to link Ruby");
+        ruby::write_version_const(ruby.version(), &out_dir);
+    }
 }
