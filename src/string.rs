@@ -412,12 +412,6 @@ impl String {
         unsafe { (*self.rstring()).len() }
     }
 
-    /// Returns whether `self` has no characters.
-    #[inline]
-    pub fn is_empty(self) -> bool {
-        self.len() == 0
-    }
-
     /// Returns the number of characters in `self`.
     ///
     /// # Examples
@@ -436,6 +430,12 @@ impl String {
     #[inline]
     pub fn char_len(self) -> usize {
         unsafe { ruby::rb_str_strlen(self.raw()) as usize }
+    }
+
+    /// Returns whether `self` has no characters.
+    #[inline]
+    pub fn is_empty(self) -> bool {
+        self.len() == 0
     }
 
     /// Concatenates `c` to `self`.
