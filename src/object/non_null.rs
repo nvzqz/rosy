@@ -1,21 +1,25 @@
 use std::{
+    ffi::c_void,
     fmt,
+    marker::PhantomData,
     num::NonZeroUsize,
-    mem,
 };
 use crate::AnyObject;
 
-// A `AnyObject` instance that doesn't use 0 (reserved for `false`). This type
+// An `AnyObject` instance that doesn't use 0 (reserved for `false`). This type
 // is used as a memory optimization for objects wrapped in `Option`.
 #[derive(Clone, Copy)]
 #[repr(transparent)]
-pub struct NonNullObject(NonZeroUsize);
+pub struct NonNullObject {
+    raw: NonZeroUsize,
+    // !Send + !Sync
+    _marker: PhantomData<*const c_void>,
+}
 
 impl From<NonNullObject> for AnyObject {
     #[inline]
     fn from(obj: NonNullObject) -> Self {
-        // Transmute to ensure the same size is used
-        unsafe { mem::transmute(obj) }
+        unsafe { AnyObject::from_raw(obj.raw.into()) }
     }
 }
 

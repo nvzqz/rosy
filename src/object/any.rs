@@ -1,6 +1,7 @@
 use std::{
     fmt,
-    ffi::{CStr, CString},
+    ffi::{c_void, CStr, CString},
+    marker::PhantomData,
 };
 use crate::{
     object::Ty,
@@ -11,7 +12,11 @@ use crate::{
 /// An instance of any Ruby object.
 #[derive(Clone, Copy)]
 #[repr(transparent)]
-pub struct AnyObject(ruby::VALUE);
+pub struct AnyObject {
+    raw: ruby::VALUE,
+    // !Send + !Sync
+    _marker: PhantomData<*const c_void>,
+}
 
 impl AsRef<AnyObject> for AnyObject {
     #[inline]
@@ -20,7 +25,9 @@ impl AsRef<AnyObject> for AnyObject {
 
 unsafe impl Object for AnyObject {
     #[inline]
-    unsafe fn from_raw(raw: ruby::VALUE) -> Self { Self(raw) }
+    unsafe fn from_raw(raw: ruby::VALUE) -> Self {
+        AnyObject { raw, _marker: PhantomData }
+    }
 
     #[inline]
     fn cast(obj: impl Object) -> Option<Self> {
@@ -33,7 +40,7 @@ unsafe impl Object for AnyObject {
 
     #[inline]
     fn raw(self) -> ruby::VALUE {
-        self.0
+        self.raw
     }
 
     #[inline]
@@ -142,7 +149,7 @@ impl From<f32> for AnyObject {
 impl From<f64> for AnyObject {
     #[inline]
     fn from(f: f64) -> Self {
-        unsafe { AnyObject(ruby::rb_float_new(f)) }
+        unsafe { AnyObject::from_raw(ruby::rb_float_new(f)) }
     }
 }
 
@@ -209,20 +216,21 @@ impl AnyObject {
     /// `const` context.
     #[inline]
     pub const unsafe fn from_raw(raw: ruby::VALUE) -> AnyObject {
-        AnyObject(raw)
+        AnyObject { raw, _marker: PhantomData }
     }
 
     /// Returns a `nil` instance.
     #[inline]
     pub const fn nil() -> AnyObject {
-        AnyObject(crate::util::NIL_VALUE)
+        unsafe { AnyObject::from_raw(crate::util::NIL_VALUE) }
     }
 
     /// Returns an instance from a boolean.
     #[inline]
     pub const fn from_bool(b: bool) -> AnyObject {
         // `false` uses 0 in Ruby
-        AnyObject(crate::util::TRUE_VALUE * b as ruby::VALUE)
+        let raw = crate::util::TRUE_VALUE * b as ruby::VALUE;
+        unsafe { AnyObject::from_raw(raw) }
     }
 
     /// Returns whether `self` is `nil`.
