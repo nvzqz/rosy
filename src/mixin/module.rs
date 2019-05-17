@@ -167,7 +167,7 @@ impl Module {
 
     /// Returns the ancestors of this module, including itself.
     #[inline]
-    pub fn ancestors(self) -> Array {
+    pub fn ancestors(self) -> Array<Module> {
         unsafe { Array::from_raw(ruby::rb_mod_ancestors(self.raw())) }
     }
 }
