@@ -185,6 +185,18 @@ impl Array {
         std::slice::from_raw_parts_mut(ptr, self.len())
     }
 
+    /// Returns the object at `index` or `None` if `index` is out-of-bounds.
+    #[inline]
+    pub fn get(self, index: usize) -> Option<AnyObject> {
+        unsafe { self.as_slice().get(index).map(|&obj| obj) }
+    }
+
+    /// Returns the object at `index` without bounds checking.
+    #[inline]
+    pub unsafe fn get_unchecked(self, index: usize) -> AnyObject {
+        *self.as_slice().get_unchecked(index)
+    }
+
     /// Removes all elements from `self`.
     ///
     /// # Safety
