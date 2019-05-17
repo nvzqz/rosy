@@ -1,3 +1,4 @@
+use std::ptr;
 use super::prelude::*;
 
 #[repr(C)]
@@ -5,6 +6,14 @@ use super::prelude::*;
 pub struct RBasic {
     pub flags: VALUE,
     pub klass: VALUE,
+}
+
+impl RBasic {
+    // Used to ensure the read doesn't get optimized out
+    #[inline]
+    pub fn volatile_flags(&self) -> VALUE {
+        unsafe { ptr::read_volatile(&self.flags) }
+    }
 }
 
 extern "C" {

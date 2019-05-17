@@ -1,3 +1,4 @@
+use std::ptr;
 use super::{
     prelude::*,
     RBasic,
@@ -17,12 +18,12 @@ impl RArray {
         use rarray_flags::*;
 
         const MASK: usize = EMBED_LEN_MASK >> EMBED_LEN_SHIFT;
-        MASK & (self.basic.flags >> EMBED_LEN_SHIFT)
+        MASK & (self.basic.volatile_flags() >> EMBED_LEN_SHIFT)
     }
 
     #[inline]
     fn is_embedded(&self) -> bool {
-        self.basic.flags & rarray_flags::EMBED_FLAG != 0
+        self.basic.volatile_flags() & rarray_flags::EMBED_FLAG != 0
     }
 
     #[inline]
@@ -30,7 +31,7 @@ impl RArray {
         if self.is_embedded() {
             self.embed_len()
         } else {
-            unsafe { self.as_.heap.len as usize }
+            unsafe { ptr::read_volatile(&self.as_.heap.len) as usize }
         }
     }
 
@@ -39,7 +40,7 @@ impl RArray {
         if self.is_embedded() {
             unsafe { self.as_.ary.as_ptr() }
         } else {
-            unsafe { self.as_.heap.ptr }
+            unsafe { ptr::read_volatile(&self.as_.heap.ptr) }
         }
     }
 
@@ -48,7 +49,7 @@ impl RArray {
         if self.is_embedded() {
             unsafe { self.as_.ary.as_mut_ptr() }
         } else {
-            unsafe { self.as_.heap.ptr as *mut VALUE }
+            unsafe { ptr::read_volatile(&self.as_.heap.ptr) as *mut VALUE }
         }
     }
 }

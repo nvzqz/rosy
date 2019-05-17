@@ -1,3 +1,4 @@
+use std::ptr;
 use super::{
     fl_type,
     OpaqueFn,
@@ -18,17 +19,17 @@ impl RString {
         use rstring_flags::*;
 
         const MASK: usize = EMBED_LEN_MASK >> EMBED_LEN_SHIFT;
-        MASK & (self.basic.flags >> EMBED_LEN_SHIFT)
+        MASK & (self.basic.volatile_flags() >> EMBED_LEN_SHIFT)
     }
 
     #[inline]
     fn is_embedded(&self) -> bool {
-        self.basic.flags & rstring_flags::NO_EMBED == 0
+        self.basic.volatile_flags() & rstring_flags::NO_EMBED == 0
     }
 
     #[inline]
     pub fn is_locked(&self) -> bool {
-        self.basic.flags & STR_TMPLOCK != 0
+        self.basic.volatile_flags() & STR_TMPLOCK != 0
     }
 
     #[inline]
@@ -36,7 +37,7 @@ impl RString {
         if self.is_embedded() {
             self.embed_len()
         } else {
-            unsafe { self.as_.heap.len as usize }
+            unsafe { ptr::read_volatile(&self.as_.heap.len) as usize }
         }
     }
 
@@ -45,7 +46,7 @@ impl RString {
         if self.is_embedded() {
             unsafe { self.as_.ary.as_ptr() }
         } else {
-            unsafe { self.as_.heap.ptr }
+            unsafe { ptr::read_volatile(&self.as_.heap.ptr) }
         }
     }
 
@@ -54,7 +55,7 @@ impl RString {
         if self.is_embedded() {
             unsafe { self.as_.ary.as_mut_ptr() }
         } else {
-            unsafe { self.as_.heap.ptr as *mut c_char }
+            unsafe { ptr::read_volatile(&self.as_.heap.ptr) as *mut c_char }
         }
     }
 }
