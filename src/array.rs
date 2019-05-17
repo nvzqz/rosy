@@ -13,6 +13,47 @@ use crate::{
 };
 
 /// An instance of Ruby's `Array` class.
+///
+/// # Examples
+///
+/// Ruby arrays can be treated as somewhat like a `Vec` without the borrow
+/// checker.
+///
+/// ```
+/// # rosy::vm::init().unwrap();
+/// use rosy::prelude::*;
+///
+/// let s = String::from("hellooo");
+/// let a = Array::from_slice(&[s, s, s]);
+///
+/// assert!(!a.is_empty());
+///
+/// for obj in a {
+///     assert_eq!(obj, s);
+/// }
+/// ```
+///
+/// Because the `Iterator` for `Array` performs a volatile read of the
+/// array length each time, a
+/// [buffer overrun](https://en.wikipedia.org/wiki/Buffer_overrun) will never
+/// occur.
+///
+/// ```
+/// # rosy::vm::init().unwrap();
+/// # use rosy::prelude::*;
+/// # let s = String::from("hellooo");
+/// # let a = Array::from_slice(&[s, s, s]);
+/// assert_eq!(a.len(), 3);
+/// let mut num_iter = 0;
+///
+/// for _ in a {
+///     // `unsafe` required because `pop` raises an exception if `a` is frozen
+///     unsafe { a.pop() };
+///     num_iter += 1;
+/// }
+///
+/// assert_eq!(num_iter, 2);
+/// ```
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
 pub struct Array(NonNullObject);
@@ -96,6 +137,16 @@ impl<'r, O: Object> FromIterator<O> for Array {
             unsafe { array.push(obj) };
         }
         array
+    }
+}
+
+impl IntoIterator for Array {
+    type Item = AnyObject;
+    type IntoIter = Iter;
+
+    #[inline]
+    fn into_iter(self) -> Iter {
+        Iter { array: self, current: 0 }
     }
 }
 
@@ -372,5 +423,42 @@ impl Array {
     pub fn join(self, separator: impl Into<String>) -> String {
         let separator = separator.into().raw();
         unsafe { String::from_raw(ruby::rb_ary_join(self.raw(), separator)) }
+    }
+}
+
+/// An iterator over the elements of an [`Array`](struct.Array.html).
+#[derive(Clone, Debug)]
+pub struct Iter {
+    array: Array,
+    current: usize,
+}
+
+impl Iterator for Iter {
+    type Item = AnyObject;
+
+    #[inline]
+    fn next(&mut self) -> Option<AnyObject> {
+        let obj = self.array.get(self.current)?;
+        self.current += 1;
+        Some(obj)
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        // Because `array` may be resized during the iteration, the lower and
+        // upper bound may be different than the yielded number of elements;
+        // however, it is safe for an `Iterator` implementation to do so
+        let len = self.array.len();
+        (len, Some(len))
+    }
+
+    #[inline]
+    fn count(self) -> usize {
+        self.array.len()
+    }
+
+    #[inline]
+    fn last(self) -> Option<AnyObject> {
+        self.array.last()
     }
 }
