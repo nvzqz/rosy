@@ -4,6 +4,7 @@ use std::{
     cmp::Ordering,
     fmt,
     iter::FromIterator,
+    marker::PhantomData,
     ops::Add,
 };
 use crate::{
@@ -60,35 +61,42 @@ use crate::{
 ///
 /// assert_eq!(num_iter, 2);
 /// ```
-#[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
-pub struct Array(NonNullObject);
-
-impl AsRef<AnyObject> for Array {
-    #[inline]
-    fn as_ref(&self) -> &AnyObject { self.0.as_ref() }
+pub struct Array<O = AnyObject> {
+    inner: NonNullObject,
+    _marker: PhantomData<*mut O>,
 }
 
-impl From<Array> for AnyObject {
+impl<O> Clone for Array<O> {
     #[inline]
-    fn from(object: Array) -> AnyObject { object.0.into() }
+    fn clone(&self) -> Self { *self }
 }
 
-impl PartialEq<AnyObject> for Array {
+impl<O> Copy for Array<O> {}
+
+impl<O> AsRef<AnyObject> for Array<O> {
+    #[inline]
+    fn as_ref(&self) -> &AnyObject { self.inner.as_ref() }
+}
+
+impl<O> From<Array<O>> for AnyObject {
+    #[inline]
+    fn from(object: Array<O>) -> AnyObject { object.inner.into() }
+}
+
+impl<O> PartialEq<AnyObject> for Array<O> {
     #[inline]
     fn eq(&self, obj: &AnyObject) -> bool {
         self.as_any_object() == obj
     }
 }
 
-unsafe impl Object for Array {
+unsafe impl<O> Object for Array<O> {
     #[inline]
+    #[allow(unused_variables)]
     fn cast(obj: impl Object) -> Option<Self> {
-        if obj.is_ty(Ty::Array) {
-            unsafe { Some(Self::from_raw(obj.raw())) }
-        } else {
-            None
-        }
+        // TODO: Figure out how to determine whether `obj` is of type `Self`
+        None
     }
 
     #[inline]
@@ -98,7 +106,16 @@ unsafe impl Object for Array {
     fn is_ty(self, ty: Ty) -> bool { ty == Ty::Array }
 }
 
-impl fmt::Display for Array {
+impl<O> fmt::Debug for Array<O> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_tuple("Array")
+            .field(&self.inner)
+            .finish()
+    }
+}
+
+impl<O> fmt::Display for Array<O> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.as_any_object().fmt(f)
@@ -106,7 +123,7 @@ impl fmt::Display for Array {
 }
 
 // Safe because this is part of the contract of implementing `Object`.
-impl<'r, O: Object> From<&[O]> for Array {
+impl<O: Object> From<&[O]> for Array<O> {
     #[inline]
     fn from(slice: &[O]) -> Self {
         let ptr = slice.as_ptr() as *const ruby::VALUE;
@@ -115,16 +132,16 @@ impl<'r, O: Object> From<&[O]> for Array {
     }
 }
 
-impl PartialEq for Array {
+impl<T, U> PartialEq<Array<U>> for Array<T> {
     #[inline]
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Array<U>) -> bool {
         self.partial_cmp(other) == Some(Ordering::Equal)
     }
 }
 
-impl PartialOrd for Array {
+impl<T, U> PartialOrd<Array<U>> for Array<T> {
     #[inline]
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Array<U>) -> Option<Ordering> {
         let value = unsafe { ruby::rb_ary_cmp(self.raw(), other.raw()) };
         if value == crate::util::NIL_VALUE {
             return None;
@@ -133,7 +150,7 @@ impl PartialOrd for Array {
     }
 }
 
-impl<'r, O: Object> FromIterator<O> for Array {
+impl<O: Object> FromIterator<O> for Array<O> {
     #[inline]
     fn from_iter<T: IntoIterator<Item=O>>(iter: T) -> Self {
         let iter = iter.into_iter();
@@ -146,18 +163,18 @@ impl<'r, O: Object> FromIterator<O> for Array {
     }
 }
 
-impl IntoIterator for Array {
-    type Item = AnyObject;
-    type IntoIter = Iter;
+impl<O: Object> IntoIterator for Array<O> {
+    type Item = O;
+    type IntoIter = Iter<O>;
 
     #[inline]
-    fn into_iter(self) -> Iter {
+    fn into_iter(self) -> Self::IntoIter {
         Iter { array: self, current: 0 }
     }
 }
 
 // Allows for `a1 + a2` in Rust
-impl Add for Array {
+impl<O: Object> Add for Array<O> {
     type Output = Self;
 
     #[inline]
@@ -166,7 +183,7 @@ impl Add for Array {
     }
 }
 
-impl Array {
+impl<O: Object> Array<O> {
     #[inline]
     pub(crate) fn rarray(self) -> *mut ruby::RArray {
         self.as_any_object()._ptr() as _
@@ -218,14 +235,14 @@ impl Array {
 
     /// Returns a pointer to the first object in `self`.
     #[inline]
-    pub fn as_ptr(self) -> *const AnyObject {
-        unsafe { (*self.rarray()).start() as *const AnyObject }
+    pub fn as_ptr(self) -> *const O {
+        unsafe { (*self.rarray()).start() as *const O }
     }
 
     /// Returns a mutable pointer to the first object in `self`.
     #[inline]
-    pub fn as_ptr_mut(self) -> *mut AnyObject {
-        unsafe { (*self.rarray()).start_mut() as *mut AnyObject }
+    pub fn as_ptr_mut(self) -> *mut O {
+        unsafe { (*self.rarray()).start_mut() as *mut O }
     }
 
     /// Returns a slice to the underlying objects of `self`.
@@ -235,7 +252,7 @@ impl Array {
     /// Care must be taken to ensure that the length of `self` is not changed
     /// through the VM or otherwise.
     #[inline]
-    pub unsafe fn as_slice(&self) -> &[AnyObject] {
+    pub unsafe fn as_slice(&self) -> &[O] {
         std::slice::from_raw_parts(self.as_ptr(), self.len())
     }
 
@@ -247,32 +264,32 @@ impl Array {
     /// exception will be raised. Care must also be taken to ensure that the
     /// length of `self` is not changed through the VM or otherwise.
     #[inline]
-    pub unsafe fn as_slice_mut(&mut self) -> &mut [AnyObject] {
+    pub unsafe fn as_slice_mut(&mut self) -> &mut [O] {
         ruby::rb_ary_modify(self.raw());
         std::slice::from_raw_parts_mut(self.as_ptr_mut(), self.len())
     }
 
     /// Returns the object at `index` or `None` if `index` is out-of-bounds.
     #[inline]
-    pub fn get(self, index: usize) -> Option<AnyObject> {
+    pub fn get(self, index: usize) -> Option<O> {
         unsafe { self.as_slice().get(index).map(|&obj| obj) }
     }
 
     /// Returns the object at `index` without bounds checking.
     #[inline]
-    pub unsafe fn get_unchecked(self, index: usize) -> AnyObject {
+    pub unsafe fn get_unchecked(self, index: usize) -> O {
         *self.as_slice().get_unchecked(index)
     }
 
     /// Returns the first object in `self`.
     #[inline]
-    pub fn first(self) -> Option<AnyObject> {
+    pub fn first(self) -> Option<O> {
         unsafe { self.as_slice().first().map(|&obj| obj) }
     }
 
     /// Returns the last element in `self`.
     #[inline]
-    pub fn last(self) -> Option<AnyObject> {
+    pub fn last(self) -> Option<O> {
         unsafe { self.as_slice().last().map(|&obj| obj) }
     }
 
@@ -294,7 +311,7 @@ impl Array {
     /// The caller must ensure that `self` is not frozen or else a `FrozenError`
     /// exception will be raised.
     #[inline]
-    pub unsafe fn extend_from_slice(self, slice: &[impl Object]) {
+    pub unsafe fn extend_from_slice(self, slice: &[O]) {
         let ptr = slice.as_ptr() as *const ruby::VALUE;
         let len = slice.len();
         ruby::rb_ary_cat(self.raw(), ptr, len as _);
@@ -310,10 +327,12 @@ impl Array {
     ///
     /// # Safety
     ///
-    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
-    /// exception will be raised.
+    /// The caller must ensure that `self` is not:
+    /// - Frozen, or else a `FrozenError` exception will be raised
+    /// - `Array<AnyObject>` that references `Array<ConcreteObject>` where `obj`
+    ///   is not the same type as `ConcreteObject`
     #[inline]
-    pub unsafe fn push(self, obj: impl Object) -> AnyObject {
+    pub unsafe fn push(self, obj: O) -> AnyObject {
         AnyObject::from_raw(ruby::rb_ary_push(self.raw(), obj.raw()))
     }
 
@@ -358,6 +377,8 @@ impl Array {
     ///
     /// assert!(a.contains(s));
     /// ```
+    // SAFETY: The use of `impl Object` is fine here since this method is not
+    // inserting it into `self`
     #[inline]
     pub fn contains(self, obj: impl Object) -> bool {
         let val = unsafe { ruby::rb_ary_includes(self.raw(), obj.raw()) };
@@ -372,6 +393,8 @@ impl Array {
     ///
     /// The caller must ensure that `self` is not frozen or else a `FrozenError`
     /// exception will be raised.
+    // SAFETY: The use of `impl Object` is fine here since this method is not
+    // inserting it into `self`
     #[inline]
     pub unsafe fn remove_all(self, obj: impl Object) -> AnyObject {
         AnyObject::from_raw(ruby::rb_ary_delete(
@@ -434,16 +457,16 @@ impl Array {
 
 /// An iterator over the elements of an [`Array`](struct.Array.html).
 #[derive(Clone, Debug)]
-pub struct Iter {
-    array: Array,
+pub struct Iter<O> {
+    array: Array<O>,
     current: usize,
 }
 
-impl Iterator for Iter {
-    type Item = AnyObject;
+impl<O: Object> Iterator for Iter<O> {
+    type Item = O;
 
     #[inline]
-    fn next(&mut self) -> Option<AnyObject> {
+    fn next(&mut self) -> Option<O> {
         let obj = self.array.get(self.current)?;
         self.current += 1;
         Some(obj)
@@ -464,7 +487,7 @@ impl Iterator for Iter {
     }
 
     #[inline]
-    fn last(self) -> Option<AnyObject> {
+    fn last(self) -> Option<O> {
         self.array.last()
     }
 }

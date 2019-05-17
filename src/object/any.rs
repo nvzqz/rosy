@@ -360,6 +360,13 @@ impl AnyObject {
     }
 
     /// Returns `self` as an `Array` if it is one.
+    ///
+    /// # Safety
+    ///
+    /// If `self` refers to an `Array<X>` and after this method objects of type
+    /// `Y` are inserted, expect
+    /// [nasal demons](https://en.wikipedia.org/wiki/Nasal_demons). You've been
+    /// warned.
     #[inline]
     pub fn to_array(self) -> Option<Array> {
         if self.is_array() {

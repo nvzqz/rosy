@@ -55,10 +55,8 @@ pub unsafe trait Exception: Object + Error {
     }
 
     /// Returns a backtrace associated with `self`.
-    ///
-    /// The array contains strings.
     #[inline]
-    fn backtrace(&self) -> Option<Array> {
+    fn backtrace(&self) -> Option<Array<String>> {
         unsafe {
             let obj = self.call_unchecked("backtrace");
             if obj.is_nil() {
