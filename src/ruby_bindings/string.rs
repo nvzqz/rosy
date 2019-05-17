@@ -121,6 +121,8 @@ pub mod rstring_flags {
 }
 
 extern "C" {
+    // VALUE rb_str_buf_new(long capa)
+    pub fn rb_str_buf_new(capa: c_long) -> VALUE;
     // VALUE rb_external_str_new_with_enc(const char *ptr, long len, rb_encoding *eenc)
     pub fn rb_external_str_new_with_enc(ptr: *const c_char, len: c_long, enc: *mut rb_encoding) -> VALUE;
 
@@ -153,6 +155,9 @@ extern "C" {
     pub fn rb_default_external_encoding() -> *mut rb_encoding;
     // rb_encoding * rb_default_internal_encoding(void)
     pub fn rb_default_internal_encoding() -> *mut rb_encoding;
+
+    // VALUE rb_enc_associate_index(VALUE obj, int idx)
+    pub fn rb_enc_associate_index(obj: VALUE, idx: c_int) -> VALUE;
 
     // int rb_enc_find_index(const char *name)
     pub fn rb_enc_find_index(name: *const c_char) -> c_int;

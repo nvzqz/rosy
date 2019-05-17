@@ -7,6 +7,7 @@ use std::{
     error::Error,
     ffi::{CStr, CString, FromBytesWithNulError},
     fmt,
+    iter::FromIterator,
     os::raw::{c_int, c_long},
     str::Utf8Error,
     string,
@@ -113,6 +114,45 @@ impl TryFrom<String> for std::string::String {
     }
 }
 
+impl FromIterator<char> for String {
+    #[inline]
+    fn from_iter<I: IntoIterator<Item = char>>(iter: I) -> Self {
+        let iter = iter.into_iter();
+        let (lower_bound, _) = iter.size_hint();
+        let string = String::with_capacity(lower_bound);
+        unsafe {
+            iter.into_iter().for_each(|c| string.push(c));
+            string.force_encoding(Encoding::utf8());
+        }
+        string
+    }
+}
+
+impl<'a> FromIterator<&'a char> for String {
+    #[inline]
+    fn from_iter<I: IntoIterator<Item = &'a char>>(iter: I) -> Self {
+        iter.into_iter().map(|&c| c).collect()
+    }
+}
+
+impl<'a> FromIterator<&'a str> for String {
+    #[inline]
+    fn from_iter<I: IntoIterator<Item = &'a str>>(iter: I) -> Self {
+        let string = String::new();
+        unsafe { iter.into_iter().for_each(|s| string.push_str(s)) };
+        string
+    }
+}
+
+impl<'a> FromIterator<&'a std::string::String> for String {
+    #[inline]
+    fn from_iter<I>(iter: I) -> Self
+        where I: IntoIterator<Item = &'a std::string::String>
+    {
+        iter.into_iter().map(|s| s.as_str()).collect()
+    }
+}
+
 // Make fast byte comparison version of `PartialEq<Self>` when specialization is
 // made stable
 impl<O: Object> PartialEq<O> for String {
@@ -201,6 +241,18 @@ impl String {
         self.as_any_object()._ptr() as _
     }
 
+    /// Creates a new empty string with a capacity of 0.
+    #[inline]
+    pub fn new() -> Self {
+        Self::with_capacity(0)
+    }
+
+    /// Creates a new string with `capacity`.
+    #[inline]
+    pub fn with_capacity(capacity: usize) -> Self {
+        unsafe { Self::from_raw(ruby::rb_str_buf_new(capacity as _)) }
+    }
+
     /// Returns a new instance from `s` encoded as `enc`.
     ///
     /// # Safety
@@ -230,6 +282,13 @@ impl String {
     #[inline]
     pub fn encoding(self) -> Encoding {
         unsafe { Encoding::_from_index(ruby::rb_enc_get_index(self.raw())) }
+    }
+
+    /// Associates the bytes of `self` with `encoding` without checking whether
+    /// `self` is actually encoded that way.
+    #[inline]
+    pub unsafe fn force_encoding(self, encoding: Encoding) {
+        ruby::rb_enc_associate_index(self.raw(), encoding._index());
     }
 
     /// Returns a reference to the underlying bytes in `self`.
@@ -398,7 +457,7 @@ impl String {
     /// exception will be raised.
     #[inline]
     pub unsafe fn push_str(self, s: &str) {
-        ruby::rb_str_cat(self.raw(), s.as_ptr() as _, s.len() as _);
+        ruby::rb_str_cat(self.raw(), s.as_ptr() as *const _, s.len() as _);
     }
 
     /// Duplicates the contents of `self` into a new instance.
