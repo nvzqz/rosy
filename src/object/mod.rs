@@ -45,8 +45,6 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
     }
 
     /// Attempts to create an instance by casting `obj`.
-    #[inline]
-    #[allow(unused)]
     fn cast(obj: impl Object) -> Option<Self>;
 
     /// Casts `obj` to `Self` without checking its type.
