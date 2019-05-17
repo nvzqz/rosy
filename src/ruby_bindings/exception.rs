@@ -13,5 +13,5 @@ extern "C" {
         proc: Option<unsafe extern "C" fn(VALUE) -> VALUE>,
         data: VALUE,
         pstate: *mut c_int,
-    );
+    ) -> VALUE;
 }
