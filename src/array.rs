@@ -74,24 +74,24 @@ impl<O> Clone for Array<O> {
 
 impl<O> Copy for Array<O> {}
 
-impl<O> AsRef<AnyObject> for Array<O> {
+impl<O: Object> AsRef<AnyObject> for Array<O> {
     #[inline]
     fn as_ref(&self) -> &AnyObject { self.inner.as_ref() }
 }
 
-impl<O> From<Array<O>> for AnyObject {
+impl<O: Object> From<Array<O>> for AnyObject {
     #[inline]
     fn from(object: Array<O>) -> AnyObject { object.inner.into() }
 }
 
-impl<O> PartialEq<AnyObject> for Array<O> {
+impl<O: Object> PartialEq<AnyObject> for Array<O> {
     #[inline]
     fn eq(&self, obj: &AnyObject) -> bool {
         self.as_any_object() == obj
     }
 }
 
-unsafe impl<O> Object for Array<O> {
+unsafe impl<O: Object> Object for Array<O> {
     #[inline]
     #[allow(unused_variables)]
     fn cast(obj: impl Object) -> Option<Self> {
@@ -106,7 +106,7 @@ unsafe impl<O> Object for Array<O> {
     fn is_ty(self, ty: Ty) -> bool { ty == Ty::Array }
 }
 
-impl<O> fmt::Debug for Array<O> {
+impl<O: Object> fmt::Debug for Array<O> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_tuple("Array")
@@ -115,7 +115,7 @@ impl<O> fmt::Debug for Array<O> {
     }
 }
 
-impl<O> fmt::Display for Array<O> {
+impl<O: Object> fmt::Display for Array<O> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.as_any_object().fmt(f)
@@ -132,14 +132,14 @@ impl<O: Object> From<&[O]> for Array<O> {
     }
 }
 
-impl<T, U> PartialEq<Array<U>> for Array<T> {
+impl<T: Object, U: Object> PartialEq<Array<U>> for Array<T> {
     #[inline]
     fn eq(&self, other: &Array<U>) -> bool {
         self.partial_cmp(other) == Some(Ordering::Equal)
     }
 }
 
-impl<T, U> PartialOrd<Array<U>> for Array<T> {
+impl<T: Object, U: Object> PartialOrd<Array<U>> for Array<T> {
     #[inline]
     fn partial_cmp(&self, other: &Array<U>) -> Option<Ordering> {
         let value = unsafe { ruby::rb_ary_cmp(self.raw(), other.raw()) };
@@ -457,7 +457,7 @@ impl<O: Object> Array<O> {
 
 /// An iterator over the elements of an [`Array`](struct.Array.html).
 #[derive(Clone, Debug)]
-pub struct Iter<O> {
+pub struct Iter<O: Object> {
     array: Array<O>,
     current: usize,
 }
