@@ -358,7 +358,7 @@ impl AnyObject {
         }
     }
 
-    /// Returns whether `self` is a `Array`.
+    /// Returns whether `self` is an `Array`.
     #[inline]
     pub fn is_array(self) -> bool {
         crate::util::value_is_built_in_ty(self.raw(), Ty::Array)
