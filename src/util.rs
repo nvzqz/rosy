@@ -19,6 +19,13 @@ pub const MAX_VALUE: VALUE = !0;
 pub const MAX_VALUE_SHIFTED: VALUE = MAX_VALUE << SPECIAL_SHIFT;
 
 #[inline]
+pub fn matches_ruby_size_align<T>() -> bool {
+    use std::mem::{align_of, size_of};
+    size_of::<T>()  == size_of::<VALUE>() &&
+    align_of::<T>() == align_of::<VALUE>()
+}
+
+#[inline]
 pub fn test_value(v: VALUE) -> bool {
     v & !NIL_VALUE != 0
 }

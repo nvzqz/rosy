@@ -92,7 +92,7 @@
 
 include!(env!("ROSY_RUBY_VERSION_CONST"));
 
-use std::mem;
+use std::{mem, ptr};
 
 #[path = "ruby_bindings/mod.rs"]
 mod ruby;
@@ -159,6 +159,10 @@ pub use self::{
 pub fn protected<F, O>(f: F) -> Result<O, AnyException>
     where F: FnOnce() -> O
 {
+    if util::matches_ruby_size_align::<O>() {
+        return unsafe { protected_size_opt(f) };
+    }
+
     unsafe extern "C" fn wrapper<F, O>(ctx: ruby::VALUE) -> ruby::VALUE
         where F: FnOnce() -> O
     {
@@ -168,7 +172,7 @@ pub fn protected<F, O>(f: F) -> Result<O, AnyException>
         // the `FnOnce` trait
         let f = f.take().unwrap_or_else(|| std::hint::unreachable_unchecked());
 
-        std::ptr::write(*out, f());
+        ptr::write(*out, f());
 
         AnyObject::nil().raw()
     }
@@ -190,5 +194,38 @@ pub fn protected<F, O>(f: F) -> Result<O, AnyException>
             0 => Ok(ManuallyDrop::into_inner(out)),
             _ => Err(AnyException::_take_current()),
         }
+    }
+}
+
+// A version of `protected` that makes use of the size and layout of `O`
+// matching that of `ruby::VALUE`. This slightly reduces the number of emitted
+// instructions and removes the need for stack-allocating `ctx`.
+#[inline]
+unsafe fn protected_size_opt<F, O>(f: F) -> Result<O, AnyException>
+    where F: FnOnce() -> O
+{
+    use mem::ManuallyDrop;
+
+    unsafe extern "C" fn wrapper<F, O>(ctx: ruby::VALUE) -> ruby::VALUE
+        where F: FnOnce() -> O
+    {
+        let f: &mut Option<F> = &mut *(ctx as *mut Option<F>);
+
+        // Get the `F` out of `Option<F>` to call by-value, which is required by
+        // the `FnOnce` trait
+        let f = f.take().unwrap_or_else(|| std::hint::unreachable_unchecked());
+
+        let value = ManuallyDrop::new(f());
+        ptr::read(&value as *const ManuallyDrop<O> as *const ruby::VALUE)
+    }
+
+    let mut ctx = Some(f);
+    let ctx = &mut ctx as *mut Option<F> as ruby::VALUE;
+
+    let mut err = 0;
+    let val = ruby::rb_protect(Some(wrapper::<F, O>), ctx, &mut err);
+    match err {
+        0 => Ok(ptr::read(&val as *const ruby::VALUE as *const O)),
+        _ => Err(AnyException::_take_current()),
     }
 }
