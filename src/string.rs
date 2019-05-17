@@ -115,7 +115,7 @@ impl TryFrom<String> for std::string::String {
 
 // Make fast byte comparison version of `PartialEq<Self>` when specialization is
 // made stable
-impl<'r, O: Object> PartialEq<O> for String {
+impl<O: Object> PartialEq<O> for String {
     // If `obj` is not an instance of `String` but responds to `to_str`, then
     // the two strings are compared using `obj.==`.
     #[inline]
