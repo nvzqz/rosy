@@ -101,7 +101,12 @@ unsafe impl<O: Object> Object for Array<O> {
 
     #[inline]
     fn cast<A: Object>(obj: A) -> Option<Self> {
-        if O::unique_id() == AnyObject::unique_id() || Self::unique_id() == A::unique_id() {
+        // Either:
+        // - `A` is of type `Self`
+        // - `Self` is `Array<AnyObject>` and `obj` is an array
+        let is_valid = Self::unique_id() == A::unique_id() ||
+            (O::unique_id() == AnyObject::unique_id() && obj.is_ty(Ty::Array));
+        if is_valid {
             unsafe { Some(Self::cast_unchecked(obj)) }
         } else {
             None

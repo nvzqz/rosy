@@ -5,8 +5,10 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
-## 0.0.2 - 2019-05-17
+### Fixed
+- `Array::cast` would pass for any objects for `Array<AnyObject>`
 
+## 0.0.2 - 2019-05-17
 ### Added
 - `_skip_linking` feature flag to hopefully get https://docs.rs/rosy up
 
