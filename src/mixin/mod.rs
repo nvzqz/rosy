@@ -28,8 +28,8 @@ unsafe fn _get_const_unchecked(m: impl Mixin, name: impl Into<SymbolId>) -> AnyO
 }
 
 #[inline]
-fn _attr(m: ruby::VALUE, name: SymbolId, read: bool, write: bool) {
-    unsafe { ruby::rb_attr(m, name.raw(), read as _, write as _, 0) };
+unsafe fn _attr(m: ruby::VALUE, name: SymbolId, read: bool, write: bool) {
+    ruby::rb_attr(m, name.raw(), read as _, write as _, 0);
 }
 
 /// A type that supports mixins (see [`Class`](struct.Class.html) and
@@ -218,27 +218,77 @@ pub trait Mixin: Object + Sealed {
 
     /// Sets the class-level `var` in `self` to `val`.
     #[inline]
-    fn set_class_var(self, var: impl Into<SymbolId>, val: impl Into<AnyObject>) {
-        let var = var.into().raw();
-        let val = val.into().raw();
-        unsafe { ruby::rb_cvar_set(self.raw(), var, val) };
+    fn set_class_var<K, V>(self, key: K, val: V) -> Result<()>
+    where
+        K: Into<SymbolId>,
+        V: Into<AnyObject>,
+    {
+        crate::protected(|| unsafe { self.set_class_var_unchecked(key, val) })
+    }
+
+    /// Sets the class-level var for `key` in `self` to `val`.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
+    #[inline]
+    unsafe fn set_class_var_unchecked<K, V>(self, key: K, val: V)
+    where
+        K: Into<SymbolId>,
+        V: Into<AnyObject>,
+    {
+        ruby::rb_cvar_set(self.raw(), key.into().raw(), val.into().raw());
     }
 
     /// Defines an read-only attribute on `self` with `name`.
     #[inline]
-    fn attr_reader(self, name: impl Into<SymbolId>) {
+    fn attr_reader<N: Into<SymbolId>>(self, name: N) -> Result {
+        crate::protected(|| unsafe { self.attr_reader_unchecked(name) })
+    }
+
+    /// Defines an read-only attribute on `self` with `name`.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
+    #[inline]
+    unsafe fn attr_reader_unchecked<N: Into<SymbolId>>(self, name: N) {
         _attr(self.raw(), name.into(), true, false);
     }
 
     /// Defines a write-only attribute on `self` with `name`.
     #[inline]
-    fn attr_writer(self, name: impl Into<SymbolId>) {
+    fn attr_writer<N: Into<SymbolId>>(self, name: N) -> Result {
+        crate::protected(|| unsafe { self.attr_writer_unchecked(name) })
+    }
+
+    /// Defines a write-only attribute on `self` with `name`.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
+    #[inline]
+    unsafe fn attr_writer_unchecked<N: Into<SymbolId>>(self, name: N) {
         _attr(self.raw(), name.into(), false, true);
     }
 
     /// Defines a read-write attribute on `self` with `name`.
     #[inline]
-    fn attr_accessor(self, name: impl Into<SymbolId>) {
+    fn attr_accessor<N: Into<SymbolId>>(self, name: N) -> Result {
+        crate::protected(|| unsafe { self.attr_accessor_unchecked(name) })
+    }
+
+    /// Defines a read-write attribute on `self` with `name`.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
+    #[inline]
+    unsafe fn attr_accessor_unchecked<N: Into<SymbolId>>(self, name: N) {
         _attr(self.raw(), name.into(), true, true);
     }
 
