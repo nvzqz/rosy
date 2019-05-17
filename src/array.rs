@@ -14,6 +14,12 @@ use crate::{
 
 /// An instance of Ruby's `Array` class.
 ///
+/// # Performance
+///
+/// Although caution must be taken with [`as_slice`](#method.as_slice) and its
+/// mutable counterpart, it is _much_ faster to iterate over the inner slice of
+/// objects in an array than it is to iterate over the array directly.
+///
 /// # Examples
 ///
 /// Ruby arrays can be treated as somewhat like a `Vec` without the borrow
