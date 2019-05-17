@@ -89,6 +89,10 @@
 
 #![cfg_attr(nightly, feature(doc_cfg))]
 #![deny(missing_docs)]
+#![cfg_attr(all(test, nightly), feature(test))]
+
+#[cfg(all(test, nightly))]
+extern crate test;
 
 include!(env!("ROSY_RUBY_VERSION_CONST"));
 

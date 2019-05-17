@@ -269,6 +269,14 @@ impl String {
     /// characters pointed to by `self` are not changed through the VM or
     /// otherwise.
     ///
+    /// If Ruby believes that the underlying encoding is indeed UTF-8, then we
+    /// return the bytes directly without any further checking. However, if the
+    /// method `force_encoding` has been called on `self`, then we are
+    /// susceptible to getting invalid UTF-8 in a `str` instance, which is UB.
+    /// To force a check, one should call
+    /// [`str::from_utf8`](https://doc.rust-lang.org/std/str/fn.from_utf8.html)
+    /// on the result of [`as_bytes`](#method.as_bytes).
+    ///
     /// # Examples
     ///
     /// ```
@@ -278,8 +286,10 @@ impl String {
     ///
     /// unsafe { assert_eq!(rb.to_str().unwrap(), rs) };
     /// ```
-    #[inline]
     pub unsafe fn to_str(&self) -> Result<&str, Utf8Error> {
+        if self.encoding().is_utf8() {
+            return Ok(self.to_str_unchecked());
+        }
         std::str::from_utf8(self.as_bytes())
     }
 
@@ -292,8 +302,18 @@ impl String {
     /// Care must be taken to ensure that, if the returned value is a reference
     /// to `self`, the length of `self` and the characters pointed to by `self`
     /// are not changed through the VM or otherwise.
-    #[inline]
+    ///
+    /// If Ruby believes that the underlying encoding is indeed UTF-8, then we
+    /// return the bytes directly without any further checking. However, if the
+    /// method `force_encoding` has been called on `self`, then we are
+    /// susceptible to getting invalid UTF-8 in a `str` instance, which is UB.
+    /// To force a check, one should call
+    /// [`str::from_utf8`](https://doc.rust-lang.org/std/str/fn.from_utf8.html)
+    /// on the result of [`as_bytes`](#method.as_bytes).
     pub unsafe fn to_str_lossy(&self) -> Cow<'_, str> {
+        if self.encoding().is_utf8() {
+            return Cow::Borrowed(self.to_str_unchecked());
+        }
         std::string::String::from_utf8_lossy(self.as_bytes())
     }
 
@@ -740,5 +760,68 @@ impl From<FromBytesWithNulError> for EncodingLookupError {
     #[inline]
     fn from(error: FromBytesWithNulError) -> Self {
         EncodingLookupError::InvalidCStr(error)
+    }
+}
+
+#[cfg(all(test, nightly))]
+mod benches {
+    use test::{Bencher, black_box};
+    use super::*;
+
+    const STRING_MULTIPLE: usize = 10;
+
+    fn create_string() -> String {
+        let mut string = std::string::String::new();
+        for _ in 0..STRING_MULTIPLE {
+            string.push('a');
+            string.push('ñ');
+            string.push('ß');
+        }
+        String::from(&*string)
+    }
+
+    #[bench]
+    fn to_str(b: &mut Bencher) {
+        crate::vm::init().unwrap();
+
+        let string = create_string();
+
+        b.bytes = string.len() as u64;
+        b.iter(move || unsafe {
+            let f = black_box(String::to_str);
+            let _ = black_box(f(&black_box(string)));
+        });
+    }
+
+    #[bench]
+    fn to_str_checked(b: &mut Bencher) {
+        crate::vm::init().unwrap();
+
+        let string = create_string();
+        let enc = String::from("ASCII-8BIT");
+        string.call_with("force_encoding", &[enc]).unwrap();
+
+        b.bytes = string.len() as u64;
+        b.iter(move || unsafe {
+            let f = black_box(String::to_str);
+            let _ = black_box(f(&black_box(string)));
+        });
+    }
+
+    #[bench]
+    fn to_str_no_lookup(b: &mut Bencher) {
+        crate::vm::init().unwrap();
+
+        unsafe fn to_str(s: &String) -> Result<&str, Utf8Error> {
+            std::str::from_utf8(s.as_bytes())
+        }
+
+        let string = create_string();
+
+        b.bytes = string.len() as u64;
+        b.iter(move || unsafe {
+            let f = black_box(to_str);
+            let _ = black_box(f(&black_box(string)));
+        });
     }
 }
