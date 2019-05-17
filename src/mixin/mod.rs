@@ -259,7 +259,7 @@ pub trait Mixin: Object + Sealed {
     ///
     /// See the docs for `EvalArgs` for more info.
     #[inline]
-    fn eval(self, args: impl EvalArgs) -> Result<AnyObject, AnyException> {
+    fn eval(self, args: impl EvalArgs) -> Result<AnyObject> {
         args.eval_in(self)
     }
 }
@@ -297,7 +297,7 @@ pub trait EvalArgs: Sized {
     /// Evaluates `self` in the context of `mixin`, returning any thrown
     /// exceptions.
     #[inline]
-    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject, AnyException> {
+    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject> {
         crate::protected(|| unsafe { self.eval_in_unchecked(mixin) })
     }
 

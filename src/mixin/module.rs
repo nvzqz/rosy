@@ -81,7 +81,7 @@ impl Module {
 
     /// Extends `object` with the contents of `self`.
     #[inline]
-    pub fn extend(self, object: impl Object) -> Result<(), AnyException> {
+    pub fn extend(self, object: impl Object) -> Result {
         crate::protected(|| unsafe { self.extend_unchecked(object) })
     }
 

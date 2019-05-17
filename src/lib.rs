@@ -126,6 +126,11 @@ pub use self::{
     symbol::{Symbol, SymbolId},
 };
 
+/// A simplified form of
+/// [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html) for
+/// when exceptions are caught.
+pub type Result<T = (), E = AnyException> = std::result::Result<T, E>;
+
 /// Calls `f` and returns its output or an exception if one is raised in `f`.
 ///
 /// # Examples
@@ -160,7 +165,7 @@ pub use self::{
 /// assert_eq!(outer.unwrap(), string);
 /// ```
 #[inline]
-pub fn protected<F, O>(f: F) -> Result<O, AnyException>
+pub fn protected<F, O>(f: F) -> Result<O>
     where F: FnOnce() -> O
 {
     if util::matches_ruby_size_align::<O>() {
@@ -205,7 +210,7 @@ pub fn protected<F, O>(f: F) -> Result<O, AnyException>
 // matching that of `ruby::VALUE`. This slightly reduces the number of emitted
 // instructions and removes the need for stack-allocating `ctx`.
 #[inline]
-unsafe fn protected_size_opt<F, O>(f: F) -> Result<O, AnyException>
+unsafe fn protected_size_opt<F, O>(f: F) -> Result<O>
     where F: FnOnce() -> O
 {
     use mem::ManuallyDrop;

@@ -78,7 +78,7 @@ unsafe fn _stat(key: impl Object) -> usize {
 /// assert_ne!(slots, 0);
 /// ```
 #[inline]
-pub fn stat(key: impl GcInfoKey) -> Result<usize, AnyException> {
+pub fn stat(key: impl GcInfoKey) -> Result<usize> {
     key.stat_gc()
 }
 
@@ -101,7 +101,7 @@ unsafe fn _latest_info(key: impl Object) -> AnyObject {
 /// Returns the latest information regarding `key` with respect to the garbage
 /// collector.
 #[inline]
-pub fn latest_info(key: impl GcInfoKey) -> Result<AnyObject, AnyException> {
+pub fn latest_info(key: impl GcInfoKey) -> Result<AnyObject> {
     key.latest_gc_info()
 }
 
@@ -166,7 +166,7 @@ pub trait GcInfoKey: Sized {
     /// Returns the status information for `self` with respect to the garbage
     /// collector, or an exception if one is raised.
     #[inline]
-    fn stat_gc(self) -> Result<usize, AnyException> {
+    fn stat_gc(self) -> Result<usize> {
         crate::protected(|| unsafe { self.stat_gc_unchecked() })
     }
 
@@ -184,7 +184,7 @@ pub trait GcInfoKey: Sized {
     ///
     /// If an exception is raised, it is returned as a `Result::Err`.
     #[inline]
-    fn latest_gc_info(self) -> Result<AnyObject, AnyException> {
+    fn latest_gc_info(self) -> Result<AnyObject> {
         crate::protected(|| unsafe { self.latest_gc_info_unchecked() })
     }
 

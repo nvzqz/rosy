@@ -360,7 +360,7 @@ impl Class {
     ///
     /// assert_eq!(output, ", , , ");
     /// ```
-    pub fn def_method<N, F>(self, name: N, f: F) -> Result<(), AnyException>
+    pub fn def_method<N, F>(self, name: N, f: F) -> Result
     where
         N: Into<SymbolId>,
         F: MethodFn,

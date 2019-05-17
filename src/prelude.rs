@@ -22,6 +22,7 @@ pub use crate::{
     hash::Hash,
     mixin::{Mixin, Class, Module},
     object::{AnyObject, Object, RosyObject},
+    Result,
     rosy::Rosy,
     string::String,
     symbol::{Symbol, SymbolId},

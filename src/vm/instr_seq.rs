@@ -54,7 +54,7 @@ impl fmt::Display for InstrSeq {
 
 impl InstrSeq {
     #[inline]
-    fn _compile(args: &[AnyObject]) -> Result<Self, AnyException> {
+    fn _compile(args: &[AnyObject]) -> Result<Self> {
         Class::instr_seq().call_with("compile", args).map(|obj| unsafe {
             Self::cast_unchecked(obj)
         })
@@ -62,7 +62,7 @@ impl InstrSeq {
 
     /// Compiles `script` into an instruction sequence.
     #[inline]
-    pub fn compile(script: impl Into<String>) -> Result<Self, AnyException> {
+    pub fn compile(script: impl Into<String>) -> Result<Self> {
         Self::_compile(&[script.into().into()])
     }
 
@@ -71,12 +71,12 @@ impl InstrSeq {
     pub fn compile_with(
         script: impl Into<String>,
         options: impl Into<Hash>,
-    ) -> Result<Self, AnyException> {
+    ) -> Result<Self> {
         Self::_compile(&[script.into().into(), options.into().into()])
     }
 
     #[inline]
-    fn _compile_file(args: &[AnyObject]) -> Result<Self, AnyException> {
+    fn _compile_file(args: &[AnyObject]) -> Result<Self> {
         Class::instr_seq().call_with("compile_file", args).map(|obj| unsafe {
             Self::cast_unchecked(obj)
         })
@@ -84,7 +84,7 @@ impl InstrSeq {
 
     /// Compiles the contents of a file at `path` into an instruction sequence.
     #[inline]
-    pub fn compile_file(path: impl Into<String>) -> Result<Self, AnyException> {
+    pub fn compile_file(path: impl Into<String>) -> Result<Self> {
         Self::_compile_file(&[path.into().into()])
     }
 
@@ -94,7 +94,7 @@ impl InstrSeq {
     pub fn compile_file_with(
         path: impl Into<String>,
         options: impl Into<Hash>,
-    ) -> Result<Self, AnyException> {
+    ) -> Result<Self> {
         Self::_compile_file(&[path.into().into(), options.into().into()])
     }
 
@@ -147,7 +147,7 @@ impl InstrSeq {
     /// assert_eq!(String::from("hihihi"), result);
     /// ```
     #[inline]
-    pub fn eval(self) -> Result<AnyObject, AnyException> {
+    pub fn eval(self) -> Result<AnyObject> {
         self.call("eval")
     }
 

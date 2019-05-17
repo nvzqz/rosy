@@ -159,7 +159,7 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
     /// Defines a method for `name` on the singleton class of `self` that calls
     /// `f` when invoked.
     #[inline]
-    fn def_singleton_method<N, F>(self, name: N, f: F) -> Result<(), AnyException>
+    fn def_singleton_method<N, F>(self, name: N, f: F) -> Result
     where
         N: Into<SymbolId>,
         F: MethodFn
@@ -185,7 +185,7 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
 
     /// Calls `method` on `self` and returns the result.
     #[inline]
-    fn call(self, method: impl Into<SymbolId>) -> Result<AnyObject, AnyException> {
+    fn call(self, method: impl Into<SymbolId>) -> Result<AnyObject> {
         crate::protected(|| unsafe { self.call_unchecked(method) })
     }
 
@@ -206,7 +206,7 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
         self,
         method: impl Into<SymbolId>,
         args: &[impl Object]
-    ) -> Result<AnyObject, AnyException> {
+    ) -> Result<AnyObject> {
         crate::protected(|| unsafe { self.call_with_unchecked(method, args) })
     }
 
@@ -234,7 +234,7 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
     fn call_public(
         self,
         method: impl Into<SymbolId>,
-    ) -> Result<AnyObject, AnyException> {
+    ) -> Result<AnyObject> {
         crate::protected(|| unsafe { self.call_public_unchecked(method) })
     }
 
@@ -259,7 +259,7 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
         self,
         method: impl Into<SymbolId>,
         args: &[impl Object]
-    ) -> Result<AnyObject, AnyException> {
+    ) -> Result<AnyObject> {
         crate::protected(|| unsafe {
             self.call_public_with_unchecked(method, args)
         })

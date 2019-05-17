@@ -230,7 +230,7 @@ impl AnyObject {
     /// Calls `super` on the current receiver without any arguments in the
     /// context of a method.
     #[inline]
-    pub fn call_super() -> Result<AnyObject, AnyException> {
+    pub fn call_super() -> Result<AnyObject> {
         crate::protected(|| unsafe { Self::call_super_unchecked() })
     }
 
@@ -245,7 +245,7 @@ impl AnyObject {
     /// Calls `super` on the current receiver with `args` in the context of a
     /// method.
     #[inline]
-    pub fn call_super_with(args: &[impl Object]) -> Result<AnyObject, AnyException> {
+    pub fn call_super_with(args: &[impl Object]) -> Result<AnyObject> {
         crate::protected(|| unsafe {  Self::call_super_with_unchecked(args) })
     }
 
