@@ -282,7 +282,7 @@ impl Array {
     /// The caller must ensure that `self` is not frozen or else a `FrozenError`
     /// exception will be raised.
     #[inline]
-    pub unsafe fn remove_all_unchecked(self, obj: impl Object) -> AnyObject {
+    pub unsafe fn remove_all(self, obj: impl Object) -> AnyObject {
         AnyObject::from_raw(ruby::rb_ary_delete(
             self.raw(),
             obj.raw(),
@@ -298,7 +298,7 @@ impl Array {
     /// The caller must ensure that `self` is not frozen or else a `FrozenError`
     /// exception will be raised.
     #[inline]
-    pub unsafe fn reverse_unchecked(self) {
+    pub unsafe fn reverse(self) {
         ruby::rb_ary_reverse(self.raw());
     }
 
@@ -317,7 +317,7 @@ impl Array {
     /// The caller must ensure that `self` is not frozen or else a `FrozenError`
     /// exception will be raised.
     #[inline]
-    pub unsafe fn sort_unchecked(self) {
+    pub unsafe fn sort(self) {
         ruby::rb_ary_sort_bang(self.raw());
     }
 
