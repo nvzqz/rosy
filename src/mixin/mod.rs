@@ -15,11 +15,16 @@ pub use self::{class::*, method::*, module::*};
 fn _get_const(m: impl Mixin, name: SymbolId) -> Option<AnyObject> {
     unsafe {
         if ruby::rb_const_defined(m.raw(), name.raw()) != 0 {
-            Some(AnyObject::from_raw(ruby::rb_const_get(m.raw(), name.raw())))
+            Some(_get_const_unchecked(m, name))
         } else {
             None
         }
     }
+}
+
+#[inline]
+unsafe fn _get_const_unchecked(m: impl Mixin, name: impl Into<SymbolId>) -> AnyObject {
+    AnyObject::from_raw(ruby::rb_const_get(m.raw(), name.into().raw()))
 }
 
 #[inline]
@@ -91,6 +96,22 @@ pub trait Mixin: Object + Sealed {
         _get_const(self, name.into())?.to_class()
     }
 
+    /// Returns the existing `Class` with `name` in `self`.
+    ///
+    /// # Safety
+    ///
+    /// This method does not:
+    /// - Check whether an item for `name` exists (an exception will be thrown
+    ///   if this is the case)
+    /// - Check whether the returned item for `name` is actually a `Class`
+    #[inline]
+    unsafe fn get_class_unchecked(
+        self,
+        name: impl Into<SymbolId>,
+    ) -> Class {
+        Class::cast_unchecked(_get_const_unchecked(self, name))
+    }
+
     /// Defines a new module under `self` with `name`.
     #[inline]
     fn def_module(
@@ -107,6 +128,22 @@ pub trait Mixin: Object + Sealed {
         name: impl Into<SymbolId>,
     ) -> Option<Module> {
         _get_const(self, name.into())?.to_module()
+    }
+
+    /// Returns the existing `Module` with `name` in `self`.
+    ///
+    /// # Safety
+    ///
+    /// This method does not:
+    /// - Check whether an item for `name` exists (an exception will be thrown
+    ///   if this is the case)
+    /// - Check whether the returned item for `name` is actually a `Module`
+    #[inline]
+    unsafe fn get_module_unchecked(
+        self,
+        name: impl Into<SymbolId>,
+    ) -> Module {
+        Module::cast_unchecked(_get_const_unchecked(self, name))
     }
 
     /// Returns whether a constant for `name` is defined in `self`, or in some

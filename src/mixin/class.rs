@@ -180,6 +180,19 @@ impl Class {
         Class::object().get_class(name)
     }
 
+    /// Retrieves an existing top-level `Class` defined by `name`.
+    ///
+    /// # Safety
+    ///
+    /// This method does not:
+    /// - Check whether an item for `name` exists (an exception will be thrown
+    ///   if this is the case)
+    /// - Check whether the returned item for `name` is actually a `Class`
+    #[inline]
+    pub unsafe fn get_unchecked(name: impl Into<SymbolId>) -> Self {
+        Class::object().get_class_unchecked(name)
+    }
+
     /// Retrieves an existing top-level `Class` defined by `name` or defines one
     /// if it doesn't exist.
     #[inline]

@@ -121,10 +121,23 @@ impl Module {
         Class::object().def_module(name)
     }
 
-    /// Retrieves an existing top-level `module` defined by `name`.
+    /// Retrieves an existing top-level `Module` defined by `name`.
     #[inline]
     pub fn get(name: impl Into<SymbolId>) -> Option<Self> {
         Class::object().get_module(name)
+    }
+
+    /// Retrieves an existing top-level `Module` defined by `name`.
+    ///
+    /// # Safety
+    ///
+    /// This method does not:
+    /// - Check whether an item for `name` exists (an exception will be thrown
+    ///   if this is the case)
+    /// - Check whether the returned item for `name` is actually a `Module`
+    #[inline]
+    pub unsafe fn get_unchecked(name: impl Into<SymbolId>) -> Self {
+        Class::object().get_module_unchecked(name)
     }
 
     /// Retrieves an existing top-level `Module` defined by `name` or defines
