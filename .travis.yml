@@ -9,6 +9,7 @@ matrix:
   allow_failures:
   - os: windows
   include:
+    # Tests the use of the `doc_cfg` nightly feature
   - os: linux
     rust: nightly
     env:
