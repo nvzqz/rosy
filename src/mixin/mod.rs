@@ -58,7 +58,7 @@ pub trait Mixin: Object + Sealed {
 
     /// Returns an array of the modules included in `self`.
     #[inline]
-    fn included_modules(self) -> Array {
+    fn included_modules(self) -> Array<Module> {
         unsafe { Array::from_raw(ruby::rb_mod_included_modules(self.raw())) }
     }
 
