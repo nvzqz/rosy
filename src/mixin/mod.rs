@@ -218,8 +218,10 @@ pub trait Mixin: Object + Sealed {
 
     /// Sets the class-level `var` in `self` to `val`.
     #[inline]
-    fn set_class_var(self, var: impl Into<SymbolId>, val: impl Object) {
-        unsafe { ruby::rb_cvar_set(self.raw(), var.into().raw(), val.raw()) };
+    fn set_class_var(self, var: impl Into<SymbolId>, val: impl Into<AnyObject>) {
+        let var = var.into().raw();
+        let val = val.into().raw();
+        unsafe { ruby::rb_cvar_set(self.raw(), var, val) };
     }
 
     /// Defines an read-only attribute on `self` with `name`.
