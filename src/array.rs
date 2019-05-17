@@ -159,6 +159,18 @@ impl Array {
         self.len() == 0
     }
 
+    /// Returns a pointer to the first object in `self`.
+    #[inline]
+    pub fn as_ptr(self) -> *const AnyObject {
+        unsafe { (*self.rarray()).start() as *const AnyObject }
+    }
+
+    /// Returns a mutable pointer to the first object in `self`.
+    #[inline]
+    pub fn as_ptr_mut(self) -> *mut AnyObject {
+        unsafe { (*self.rarray()).start_mut() as *mut AnyObject }
+    }
+
     /// Returns a slice to the underlying objects of `self`.
     ///
     /// # Safety
@@ -167,8 +179,7 @@ impl Array {
     /// through the VM or otherwise.
     #[inline]
     pub unsafe fn as_slice(&self) -> &[AnyObject] {
-        let ptr = (*self.rarray()).start() as *const AnyObject;
-        std::slice::from_raw_parts(ptr, self.len())
+        std::slice::from_raw_parts(self.as_ptr(), self.len())
     }
 
     /// Returns a mutable slice to the underlying objects of `self`.
@@ -181,8 +192,7 @@ impl Array {
     #[inline]
     pub unsafe fn as_slice_mut(&mut self) -> &mut [AnyObject] {
         ruby::rb_ary_modify(self.raw());
-        let ptr = (*self.rarray()).start_mut() as *mut AnyObject;
-        std::slice::from_raw_parts_mut(ptr, self.len())
+        std::slice::from_raw_parts_mut(self.as_ptr_mut(), self.len())
     }
 
     /// Returns the object at `index` or `None` if `index` is out-of-bounds.
