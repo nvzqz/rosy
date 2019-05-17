@@ -254,6 +254,9 @@ impl Class {
 
     /// Defines a method for `name` on `self` that calls `f` when invoked.
     ///
+    /// Note that `MethodFn` functions can return any type that implements
+    /// the `Object` trait.
+    ///
     /// Unfortunately, because `MethodFn` is defined on `extern "C" fn` types
     /// and these function declarations don't implicitly resolve to those types,
     /// an `as` cast is required for `f`.
@@ -331,18 +334,18 @@ impl Class {
     /// # rosy::vm::init().unwrap();
     /// use rosy::prelude::*;
     ///
-    /// let class = Class::array();
-    /// let value = String::from("hey");
-    /// let slice = &[value, value];
-    /// let array = Array::from_slice(slice);
-    ///
-    /// extern "C" fn eq_args(this: AnyObject, args: Array) -> AnyObject {
-    ///     AnyObject::from(this == args)
+    /// unsafe extern "C" fn joining(this: AnyObject, args: Array) -> String {
+    ///     args.join(String::cast_unchecked(this))
     /// }
+    /// let joining: unsafe extern fn(_, _) -> _ = joining;
     ///
-    /// class.def_method("eq_args?", eq_args as extern fn(_, _) -> _).unwrap();
+    /// let class = Class::string();
+    /// class.def_method("joining", joining).unwrap();
     ///
-    /// assert!(array.call_with("eq_args?", slice).unwrap().is_true());
+    /// let string = String::from(", ");
+    /// let output = string.call_with("joining", &[string, string]).unwrap();
+    ///
+    /// assert_eq!(output, ", , , ");
     /// ```
     pub fn def_method<N, F>(self, name: N, f: F) -> Result<(), AnyException>
     where

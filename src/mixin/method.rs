@@ -19,11 +19,11 @@ pub unsafe trait MethodFn {
 
 macro_rules! impl_trait {
     ($($a:expr $(,$args:ty)*;)+) => { $(
-        impl_trait!(@fn $a, unsafe extern "C" fn(this: AnyObject $(,$args)*) -> AnyObject);
-        impl_trait!(@fn $a,        extern "C" fn(this: AnyObject $(,$args)*) -> AnyObject);
+        impl_trait!(@fn $a, unsafe extern "C" fn(this: AnyObject $(,$args)*));
+        impl_trait!(@fn $a,        extern "C" fn(this: AnyObject $(,$args)*));
     )+ };
-    (@fn $a:expr, $f:ty) => {
-        unsafe impl MethodFn for $f {
+    (@fn $a:expr, $($f:tt)+) => {
+        unsafe impl<O: Object> MethodFn for $($f)+ -> O {
             const ARITY: c_int = $a;
 
             #[inline]
