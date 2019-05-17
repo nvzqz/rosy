@@ -30,9 +30,9 @@ use crate::{
 /// use rosy::prelude::*;
 ///
 /// let s = String::from("hellooo");
-/// let a = Array::from_slice(&[s, s, s]);
 ///
-/// assert!(!a.is_empty());
+/// let a = Array::from_slice(&[s, s, s]);
+/// assert_eq!(a.len(), 3);
 ///
 /// for obj in a {
 ///     assert_eq!(obj, s);
