@@ -167,6 +167,22 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
         self.singleton_class().def_method(name, f)
     }
 
+    /// Defines a method for `name` on the singleton class of `self` that calls
+    /// `f` when invoked.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self` is not frozen or else a `FrozenError`
+    /// exception will be raised.
+    #[inline]
+    unsafe fn def_singleton_method_unchecked<N, F>(self, name: N, f: F)
+    where
+        N: Into<SymbolId>,
+        F: MethodFn
+    {
+        self.singleton_class().def_method_unchecked(name, f);
+    }
+
     /// Calls `method` on `self` and returns the result.
     #[inline]
     fn call(self, method: impl Into<SymbolId>) -> Result<AnyObject, AnyException> {
