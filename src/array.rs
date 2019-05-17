@@ -197,6 +197,18 @@ impl Array {
         *self.as_slice().get_unchecked(index)
     }
 
+    /// Returns the first object in `self`.
+    #[inline]
+    pub fn first(self) -> Option<AnyObject> {
+        unsafe { self.as_slice().first().map(|&obj| obj) }
+    }
+
+    /// Returns the last element in `self`.
+    #[inline]
+    pub fn last(self) -> Option<AnyObject> {
+        unsafe { self.as_slice().last().map(|&obj| obj) }
+    }
+
     /// Removes all elements from `self`.
     ///
     /// # Safety
