@@ -62,10 +62,24 @@ impl From<&str> for String {
     }
 }
 
+impl From<&str> for AnyObject {
+    #[inline]
+    fn from(s: &str) -> Self {
+        String::from(s).into()
+    }
+}
+
 impl From<&CStr> for String {
     #[inline]
     fn from(s: &CStr) -> String {
         s.to_bytes().into()
+    }
+}
+
+impl From<&CStr> for AnyObject {
+    #[inline]
+    fn from(s: &CStr) -> Self {
+        String::from(s).into()
     }
 }
 
@@ -75,6 +89,13 @@ impl From<&[u8]> for String {
         let ptr = bytes.as_ptr();
         let len = bytes.len();
         unsafe { String::from_raw(ruby::rb_str_new(ptr as *const _, len as _)) }
+    }
+}
+
+impl From<&[u8]> for AnyObject {
+    #[inline]
+    fn from(s: &[u8]) -> Self {
+        String::from(s).into()
     }
 }
 

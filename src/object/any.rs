@@ -216,20 +216,6 @@ impl From<bool> for AnyObject {
     }
 }
 
-impl From<&str> for AnyObject {
-    #[inline]
-    fn from(s: &str) -> Self {
-        String::from(s).into()
-    }
-}
-
-impl From<&CStr> for AnyObject {
-    #[inline]
-    fn from(s: &CStr) -> Self {
-        String::from(s).into()
-    }
-}
-
 impl AnyObject {
     #[inline]
     pub(crate) fn _ptr(self) -> *mut std::ffi::c_void {
