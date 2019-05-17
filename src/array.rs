@@ -93,10 +93,19 @@ impl<O: Object> PartialEq<AnyObject> for Array<O> {
 
 unsafe impl<O: Object> Object for Array<O> {
     #[inline]
-    #[allow(unused_variables)]
-    fn cast(obj: impl Object) -> Option<Self> {
-        // TODO: Figure out how to determine whether `obj` is of type `Self`
-        None
+    fn unique_id() -> Option<u128> {
+        let base = O::unique_id()?;
+        let this = !(Ty::Array as u128);
+        Some(!(base.rotate_right(1) ^ this))
+    }
+
+    #[inline]
+    fn cast<A: Object>(obj: A) -> Option<Self> {
+        if O::unique_id() == AnyObject::unique_id() || Self::unique_id() == A::unique_id() {
+            unsafe { Some(Self::cast_unchecked(obj)) }
+        } else {
+            None
+        }
     }
 
     #[inline]

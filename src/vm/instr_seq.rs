@@ -31,7 +31,12 @@ impl PartialEq<AnyObject> for InstrSeq {
 
 unsafe impl Object for InstrSeq {
     #[inline]
-    fn cast(obj: impl Object) -> Option<Self> {
+    fn unique_id() -> Option<u128> {
+        Some((!0) - 1)
+    }
+
+    #[inline]
+    fn cast<A: Object>(obj: A) -> Option<Self> {
         if obj.class().inherits(Class::instr_seq()) {
             unsafe { Some(Self::cast_unchecked(obj)) }
         } else {

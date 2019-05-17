@@ -49,6 +49,17 @@ pub unsafe trait Rosy: Sized {
     /// because creating a constant instance can only be done on nightly.
     const ID: *const c_char;
 
+    /// A unique identifier for `RosyObject<Self>` to facilitate casting.
+    ///
+    /// # Safety
+    ///
+    /// This value _must_ be unique. Rosy's built-in objects use identifiers
+    /// that are very close to `u128::max_value()`, so those are easy to avoid.
+    #[inline]
+    fn unique_object_id() -> Option<u128> {
+        None
+    }
+
     /// Returns the class defined for this type.
     ///
     /// The default is `RustObject`, however other implementors of this trait
@@ -64,10 +75,18 @@ pub unsafe trait Rosy: Sized {
     /// This could be implemented by checking against [`class`](#method.class)
     /// but care must be taken to ensure that all instances of this type's class
     /// refer to Rust data of type `Self`.
+    ///
+    /// The default implementation checks the
+    /// [`unique_object_id`](#method.unique_object_id) of `Self` against the
+    /// `unique_id` of `A`.
     #[inline]
     #[allow(unused_variables)]
-    fn cast(obj: impl Object) -> Option<RosyObject<Self>> {
-        None
+    fn cast<A: Object>(obj: A) -> Option<RosyObject<Self>> {
+        if A::unique_id() == Self::unique_object_id() {
+            unsafe { Some(RosyObject::cast_unchecked(obj)) }
+        } else {
+            None
+        }
     }
 
     /// Called during Ruby's mark phase of garbage collection to determine which
@@ -129,6 +148,13 @@ unsafe impl<R: Rosy> Rosy for Vec<R> {
     const ID: *const c_char = b"rust_vec\0".as_ptr() as _;
 
     #[inline]
+    fn unique_object_id() -> Option<u128> {
+        let inner = R::unique_object_id()?;
+        let base = u128::from_le_bytes(*b"built-in Vec<T> ");
+        Some(inner.rotate_right(1) ^ base)
+    }
+
+    #[inline]
     fn mark(&self) {
         self.iter().for_each(Rosy::mark);
     }
@@ -153,6 +179,11 @@ unsafe impl Rosy for &str {
 
 unsafe impl Rosy for std::string::String {
     const ID: *const c_char = b"rust_string\0".as_ptr() as _;
+
+    #[inline]
+    fn unique_object_id() -> Option<u128> {
+        Some((!0) - 0xff)
+    }
 
     #[inline]
     fn mark(&self) {}

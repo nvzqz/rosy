@@ -68,7 +68,12 @@ impl<R: Rosy> PartialEq<AnyObject> for RosyObject<R> {
 
 unsafe impl<R: Rosy> Object for RosyObject<R> {
     #[inline]
-    fn cast(obj: impl Object) -> Option<Self> {
+    fn unique_id() -> Option<u128> {
+        R::unique_object_id()
+    }
+
+    #[inline]
+    fn cast<A: Object>(obj: A) -> Option<Self> {
         R::cast(obj)
     }
 

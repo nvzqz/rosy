@@ -31,7 +31,12 @@ impl fmt::Display for String {
 
 unsafe impl Object for String {
     #[inline]
-    fn cast(obj: impl Object) -> Option<Self> {
+    fn unique_id() -> Option<u128> {
+        Some(!(Ty::String as u128))
+    }
+
+    #[inline]
+    fn cast<A: Object>(obj: A) -> Option<Self> {
         Some(obj.to_s())
     }
 
@@ -477,7 +482,7 @@ impl PartialEq<AnyObject> for Encoding {
 
 unsafe impl Object for Encoding {
     #[inline]
-    fn cast(obj: impl Object) -> Option<Self> {
+    fn cast<A: Object>(obj: A) -> Option<Self> {
         if obj.class().inherits(Class::encoding()) {
             unsafe { Some(Self::cast_unchecked(obj)) }
         } else {

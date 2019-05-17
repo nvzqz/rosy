@@ -58,7 +58,12 @@ impl From<Class> for AnyObject {
 
 unsafe impl Object for Class {
     #[inline]
-    fn cast(obj: impl Object) -> Option<Self> {
+    fn unique_id() -> Option<u128> {
+        Some(!(Ty::Class as u128))
+    }
+
+    #[inline]
+    fn cast<A: Object>(obj: A) -> Option<Self> {
         if obj.is_ty(Ty::Class) {
             unsafe { Some(Self::cast_unchecked(obj)) }
         } else {

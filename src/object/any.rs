@@ -25,12 +25,17 @@ impl AsRef<AnyObject> for AnyObject {
 
 unsafe impl Object for AnyObject {
     #[inline]
+    fn unique_id() -> Option<u128> {
+        Some(!0)
+    }
+
+    #[inline]
     unsafe fn from_raw(raw: ruby::VALUE) -> Self {
         AnyObject { raw, _marker: PhantomData }
     }
 
     #[inline]
-    fn cast(obj: impl Object) -> Option<Self> {
+    fn cast<A: Object>(obj: A) -> Option<Self> {
         Some(obj.into_any_object())
     }
 

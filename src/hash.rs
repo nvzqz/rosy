@@ -31,7 +31,12 @@ impl PartialEq<AnyObject> for Hash {
 
 unsafe impl Object for Hash {
     #[inline]
-    fn cast(obj: impl Object) -> Option<Self> {
+    fn unique_id() -> Option<u128> {
+        Some(!(Ty::Hash as u128))
+    }
+
+    #[inline]
+    fn cast<A: Object>(obj: A) -> Option<Self> {
         if obj.is_ty(Ty::Hash) {
             unsafe { Some(Self::from_raw(obj.raw())) }
         } else {

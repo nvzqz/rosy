@@ -98,7 +98,7 @@ impl From<AnyException> for AnyObject {
 
 unsafe impl Object for AnyException {
     #[inline]
-    fn cast(obj: impl Object) -> Option<Self> {
+    fn cast<A: Object>(obj: A) -> Option<Self> {
         if obj.class().inherits(Class::exception()) {
             unsafe { Some(Self::from_raw(obj.raw())) }
         } else {

@@ -27,6 +27,17 @@ pub use self::{
 /// All types that implement this trait _must_ be light wrappers around an
 /// [`AnyObject`](struct.AnyObject.html) and thus have the same size and layout.
 pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<AnyObject> {
+    /// Returns a unique identifier for an object type to facilitate casting.
+    ///
+    /// # Safety
+    ///
+    /// This value _must_ be unique. Rosy's built-in objects use identifiers
+    /// that are very close to `u128::max_value()`, so those are easy to avoid.
+    #[inline]
+    fn unique_id() -> Option<u128> {
+        None
+    }
+
     /// Creates a new object from `raw` without checking.
     ///
     /// # Safety
@@ -45,7 +56,17 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
     }
 
     /// Attempts to create an instance by casting `obj`.
-    fn cast(obj: impl Object) -> Option<Self>;
+    ///
+    /// The default implementation checks the [`unique_id`](#method.unique_id)
+    /// of `A` against that of `Self`.
+    #[inline]
+    fn cast<A: Object>(obj: A) -> Option<Self> {
+        if A::unique_id() == Self::unique_id() {
+            unsafe { Some(Self::cast_unchecked(obj)) }
+        } else {
+            None
+        }
+    }
 
     /// Casts `obj` to `Self` without checking its type.
     #[inline]
@@ -289,5 +310,41 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
         let this = self.raw();
         let that = other.raw();
         unsafe { ruby::rb_eql(this, that) != 0 }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unique_ids() {
+        macro_rules! ids {
+            ($($t:ty,)+) => { [$(
+                <$t>::unique_id(),
+                Array::<$t>::unique_id(),
+                Array::<Array<$t>>::unique_id(),
+            )+] }
+        }
+        let ids: &[_] = &ids! {
+            AnyObject,
+            AnyException,
+            Hash,
+            String,
+            Symbol,
+            crate::vm::InstrSeq,
+            RosyObject<std::string::String>,
+        };
+        for a in ids {
+            for b in ids {
+                if std::ptr::eq(a, b) {
+                    continue;
+                }
+                match (a, b) {
+                    (Some(a), Some(b)) => assert_ne!(a, b),
+                    (_, _) => {},
+                }
+            }
+        }
     }
 }

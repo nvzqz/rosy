@@ -25,7 +25,12 @@ impl From<Module> for AnyObject {
 
 unsafe impl Object for Module {
     #[inline]
-    fn cast(obj: impl Object) -> Option<Self> {
+    fn unique_id() -> Option<u128> {
+        Some(!(Ty::Module as u128))
+    }
+
+    #[inline]
+    fn cast<A: Object>(obj: A) -> Option<Self> {
         if obj.is_ty(Ty::Module) {
             unsafe { Some(Self::cast_unchecked(obj)) }
         } else {

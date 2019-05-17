@@ -36,7 +36,7 @@ impl PartialEq<AnyObject> for Symbol {
 
 unsafe impl Object for Symbol {
     #[inline]
-    fn cast(obj: impl Object) -> Option<Self> {
+    fn cast<A: Object>(obj: A) -> Option<Self> {
         if obj.is_ty(Ty::Symbol) {
             unsafe { Some(Self::cast_unchecked(obj)) }
         } else {
