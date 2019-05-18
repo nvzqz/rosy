@@ -455,12 +455,31 @@ impl String {
     }
 
     /// Returns whether `self` only contains whitespace.
+    ///
+    /// # Examples
+    ///
+    /// When `self` is encoded as UTF-8, it checks against all unicode
+    /// characters with the property "WSpace=Y":
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use rosy::String;
+    ///
+    /// let space = String::from("\u{0009}\u{000A}\u{000B}\u{000C}\u{000D}\
+    ///                           \u{0020}\u{0085}\u{00A0}\u{1680}\u{2000}\
+    ///                           \u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\
+    ///                           \u{2006}\u{2007}\u{2008}\u{2009}\u{200A}\
+    ///                           \u{2028}\u{202F}\u{2029}\u{205F}\u{3000}");
+    ///
+    /// assert!(space.is_whitespace());
+    /// ```
     pub fn is_whitespace(self) -> bool {
         unsafe {
             if let Ok(s) = self.to_str() {
                 s.chars().all(|ch| ch.is_whitespace())
             } else {
-                self.is_ascii_whitespace()
+                // We only care about Unicode whitespace
+                false
             }
         }
     }

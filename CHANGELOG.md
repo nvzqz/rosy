@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog] and this project adheres to
 ### Fixed
 - `Array::cast` would pass for any objects for `Array<AnyObject>`
 
+### Removed
+- Fallback call to `is_ascii_whitespace` in `is_whitespace` on `String`
+
 ## 0.0.2 - 2019-05-17
 ### Added
 - `_skip_linking` feature flag to hopefully get https://docs.rs/rosy up
