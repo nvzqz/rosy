@@ -334,6 +334,13 @@ mod tests {
     use super::*;
 
     #[test]
+    fn array_unique_id() {
+        let expected = !(Ty::Array as u128);
+        let array_id = Array::<AnyObject>::unique_id().unwrap();
+        assert_eq!(array_id, expected);
+    }
+
+    #[test]
     fn hash_unique_id() {
         let expected = !(Ty::Hash as u128);
         let hash_id = Hash::<AnyObject, AnyObject>::unique_id().unwrap();

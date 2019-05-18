@@ -95,8 +95,8 @@ unsafe impl<O: Object> Object for Array<O> {
     #[inline]
     fn unique_id() -> Option<u128> {
         let base = O::unique_id()?;
-        let this = !(Ty::Array as u128);
-        Some(!(base.rotate_right(1) ^ this))
+        let this = Ty::Array as u128;
+        Some(base.rotate_right(1) ^ this)
     }
 
     #[inline]
