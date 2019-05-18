@@ -5,6 +5,17 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+### Added
+- Fast encoding-checking methods to `String` that give `String::to_str` a 3x
+  performance improvement when the internal Ruby encoding is UTF-8
+  - `encoding_is_ascii_8bit`
+  - `encoding_is_utf8`
+  - `encoding_is_us_ascii`
+- Made some methods on `Encoding` a bit faster:
+  - `is_ascii_8bit`
+  - `is_utf8`
+  - `is_us_ascii`
+
 ### Fixed
 - `Array::cast` would pass for any objects for `Array<AnyObject>`
 

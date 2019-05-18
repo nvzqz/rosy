@@ -261,6 +261,11 @@ impl String {
         self.as_any_object()._ptr() as _
     }
 
+    #[inline]
+    pub(crate) fn _enc_index(self) -> c_int {
+        unsafe { ruby::rb_enc_get_index(self.raw()) }
+    }
+
     /// Creates a new empty string with a capacity of 0.
     #[inline]
     pub fn new() -> Self {
@@ -301,7 +306,7 @@ impl String {
     /// ```
     #[inline]
     pub fn encoding(self) -> Encoding {
-        unsafe { Encoding::_from_index(ruby::rb_enc_get_index(self.raw())) }
+        Encoding::_from_index(self._enc_index())
     }
 
     /// Associates the bytes of `self` with `encoding` without checking whether
@@ -309,6 +314,53 @@ impl String {
     #[inline]
     pub unsafe fn force_encoding(self, encoding: Encoding) {
         ruby::rb_enc_associate_index(self.raw(), encoding._index());
+    }
+
+    /// A fast shortcut to `self.encoding().is_ascii_8bit()`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// let bytes: &[u8] = &[0, 1, 255, 42];
+    /// let string = rosy::String::from(bytes);
+    /// assert!(string.encoding_is_ascii_8bit());
+    /// ```
+    #[inline]
+    pub fn encoding_is_ascii_8bit(self) -> bool {
+        self._enc_index() == ruby::rb_encoding::ascii_8bit_index()
+    }
+
+    /// A fast shortcut to `self.encoding().is_utf8()`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// let string = rosy::String::from("hellooo");
+    /// assert!(string.encoding_is_utf8());
+    /// ```
+    #[inline]
+    pub fn encoding_is_utf8(self) -> bool {
+        self._enc_index() == ruby::rb_encoding::utf8_index()
+    }
+
+    /// A fast shortcut to `self.encoding().is_us_ascii()`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use rosy::{Object, String};
+    ///
+    /// let string = String::from("hellooo");
+    /// string.call_with("encode!", &[String::from("US-ASCII")]).unwrap();
+    ///
+    /// assert!(string.encoding_is_us_ascii());
+    /// ```
+    #[inline]
+    pub fn encoding_is_us_ascii(self) -> bool {
+        self._enc_index() == ruby::rb_encoding::us_ascii_index()
     }
 
     /// Returns a reference to the underlying bytes in `self`.
@@ -382,7 +434,7 @@ impl String {
     /// unsafe { assert_eq!(rb.to_str().unwrap(), rs) };
     /// ```
     pub unsafe fn to_str(&self) -> Result<&str, Utf8Error> {
-        if self.encoding().is_utf8() {
+        if self.encoding_is_utf8() {
             return Ok(self.to_str_unchecked());
         }
         std::str::from_utf8(self.as_bytes())
@@ -406,7 +458,7 @@ impl String {
     /// [`str::from_utf8`](https://doc.rust-lang.org/std/str/fn.from_utf8.html)
     /// on the result of [`as_bytes`](#method.as_bytes).
     pub unsafe fn to_str_lossy(&self) -> Cow<'_, str> {
-        if self.encoding().is_utf8() {
+        if self.encoding_is_utf8() {
             return Cow::Borrowed(self.to_str_unchecked());
         }
         std::string::String::from_utf8_lossy(self.as_bytes())
@@ -722,7 +774,7 @@ impl Encoding {
 
     #[inline]
     pub(crate) fn _index(self) -> c_int {
-        unsafe { ruby::rb_enc_to_index(self._enc()) }
+        unsafe { (*self._enc()).index() }
     }
 
     /// Returns the `ASCII-8BIT` encoding.
@@ -820,19 +872,19 @@ impl Encoding {
     /// Returns whether `self` is `ASCII-8BIT`.
     #[inline]
     pub fn is_ascii_8bit(self) -> bool {
-        unsafe { self._index() == ruby::rb_ascii8bit_encindex() }
+        self._index() == ruby::rb_encoding::ascii_8bit_index()
     }
 
     /// Returns whether `self` is `UTF-8`.
     #[inline]
     pub fn is_utf8(self) -> bool {
-        unsafe { self._index() == ruby::rb_utf8_encindex() }
+        self._index() == ruby::rb_encoding::utf8_index()
     }
 
     /// Returns whether `self` is `US-ASCII`.
     #[inline]
     pub fn is_us_ascii(self) -> bool {
-        unsafe { self._index() == ruby::rb_usascii_encindex() }
+        self._index() == ruby::rb_encoding::us_ascii_index()
     }
 
     /// Returns whether `self` is the locale encoding.

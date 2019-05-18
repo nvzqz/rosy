@@ -105,6 +105,61 @@ pub struct rb_encoding {
     pub flags: c_uint,
 }
 
+impl rb_encoding {
+    #[inline]
+    pub fn ascii_8bit_index() -> c_int {
+        let index = preserved_encindex::ASCII as c_int;
+        debug_assert_eq!(index, unsafe { rb_ascii8bit_encindex() });
+        index
+    }
+
+    #[inline]
+    pub fn utf8_index() -> c_int {
+        let index = preserved_encindex::UTF_8 as c_int;
+        debug_assert_eq!(index, unsafe { rb_utf8_encindex() });
+        index
+    }
+
+    #[inline]
+    pub fn us_ascii_index() -> c_int {
+        let index = preserved_encindex::US_ASCII as c_int;
+        debug_assert_eq!(index, unsafe { rb_usascii_encindex() });
+        index
+    }
+
+    #[inline]
+    pub fn index(&mut self) -> c_int {
+        let index = self.ruby_encoding_index & ENC_INDEX_MASK;
+        debug_assert_eq!(index, unsafe { rb_enc_to_index(self) });
+        index
+    }
+}
+
+#[repr(C)]
+#[allow(non_camel_case_types)]
+pub enum preserved_encindex {
+    ASCII,
+    UTF_8,
+    US_ASCII,
+
+    /* preserved indexes */
+    UTF_16BE,
+    UTF_16LE,
+    UTF_32BE,
+    UTF_32LE,
+    UTF_16,
+    UTF_32,
+    UTF_8_MAC,
+
+    /* for old options of regexp */
+    EUC_JP,
+    Windows_31J,
+
+    BUILTIN_MAX,
+}
+
+pub const ENC_INDEX_MASK: c_int = !(!(0 as c_uint) << 24) as c_int;
+
 pub const STR_TMPLOCK: VALUE = fl_type::FL_USER_7;
 
 pub mod rstring_flags {
