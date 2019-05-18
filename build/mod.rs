@@ -20,10 +20,9 @@ fn main() {
     rerun_if_env_changed("ROSY_RUBY_VERSION");
     rerun_if_env_changed("ROSY_PRINT_RUBY_CONFIG");
 
-    #[cfg(feature = "rustc_version")]
+    #[cfg(feature = "version_check")]
     {
-        use rustc_version::*;
-        if version_meta().unwrap().channel == Channel::Nightly {
+        if version_check::is_nightly() == Some(true) {
             println!("cargo:rustc-cfg=nightly");
         }
     }

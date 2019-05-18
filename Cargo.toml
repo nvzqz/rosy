@@ -25,7 +25,7 @@ static_assertions = "0.3.0"
 aloxide = { version = "0.0.8", default-features = false }
 
 # Used to enable `cfg(nightly)`
-rustc_version = { version = "0.2", optional = true }
+version_check = { version = "0.1", optional = true }
 
 [features]
 default = ["static"]
@@ -39,4 +39,4 @@ ruby_2_6 = []
 _skip_linking = []
 
 [package.metadata.docs.rs]
-features = ["ruby_2_6", "rustc_version", "_skip_linking"]
+features = ["ruby_2_6", "version_check", "_skip_linking"]
