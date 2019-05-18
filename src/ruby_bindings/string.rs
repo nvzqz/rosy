@@ -175,6 +175,23 @@ pub mod rstring_flags {
     pub const FSTR: usize = FL_USER_17;
 }
 
+// Taken from `ruby_encoding_consts` in 'encoding.h'
+pub mod encoding_consts {
+    pub const INLINE_MAX: usize = 127;
+    pub const SHIFT: usize = super::fl_type::FL_USHIFT + 10;
+    pub const MASK: usize = INLINE_MAX << SHIFT;
+    pub const MAX_NAME_LEN: usize = 42;
+}
+
+impl RBasic {
+    // Taken from `RB_ENCODING_GET_INLINED(obj)` in 'encoding.h'
+    #[inline]
+    pub fn encoding_index(&self) -> c_int {
+        use encoding_consts::*;
+        ((self.flags & MASK) >> SHIFT) as c_int
+    }
+}
+
 extern "C" {
     // VALUE rb_str_buf_new(long capa)
     pub fn rb_str_buf_new(capa: c_long) -> VALUE;

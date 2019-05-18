@@ -266,6 +266,14 @@ impl String {
         unsafe { ruby::rb_enc_get_index(self.raw()) }
     }
 
+    // Taken from `enc_get_index_str` in 'encoding.c':
+    // `enc_get_index_str` checks for the "encoding" ivar on the string if
+    // `ENCODING_GET_INLINED` returns `ENCODING_INLINE_MAX`
+    #[inline]
+    pub(crate) fn _enc_index_skip_ivar(self) -> c_int {
+        unsafe { (*self.rstring()).basic.encoding_index() }
+    }
+
     /// Creates a new empty string with a capacity of 0.
     #[inline]
     pub fn new() -> Self {
@@ -328,7 +336,7 @@ impl String {
     /// ```
     #[inline]
     pub fn encoding_is_ascii_8bit(self) -> bool {
-        self._enc_index() == ruby::rb_encoding::ascii_8bit_index()
+        self._enc_index_skip_ivar() == ruby::rb_encoding::ascii_8bit_index()
     }
 
     /// A fast shortcut to `self.encoding().is_utf8()`.
@@ -342,7 +350,7 @@ impl String {
     /// ```
     #[inline]
     pub fn encoding_is_utf8(self) -> bool {
-        self._enc_index() == ruby::rb_encoding::utf8_index()
+        self._enc_index_skip_ivar() == ruby::rb_encoding::utf8_index()
     }
 
     /// A fast shortcut to `self.encoding().is_us_ascii()`.
@@ -360,7 +368,7 @@ impl String {
     /// ```
     #[inline]
     pub fn encoding_is_us_ascii(self) -> bool {
-        self._enc_index() == ruby::rb_encoding::us_ascii_index()
+        self._enc_index_skip_ivar() == ruby::rb_encoding::us_ascii_index()
     }
 
     /// Returns a reference to the underlying bytes in `self`.
