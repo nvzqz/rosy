@@ -26,11 +26,11 @@ The format is based on [Keep a Changelog] and this project adheres to
 ### Removed
 - Fallback call to `is_ascii_whitespace` in `is_whitespace` on `String`
 
-## 0.0.2 - 2019-05-17
+## [0.0.2] - 2019-05-17
 ### Added
 - `_skip_linking` feature flag to hopefully get https://docs.rs/rosy up
 
-## [0.0.1] - 2019-05-17
+## 0.0.1 - 2019-05-17
 Initial release
 
 [crate]:       https://crates.io/crates/rosy
@@ -42,6 +42,6 @@ Initial release
 [Semantic Versioning]: http://semver.org/spec/v2.0.0.html
 
 [Unreleased]: https://github.com/oceanpkg/rosy/compare/v0.0.2...HEAD
-[0.0.1]: https://github.com/nvzqz/static-assertions-rs/compare/v0.0.1...v0.0.2
+[0.0.2]: https://github.com/oceanpkg/rosy/compare/v0.0.1...v0.0.2
 
 [`std::panic::catch_unwind`]: https://doc.rust-lang.org/std/panic/fn.catch_unwind.html
