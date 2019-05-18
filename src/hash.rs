@@ -45,7 +45,10 @@ impl<K: Object, V: Object> PartialEq<AnyObject> for Hash<K, V> {
 unsafe impl<K: Object, V: Object> Object for Hash<K, V> {
     #[inline]
     fn unique_id() -> Option<u128> {
-        Some(!(Ty::Hash as u128))
+        let key = K::unique_id()?;
+        let val = V::unique_id()?;
+        let hash = !(Ty::Hash as u128);
+        Some(key.rotate_left(1) ^ val.rotate_right(7) ^ hash)
     }
 
     #[inline]

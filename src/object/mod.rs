@@ -334,18 +334,50 @@ mod tests {
     use super::*;
 
     #[test]
+    fn hash_unique_id() {
+        let expected = !(Ty::Hash as u128);
+        let hash_id = Hash::<AnyObject, AnyObject>::unique_id().unwrap();
+        assert_eq!(hash_id, expected);
+    }
+
+    #[test]
     fn unique_ids() {
-        macro_rules! ids {
-            ($($t:ty,)+) => { [$(
-                <$t>::unique_id(),
-                Array::<$t>::unique_id(),
-                Array::<Array<$t>>::unique_id(),
-            )+] }
+        // Takes a sequence of `ty` and transforms it into an NxN sequence where
+        // the work is done in the `single` branch over each `Hash` combination
+        macro_rules! nxn_hash_ids {
+            ($ids:expr => $($t:ty),*) => {
+                nxn_hash_ids! { do_stuff $ids => $($t),* ; $($t),* }
+            };
+            (do_stuff $ids:expr => $t1next:ty ; $($t2s:ty),*) => {
+                nxn_hash_ids! { expand $ids => $t1next, $($t2s),* }
+            };
+            (do_stuff $ids:expr => $t1next:ty, $($t1rest:ty),+ ; $($t2s:ty),*) => {
+                nxn_hash_ids! { expand   $ids => $t1next, $($t2s),* }
+                nxn_hash_ids! { do_stuff $ids => $($t1rest),* ; $($t2s),* }
+            };
+            (expand $ids:expr => $t1:ty, $($t2s:ty),*) => {
+                $(nxn_hash_ids! { single $ids => $t1, $t2s })*
+            };
+            (single $ids:expr => $t1:ty, $t2:ty) => {
+                $ids.push((stringify!(Hash<$t1, $t2>), Hash::<$t1, $t2>::unique_id()));
+            };
         }
-        let ids: &[_] = &ids! {
+        macro_rules! ids {
+            ($($t:ty,)+) => { {
+                let mut ids = vec![
+                    $(
+                        (stringify!(<$t>),              <$t>::unique_id()),
+                        (stringify!(Array<$t>),         Array::<$t>::unique_id()),
+                        (stringify!(Array<Array<$t>>),  Array::<Array<$t>>::unique_id()),
+                    )+
+                ];
+                nxn_hash_ids!(ids => $($t),+);
+                ids
+            } }
+        }
+        let ids: &[(&str, _)] = &ids! {
             AnyObject,
             AnyException,
-            Hash,
             String,
             Symbol,
             crate::vm::InstrSeq,
@@ -357,7 +389,9 @@ mod tests {
                     continue;
                 }
                 match (a, b) {
-                    (Some(a), Some(b)) => assert_ne!(a, b),
+                    ((ty_a, Some(a)), (ty_b, Some(b))) => {
+                        assert_ne!(a, b, "{} and {} have same ID", ty_a, ty_b);
+                    },
                     (_, _) => {},
                 }
             }
