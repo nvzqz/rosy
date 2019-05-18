@@ -62,8 +62,13 @@ pub unsafe fn force_recycle(obj: impl Object) {
 
 // Only safely usable with `Symbol` and `Hash`
 #[inline]
-unsafe fn _stat(key: impl Object) -> usize {
+unsafe fn _stat_unchecked(key: AnyObject) -> usize {
     ruby::rb_gc_stat(key.raw())
+}
+
+// monomorphization
+unsafe fn _stat(key: AnyObject) -> Result<usize> {
+    crate::protected_no_panic(|| _stat_unchecked(key))
 }
 
 /// Returns the status information for `key`, or an exception if one is raised.
@@ -94,8 +99,13 @@ pub unsafe fn stat_unchecked(key: impl GcInfoKey) -> usize {
 
 // Only safely usable with `Symbol` and `Hash`
 #[inline]
-unsafe fn _latest_info(key: impl Object) -> AnyObject {
+unsafe fn _latest_info_unchecked(key: AnyObject) -> AnyObject {
     AnyObject::from_raw(ruby::rb_gc_latest_gc_info(key.raw()))
+}
+
+// monomorphization
+unsafe fn _latest_info(key: AnyObject) -> Result<AnyObject> {
+    crate::protected_no_panic(|| _latest_info_unchecked(key))
 }
 
 /// Returns the latest information regarding `key` with respect to the garbage
@@ -166,9 +176,7 @@ pub trait GcInfoKey: Sized {
     /// Returns the status information for `self` with respect to the garbage
     /// collector, or an exception if one is raised.
     #[inline]
-    fn stat_gc(self) -> Result<usize> {
-        crate::protected(|| unsafe { self.stat_gc_unchecked() })
-    }
+    fn stat_gc(self) -> Result<usize>;
 
     /// Returns the status information for `self` with respect to the garbage
     /// collector.
@@ -184,9 +192,7 @@ pub trait GcInfoKey: Sized {
     ///
     /// If an exception is raised, it is returned as a `Result::Err`.
     #[inline]
-    fn latest_gc_info(self) -> Result<AnyObject> {
-        crate::protected(|| unsafe { self.latest_gc_info_unchecked() })
-    }
+    fn latest_gc_info(self) -> Result<AnyObject>;
 
     /// Returns the latest information regarding `self` with respect to the
     /// garbage collector.
@@ -200,32 +206,62 @@ pub trait GcInfoKey: Sized {
 
 impl GcInfoKey for Hash {
     #[inline]
+    fn stat_gc(self) -> Result<usize> {
+        unsafe { _stat(self.into()) }
+    }
+
+    #[inline]
     unsafe fn stat_gc_unchecked(self) -> usize {
-       _stat(self)
+        _stat_unchecked(self.into())
+    }
+
+    #[inline]
+    fn latest_gc_info(self) -> Result<AnyObject> {
+        unsafe { _latest_info(self.into()) }
     }
 
     #[inline]
     unsafe fn latest_gc_info_unchecked(self) -> AnyObject {
-        _latest_info(self)
+        _latest_info_unchecked(self.into())
     }
 }
 
 impl GcInfoKey for Symbol {
     #[inline]
+    fn stat_gc(self) -> Result<usize> {
+        unsafe { _stat(self.into()) }
+    }
+
+    #[inline]
     unsafe fn stat_gc_unchecked(self) -> usize {
-        _stat(self)
+        _stat_unchecked(self.into())
+    }
+
+    #[inline]
+    fn latest_gc_info(self) -> Result<AnyObject> {
+        unsafe { _latest_info(self.into()) }
     }
 
     #[inline]
     unsafe fn latest_gc_info_unchecked(self) -> AnyObject {
-        _latest_info(self)
+        _latest_info_unchecked(self.into())
     }
 }
 
 impl GcInfoKey for &str {
     #[inline]
+    fn stat_gc(self) -> Result<usize> {
+        Symbol::from(self).stat_gc()
+    }
+
+    #[inline]
     unsafe fn stat_gc_unchecked(self) -> usize {
         Symbol::from(self).stat_gc_unchecked()
+    }
+
+    #[inline]
+    fn latest_gc_info(self) -> Result<AnyObject> {
+        Symbol::from(self).latest_gc_info()
     }
 
     #[inline]
@@ -236,8 +272,18 @@ impl GcInfoKey for &str {
 
 impl GcInfoKey for String {
     #[inline]
+    fn stat_gc(self) -> Result<usize> {
+        Symbol::from(self).stat_gc()
+    }
+
+    #[inline]
     unsafe fn stat_gc_unchecked(self) -> usize {
         Symbol::from(self).stat_gc_unchecked()
+    }
+
+    #[inline]
+    fn latest_gc_info(self) -> Result<AnyObject> {
+        Symbol::from(self).latest_gc_info()
     }
 
     #[inline]

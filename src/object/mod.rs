@@ -186,7 +186,8 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
     /// Calls `method` on `self` and returns the result.
     #[inline]
     fn call(self, method: impl Into<SymbolId>) -> Result<AnyObject> {
-        crate::protected(|| unsafe { self.call_unchecked(method) })
+        let args: &[AnyObject] = &[];
+        self.call_with(method, args)
     }
 
     /// Calls `method` on `self` and returns the result.
@@ -207,7 +208,13 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
         method: impl Into<SymbolId>,
         args: &[impl Object]
     ) -> Result<AnyObject> {
-        crate::protected(|| unsafe { self.call_with_unchecked(method, args) })
+        // monomorphization
+        fn call_with(object: AnyObject, method: SymbolId, args: &[AnyObject]) -> Result<AnyObject> {
+            unsafe { crate::protected_no_panic(|| {
+                object.call_with_unchecked(method, args)
+            }) }
+        }
+        call_with(self.into(), method.into(), AnyObject::convert_slice(args))
     }
 
     /// Calls `method` on `self` with `args` and returns the result.
@@ -235,7 +242,8 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
         self,
         method: impl Into<SymbolId>,
     ) -> Result<AnyObject> {
-        crate::protected(|| unsafe { self.call_public_unchecked(method) })
+        let args: &[AnyObject] = &[];
+        self.call_public_with(method, args)
     }
 
     /// Calls the public `method` on `self` and returns the result.
@@ -260,9 +268,14 @@ pub unsafe trait Object: Copy + Into<AnyObject> + AsRef<AnyObject> + PartialEq<A
         method: impl Into<SymbolId>,
         args: &[impl Object]
     ) -> Result<AnyObject> {
-        crate::protected(|| unsafe {
-            self.call_public_with_unchecked(method, args)
-        })
+        // monomorphization
+        fn call_public_with(object: AnyObject, method: SymbolId, args: &[AnyObject]) -> Result<AnyObject> {
+            unsafe { crate::protected_no_panic(|| {
+                object.call_public_with_unchecked(method, args)
+            }) }
+        }
+        let args = AnyObject::convert_slice(args);
+        call_public_with(self.into(), method.into(), args)
     }
 
     /// Calls the public `method` on `self` with `args` and returns the result.

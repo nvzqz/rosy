@@ -96,12 +96,11 @@ extern crate test;
 
 include!(env!("ROSY_RUBY_VERSION_CONST"));
 
-use std::{mem, ptr};
-
 #[path = "ruby_bindings/mod.rs"]
 mod ruby;
 
 mod rosy;
+mod protected;
 mod util;
 pub mod array;
 pub mod exception;
@@ -115,6 +114,9 @@ pub mod symbol;
 pub mod vm;
 
 #[doc(inline)]
+pub use protected::*;
+
+#[doc(inline)] // prelude
 pub use self::{
     array::Array,
     exception::{AnyException, Exception},
@@ -130,111 +132,3 @@ pub use self::{
 /// [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html) for
 /// when exceptions are caught.
 pub type Result<T = (), E = AnyException> = std::result::Result<T, E>;
-
-/// Calls `f` and returns its output or an exception if one is raised in `f`.
-///
-/// # Examples
-///
-/// This is great for calling methods that may not exist:
-///
-/// ```
-/// # rosy::vm::init();
-/// use rosy::{Object, String, protected};
-///
-/// let string = String::from("¡Hola!");
-/// let result = protected(|| unsafe { string.call_unchecked("likes_pie?") });
-///
-/// assert!(result.is_err());
-/// ```
-///
-/// Calls can even be nested like so:
-///
-/// ```
-/// # rosy::vm::init();
-/// use rosy::{Object, String, protected};
-///
-/// let string = String::from("Hiii!!!");
-///
-/// let outer = protected(|| {
-///     protected(|| unsafe {
-///         string.call_unchecked("likes_pie?")
-///     }).unwrap_err();
-///     string
-/// });
-///
-/// assert_eq!(outer.unwrap(), string);
-/// ```
-#[inline]
-pub fn protected<F, O>(f: F) -> Result<O>
-    where F: FnOnce() -> O
-{
-    if util::matches_ruby_size_align::<O>() {
-        return unsafe { protected_size_opt(f) };
-    }
-
-    unsafe extern "C" fn wrapper<F, O>(ctx: ruby::VALUE) -> ruby::VALUE
-        where F: FnOnce() -> O
-    {
-        let (f, out) = &mut *(ctx as *mut (Option<F>, &mut O));
-
-        // Get the `F` out of `Option<F>` to call by-value, which is required by
-        // the `FnOnce` trait
-        let f = f.take().unwrap_or_else(|| std::hint::unreachable_unchecked());
-
-        ptr::write(*out, f());
-
-        AnyObject::nil().raw()
-    }
-    unsafe {
-        // Required to prevent stack unwinding (if there's a `panic!` in `f()`)
-        // from dropping `out`, which is uninitialized memory until `f()`
-        use mem::ManuallyDrop;
-
-        // These shenanigans allow us to pass in a pointer to `f`, with a
-        // pointer to its uninitialized output, into `rb_protect` to make them
-        // accessible from `wrapper`
-        let mut out = ManuallyDrop::new(mem::uninitialized::<O>());
-        let mut ctx = (Some(f), &mut *out);
-        let ctx = &mut ctx as *mut (Option<F>, &mut O) as ruby::VALUE;
-
-        let mut err = 0;
-        ruby::rb_protect(Some(wrapper::<F, O>), ctx, &mut err);
-        match err {
-            0 => Ok(ManuallyDrop::into_inner(out)),
-            _ => Err(AnyException::_take_current()),
-        }
-    }
-}
-
-// A version of `protected` that makes use of the size and layout of `O`
-// matching that of `ruby::VALUE`. This slightly reduces the number of emitted
-// instructions and removes the need for stack-allocating `ctx`.
-#[inline]
-unsafe fn protected_size_opt<F, O>(f: F) -> Result<O>
-    where F: FnOnce() -> O
-{
-    use mem::ManuallyDrop;
-
-    unsafe extern "C" fn wrapper<F, O>(ctx: ruby::VALUE) -> ruby::VALUE
-        where F: FnOnce() -> O
-    {
-        let f: &mut Option<F> = &mut *(ctx as *mut Option<F>);
-
-        // Get the `F` out of `Option<F>` to call by-value, which is required by
-        // the `FnOnce` trait
-        let f = f.take().unwrap_or_else(|| std::hint::unreachable_unchecked());
-
-        let value = ManuallyDrop::new(f());
-        ptr::read(&value as *const ManuallyDrop<O> as *const ruby::VALUE)
-    }
-
-    let mut ctx = Some(f);
-    let ctx = &mut ctx as *mut Option<F> as ruby::VALUE;
-
-    let mut err = 0;
-    let val = ruby::rb_protect(Some(wrapper::<F, O>), ctx, &mut err);
-    match err {
-        0 => Ok(ptr::read(&val as *const ruby::VALUE as *const O)),
-        _ => Err(AnyException::_take_current()),
-    }
-}

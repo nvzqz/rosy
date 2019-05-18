@@ -237,7 +237,8 @@ impl AnyObject {
     /// context of a method.
     #[inline]
     pub fn call_super() -> Result<AnyObject> {
-        crate::protected(|| unsafe { Self::call_super_unchecked() })
+        let args: &[AnyObject] = &[];
+        Self::call_super_with(args)
     }
 
     /// Calls `super` on the current receiver without any arguments in the
@@ -252,7 +253,14 @@ impl AnyObject {
     /// method.
     #[inline]
     pub fn call_super_with(args: &[impl Object]) -> Result<AnyObject> {
-        crate::protected(|| unsafe {  Self::call_super_with_unchecked(args) })
+        Self::_call_super_with(Self::convert_slice(args))
+    }
+
+    // monomorphization
+    fn _call_super_with(args: &[AnyObject]) -> Result<AnyObject> {
+        unsafe {
+            crate::protected_no_panic(|| Self::call_super_with_unchecked(args))
+        }
     }
 
     /// Calls `super` on the current receiver with `args` in the context of a

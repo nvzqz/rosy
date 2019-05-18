@@ -265,6 +265,26 @@ impl Class {
         unsafe { String::from_raw(ruby::rb_class_name(self.raw())) }
     }
 
+    // monomorphization
+    unsafe fn _def_method(
+        self,
+        name: SymbolId,
+        f: unsafe extern "C" fn() -> ruby::VALUE,
+        arity: c_int,
+    ) -> Result {
+        crate::protected_no_panic(|| self._def_method_unchecked(name, f, arity))
+    }
+
+    #[inline]
+    unsafe fn _def_method_unchecked(
+        self,
+        name: SymbolId,
+        f: unsafe extern "C" fn() -> ruby::VALUE,
+        arity: c_int,
+    ) {
+        ruby::rb_define_method_id(self.raw(), name.raw(), Some(f), arity)
+    }
+
     /// Defines a method for `name` on `self` that calls `f` when invoked.
     ///
     /// Note that `MethodFn` functions can return any type that implements
@@ -365,7 +385,7 @@ impl Class {
         N: Into<SymbolId>,
         F: MethodFn,
     {
-        crate::protected(|| unsafe { self.def_method_unchecked(name, f) })
+        unsafe { self._def_method(name.into(), f.raw_fn(), F::ARITY) }
     }
 
     /// Defines a method for `name` on `self` that calls `f` when invoked.
@@ -380,9 +400,7 @@ impl Class {
         N: Into<SymbolId>,
         F: MethodFn,
     {
-        let name = name.into().raw();
-        let f = Some(f.raw_fn());
-        ruby::rb_define_method_id(self.raw(), name, f, F::ARITY)
+        self._def_method_unchecked(name.into(), f.raw_fn(), F::ARITY)
     }
 }
 

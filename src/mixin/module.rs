@@ -79,10 +79,15 @@ impl Module {
         }
     }
 
+    // monomorphization
+    fn _extend(self, object: AnyObject) -> Result {
+        unsafe { crate::protected_no_panic(|| self.extend_unchecked(object)) }
+    }
+
     /// Extends `object` with the contents of `self`.
     #[inline]
     pub fn extend(self, object: impl Object) -> Result {
-        crate::protected(|| unsafe { self.extend_unchecked(object) })
+        self._extend(object.into())
     }
 
     /// Extends `object` with the contents of `self`.

@@ -16,9 +16,12 @@ The format is based on [Keep a Changelog] and this project adheres to
   - `is_ascii_8bit`
   - `is_utf8`
   - `is_us_ascii`
+- Unsafe `protected_no_panic` variant for when the argument is guaranteed by the
+  caller to not panic
 
 ### Fixed
 - `Array::cast` would pass for any objects for `Array<AnyObject>`
+- `protected` is now panic-safe via [`std::panic::catch_unwind`]
 
 ### Removed
 - Fallback call to `is_ascii_whitespace` in `is_whitespace` on `String`
@@ -40,3 +43,5 @@ Initial release
 
 [Unreleased]: https://github.com/oceanpkg/rosy/compare/v0.0.2...HEAD
 [0.0.1]: https://github.com/nvzqz/static-assertions-rs/compare/v0.0.1...v0.0.2
+
+[`std::panic::catch_unwind`]: https://doc.rust-lang.org/std/panic/fn.catch_unwind.html

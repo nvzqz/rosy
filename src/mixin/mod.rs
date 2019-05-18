@@ -2,7 +2,7 @@
 
 use crate::{
     prelude::*,
-    ruby,
+    ruby::{self, ID, VALUE},
     util::Sealed,
 };
 
@@ -27,9 +27,24 @@ unsafe fn _get_const_unchecked(m: impl Mixin, name: impl Into<SymbolId>) -> AnyO
     AnyObject::from_raw(ruby::rb_const_get(m.raw(), name.into().raw()))
 }
 
+// monomorphization
+unsafe fn _attr(m: VALUE, name: ID, read: bool, write: bool) -> Result {
+    crate::protected_no_panic(|| _attr_unchecked(m, name, read, write))
+}
+
 #[inline]
-unsafe fn _attr(m: ruby::VALUE, name: SymbolId, read: bool, write: bool) {
-    ruby::rb_attr(m, name.raw(), read as _, write as _, 0);
+unsafe fn _attr_unchecked(m: VALUE, name: ID, read: bool, write: bool) {
+    ruby::rb_attr(m, name, read as _, write as _, 0);
+}
+
+// monomorphization
+unsafe fn _set_class_var(m: VALUE, key: ID, val: VALUE) -> Result {
+    crate::protected_no_panic(|| _set_class_var_unchecked(m, key, val))
+}
+
+#[inline]
+unsafe fn _set_class_var_unchecked(m: VALUE, key: ID, val: VALUE) {
+    ruby::rb_cvar_set(m, key, val)
 }
 
 /// A type that supports mixins (see [`Class`](struct.Class.html) and
@@ -218,12 +233,14 @@ pub trait Mixin: Object + Sealed {
 
     /// Sets the class-level `var` in `self` to `val`.
     #[inline]
-    fn set_class_var<K, V>(self, key: K, val: V) -> Result<()>
+    fn set_class_var<K, V>(self, key: K, val: V) -> Result
     where
         K: Into<SymbolId>,
         V: Into<AnyObject>,
     {
-        crate::protected(|| unsafe { self.set_class_var_unchecked(key, val) })
+        let key = key.into().raw();
+        let val = val.into().raw();
+        unsafe { _set_class_var(self.raw(), key, val) }
     }
 
     /// Sets the class-level var for `key` in `self` to `val`.
@@ -238,13 +255,13 @@ pub trait Mixin: Object + Sealed {
         K: Into<SymbolId>,
         V: Into<AnyObject>,
     {
-        ruby::rb_cvar_set(self.raw(), key.into().raw(), val.into().raw());
+        _set_class_var_unchecked(self.raw(), key.into().raw(), val.into().raw())
     }
 
     /// Defines an read-only attribute on `self` with `name`.
     #[inline]
     fn attr_reader<N: Into<SymbolId>>(self, name: N) -> Result {
-        crate::protected(|| unsafe { self.attr_reader_unchecked(name) })
+        unsafe { _attr(self.raw(), name.into().raw(), true, false) }
     }
 
     /// Defines an read-only attribute on `self` with `name`.
@@ -255,13 +272,13 @@ pub trait Mixin: Object + Sealed {
     /// exception will be raised.
     #[inline]
     unsafe fn attr_reader_unchecked<N: Into<SymbolId>>(self, name: N) {
-        _attr(self.raw(), name.into(), true, false);
+        _attr_unchecked(self.raw(), name.into().raw(), true, false);
     }
 
     /// Defines a write-only attribute on `self` with `name`.
     #[inline]
     fn attr_writer<N: Into<SymbolId>>(self, name: N) -> Result {
-        crate::protected(|| unsafe { self.attr_writer_unchecked(name) })
+        unsafe { _attr(self.raw(), name.into().raw(), false, true) }
     }
 
     /// Defines a write-only attribute on `self` with `name`.
@@ -272,13 +289,13 @@ pub trait Mixin: Object + Sealed {
     /// exception will be raised.
     #[inline]
     unsafe fn attr_writer_unchecked<N: Into<SymbolId>>(self, name: N) {
-        _attr(self.raw(), name.into(), false, true);
+        _attr_unchecked(self.raw(), name.into().raw(), false, true);
     }
 
     /// Defines a read-write attribute on `self` with `name`.
     #[inline]
     fn attr_accessor<N: Into<SymbolId>>(self, name: N) -> Result {
-        crate::protected(|| unsafe { self.attr_accessor_unchecked(name) })
+        unsafe { _attr(self.raw(), name.into().raw(), true, true) }
     }
 
     /// Defines a read-write attribute on `self` with `name`.
@@ -289,7 +306,7 @@ pub trait Mixin: Object + Sealed {
     /// exception will be raised.
     #[inline]
     unsafe fn attr_accessor_unchecked<N: Into<SymbolId>>(self, name: N) {
-        _attr(self.raw(), name.into(), true, true);
+        _attr_unchecked(self.raw(), name.into().raw(), true, true);
     }
 
     /// Evaluates `args` in the context of `self`.
@@ -347,9 +364,7 @@ pub trait EvalArgs: Sized {
     /// Evaluates `self` in the context of `mixin`, returning any thrown
     /// exceptions.
     #[inline]
-    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject> {
-        crate::protected(|| unsafe { self.eval_in_unchecked(mixin) })
-    }
+    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject>;
 
     /// Evaluates `self` in the context of `mixin`.
     ///
@@ -362,6 +377,20 @@ pub trait EvalArgs: Sized {
 
 /// Unchecked arguments directly to the evaluation function.
 impl<O: Object> EvalArgs for &[O] {
+    #[inline]
+    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject> {
+        // monomorphization
+        unsafe fn eval_in(args: &[AnyObject], mixin: VALUE) -> Result<AnyObject> {
+            let raw = crate::protected_no_panic(|| ruby::rb_mod_module_eval(
+                args.len() as _,
+                args.as_ptr() as *const ruby::VALUE,
+                mixin,
+            ))?;
+            Ok(AnyObject::from_raw(raw))
+        }
+        unsafe { eval_in(AnyObject::convert_slice(self), mixin.raw()) }
+    }
+
     #[inline]
     unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
         let raw = ruby::rb_mod_module_eval(
@@ -376,6 +405,11 @@ impl<O: Object> EvalArgs for &[O] {
 /// The script argument without any extra information.
 impl EvalArgs for String {
     #[inline]
+    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject> {
+        self.as_any_slice().eval_in(mixin)
+    }
+
+    #[inline]
     unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
         self.as_any_slice().eval_in_unchecked(mixin)
     }
@@ -385,6 +419,11 @@ impl EvalArgs for String {
 // TODO: Impl for `Into<String>` when specialization stabilizes
 impl EvalArgs for &str {
     #[inline]
+    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject> {
+        String::from(self).eval_in(mixin)
+    }
+
+    #[inline]
     unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
         String::from(self).eval_in_unchecked(mixin)
     }
@@ -392,6 +431,12 @@ impl EvalArgs for &str {
 
 /// The script and filename arguments.
 impl<S: Into<String>, F: Into<String>> EvalArgs for (S, F) {
+    #[inline]
+    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject> {
+        let (s, f) = self;
+        [s.into(), f.into()].eval_in(mixin)
+    }
+
     #[inline]
     unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
         let (s, f) = self;
@@ -402,8 +447,21 @@ impl<S: Into<String>, F: Into<String>> EvalArgs for (S, F) {
 /// The script, filename, and line number arguments.
 impl<S: Into<String>, F: Into<String>, L: Into<u32>> EvalArgs for (S, F, L) {
     #[inline]
-    unsafe fn eval_in_unchecked(self, _mixin: impl Mixin) -> AnyObject {
-        unimplemented!("TODO: Convert u32 to object");
+    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject> {
+        let (s, f, l) = self;
+        let s = AnyObject::from(s.into());
+        let f = AnyObject::from(f.into());
+        let l = AnyObject::from(l.into());
+        [s, f, l].eval_in(mixin)
+    }
+
+    #[inline]
+    unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
+        let (s, f, l) = self;
+        let s = AnyObject::from(s.into());
+        let f = AnyObject::from(f.into());
+        let l = AnyObject::from(l.into());
+        [s, f, l].eval_in_unchecked(mixin)
     }
 }
 
