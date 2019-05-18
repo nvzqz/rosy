@@ -1,6 +1,10 @@
 //! Ruby hash tables.
 
-use std::{fmt, iter::FromIterator};
+use std::{
+    fmt,
+    iter::FromIterator,
+    marker::PhantomData,
+};
 use crate::{
     object::{NonNullObject, Ty},
     prelude::*,
@@ -8,28 +12,37 @@ use crate::{
 };
 
 /// An instance of Ruby's `Hash` class.
-#[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
-pub struct Hash(NonNullObject);
-
-impl AsRef<AnyObject> for Hash {
-    #[inline]
-    fn as_ref(&self) -> &AnyObject { self.0.as_ref() }
+pub struct Hash<K = AnyObject, V = AnyObject> {
+    inner: NonNullObject,
+    _marker: PhantomData<(*mut K, *mut V)>
 }
 
-impl From<Hash> for AnyObject {
+impl<K, V> Clone for Hash<K, V> {
     #[inline]
-    fn from(object: Hash) -> AnyObject { object.0.into() }
+    fn clone(&self) -> Self { *self }
 }
 
-impl PartialEq<AnyObject> for Hash {
+impl<K, V> Copy for Hash<K, V> {}
+
+impl<K: Object, V: Object> AsRef<AnyObject> for Hash<K, V> {
+    #[inline]
+    fn as_ref(&self) -> &AnyObject { self.inner.as_ref() }
+}
+
+impl<K: Object, V: Object> From<Hash<K, V>> for AnyObject {
+    #[inline]
+    fn from(object: Hash<K, V>) -> AnyObject { object.inner.into() }
+}
+
+impl<K: Object, V: Object> PartialEq<AnyObject> for Hash<K, V> {
     #[inline]
     fn eq(&self, obj: &AnyObject) -> bool {
         self.as_any_object() == obj
     }
 }
 
-unsafe impl Object for Hash {
+unsafe impl<K: Object, V: Object> Object for Hash<K, V> {
     #[inline]
     fn unique_id() -> Option<u128> {
         Some(!(Ty::Hash as u128))
@@ -51,33 +64,44 @@ unsafe impl Object for Hash {
     fn is_ty(self, ty: Ty) -> bool { ty == Ty::Hash }
 }
 
-impl fmt::Display for Hash {
+impl<K: Object, V: Object> fmt::Display for Hash<K, V> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.as_any_object().fmt(f)
     }
 }
 
+impl<K: Object, V: Object> fmt::Debug for Hash<K, V> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_tuple("Hash")
+            .field(&self.inner)
+            .finish()
+    }
+}
+
 #[cfg(feature = "ruby_2_6")]
-impl<K: Object, V: Object> From<&[(K, V)]> for Hash {
+impl<K: Object, V: Object> From<&[(K, V)]> for Hash<K, V> {
     #[inline]
     fn from(pairs: &[(K, V)]) -> Self {
         Self::from_pairs(pairs)
     }
 }
 
-impl<K: Into<AnyObject>, V: Into<AnyObject>> FromIterator<(K, V)> for Hash {
+impl<K1, K2, V1, V2> FromIterator<(K2, V2)> for Hash<K1, V1>
+    where K1: Object, K2: Into<K1>, V1: Object, V2: Into<V1>
+{
     #[inline]
-    fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
-        let hash = Hash::new();
+    fn from_iter<I: IntoIterator<Item = (K2, V2)>>(iter: I) -> Self {
+        let hash = Self::new();
         for (key, val) in iter {
-            unsafe { hash.insert(key, val) };
+            unsafe { hash.insert(key.into(), val.into()) };
         }
         hash
     }
 }
 
-impl Hash {
+impl<K: Object, V: Object> Hash<K, V> {
     /// Creates a new hash table.
     #[inline]
     pub fn new() -> Self {
@@ -94,22 +118,22 @@ impl Hash {
     /// ```
     /// # rosy::vm::init().unwrap();
     /// use std::collections::HashMap;
-    /// use rosy::Hash;
+    /// use rosy::prelude::*;
     ///
     /// let mut map = HashMap::new();
     /// map.insert("is_working", true);
     ///
-    /// let hash = Hash::from_map(&map);
-    /// assert_eq!(hash.get("is_working"), true);
+    /// let hash = Hash::<String, AnyObject>::from_map(&map);
+    /// assert_eq!(hash.get("is_working").unwrap(), true);
     /// ```
     ///
     /// [`HashMap`]: https://doc.rust-lang.org/std/collections/struct.HashMap.html
     #[inline]
-    pub fn from_map<'a, I, K, V>(map: I) -> Self
+    pub fn from_map<'a, M, MK, MV>(map: M) -> Self
     where
-        I: IntoIterator<Item = (&'a K, &'a V)>,
-        K: Copy + Into<AnyObject> + 'a,
-        V: Copy + Into<AnyObject> + 'a,
+        M: IntoIterator<Item = (&'a MK, &'a MV)>,
+        MK: Copy + Into<K> + 'a,
+        MV: Copy + Into<V> + 'a,
     {
         map.into_iter().map(|(&k, &v)| (k, v)).collect()
     }
@@ -121,27 +145,26 @@ impl Hash {
     /// # Examples
     ///
     /// Although this may insert the objects efficiently, it requires a bit more
-    /// verbose code.
-    ///
-    /// However, one can use the [turbofish (`::<>`) syntax](https://turbo.fish)
-    /// to allow the compiler to infer types more easily:
+    /// verbose code with explicit
+    /// [`Into`](https://doc.rust-lang.org/std/convert/trait.Into.html)
+    /// conversions from non-Ruby types.
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
     /// use rosy::{Hash, String};
     ///
-    /// let hash = Hash::from_pairs::<String, String>(&[
+    /// let hash = Hash::<String, String>::from_pairs(&[
     ///     ("user".into(), "nvzqz".into()),
     ///     ("name".into(), "Nikolai Vazquez".into()),
     /// ]);
     ///
-    /// assert_eq!(hash.get("user"), "nvzqz");
-    /// assert_eq!(hash.get("name"), "Nikolai Vazquez");
+    /// assert_eq!(hash.get("user").unwrap(), "nvzqz");
+    /// assert_eq!(hash.get("name").unwrap(), "Nikolai Vazquez");
     /// ```
     #[cfg(feature = "ruby_2_6")]
     #[cfg_attr(nightly, doc(cfg(feature = "ruby_2_6")))]
     #[inline]
-    pub fn from_pairs<K: Object, V: Object>(pairs: &[(K, V)]) -> Self {
+    pub fn from_pairs(pairs: &[(K, V)]) -> Self {
         let hash = Self::new();
         unsafe { hash.insert_pairs(pairs) };
         hash
@@ -160,15 +183,15 @@ impl Hash {
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
-    /// use rosy::{Hash, Object};
+    /// use rosy::prelude::*;
     ///
-    /// let hash = Hash::new();
+    /// let hash = Hash::<String, AnyObject>::new();
     /// unsafe { hash.insert("should_eat", true) };
     ///
     /// assert_eq!(hash.to_s(), r#"{"should_eat"=>true}"#);
     /// ```
     #[inline]
-    pub unsafe fn insert(self, key: impl Into<AnyObject>, val: impl Into<AnyObject>) {
+    pub unsafe fn insert(self, key: impl Into<K>, val: impl Into<V>) {
         let key = key.into().raw();
         let val = val.into().raw();
         ruby::rb_hash_aset(self.raw(), key, val);
@@ -183,7 +206,7 @@ impl Hash {
     #[cfg(feature = "ruby_2_6")]
     #[cfg_attr(nightly, doc(cfg(feature = "ruby_2_6")))]
     #[inline]
-    pub unsafe fn insert_pairs<K: Object, V: Object>(self, pairs: &[(K, V)]) {
+    pub unsafe fn insert_pairs(self, pairs: &[(K, V)]) {
         ruby::rb_hash_bulk_insert_into_st_table(
             (pairs.len() * 2) as _,
             pairs.as_ptr() as *const _,
@@ -193,9 +216,16 @@ impl Hash {
 
     /// Returns the value for `key`.
     #[inline]
-    pub fn get(self, key: impl Into<AnyObject>) -> AnyObject {
+    pub fn get(self, key: impl Into<K>) -> Option<V> {
         let key = key.into().raw();
-        unsafe { AnyObject::from_raw(ruby::rb_hash_aref(self.raw(), key)) }
+        unsafe {
+            let val = AnyObject::from_raw(ruby::rb_hash_aref(self.raw(), key));
+            if val.is_nil() {
+                None
+            } else {
+                Some(V::cast_unchecked(val))
+            }
+        }
     }
 
     /// Returns the number of key-value pairs in `self`.
@@ -221,18 +251,25 @@ impl Hash {
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
-    /// let hash = rosy::Hash::new();
+    /// use rosy::prelude::*;
+    ///
+    /// let hash = Hash::<String, AnyObject>::new();
     ///
     /// unsafe {
-    ///     assert!(hash.remove("not_here").is_nil());
+    ///     assert!(hash.remove("not_here").is_none());
     ///     hash.insert("is_here", true);
-    ///     assert_eq!(hash.remove("is_here"), true);
+    ///     assert_eq!(hash.remove("is_here").unwrap(), true);
     /// }
     /// ```
     #[inline]
-    pub unsafe fn remove(self, key: impl Into<AnyObject>) -> AnyObject {
+    pub unsafe fn remove(self, key: impl Into<K>) -> Option<V> {
         let key = key.into().raw();
-        AnyObject::from_raw(ruby::rb_hash_delete(self.raw(), key))
+        let val = AnyObject::from_raw(ruby::rb_hash_delete(self.raw(), key));
+        if val.is_nil() {
+            None
+        } else {
+            Some(V::cast_unchecked(val))
+        }
     }
 
     /// Removes all elements from `self` in-place.

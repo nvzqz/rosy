@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 
 ## [Unreleased]
 ### Added
+- Typed keys and values for `Hash`
 - Fast encoding-checking methods to `String` that give `String::to_str` a ~7.5x
   performance improvement when the internal Ruby encoding is UTF-8
   - `encoding_is_ascii_8bit`
