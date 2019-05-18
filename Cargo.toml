@@ -40,3 +40,9 @@ _skip_linking = []
 
 [package.metadata.docs.rs]
 features = ["ruby_2_6", "version_check", "_skip_linking"]
+
+[badges]
+travis-ci = { repository = "oceanpkg/rosy" }
+is-it-maintained-open-issues = { repository = "oceanpkg/rosys" }
+is-it-maintained-issue-resolution = { repository = "oceanpkg/rosy" }
+maintenance = { status = "actively-developed" }
