@@ -58,6 +58,23 @@ impl From<String> for AnyObject {
     fn from(object: String) -> AnyObject { object.0.into() }
 }
 
+macro_rules! forward_from {
+    ($($t:ty,)+) => { $(
+        impl From<$t> for AnyObject {
+            #[inline]
+            fn from(string: $t) -> Self {
+                String::from(string).into()
+            }
+        }
+    )+ }
+}
+
+forward_from! {
+    &str, &std::string::String,
+    &[u8], &Vec<u8>,
+    &CStr, &CString,
+}
+
 impl From<&str> for String {
     #[inline]
     fn from(s: &str) -> String {
@@ -68,10 +85,13 @@ impl From<&str> for String {
     }
 }
 
-impl From<&str> for AnyObject {
+impl From<&std::string::String> for String {
     #[inline]
-    fn from(s: &str) -> Self {
-        String::from(s).into()
+    fn from(s: &std::string::String) -> String {
+        unsafe { String::from_raw(ruby::rb_utf8_str_new(
+            s.as_ptr() as *const _,
+            s.len() as _,
+        )) }
     }
 }
 
@@ -82,10 +102,10 @@ impl From<&CStr> for String {
     }
 }
 
-impl From<&CStr> for AnyObject {
+impl From<&CString> for String {
     #[inline]
-    fn from(s: &CStr) -> Self {
-        String::from(s).into()
+    fn from(s: &CString) -> String {
+        s.as_c_str().into()
     }
 }
 
@@ -98,10 +118,10 @@ impl From<&[u8]> for String {
     }
 }
 
-impl From<&[u8]> for AnyObject {
+impl From<&Vec<u8>> for String {
     #[inline]
-    fn from(s: &[u8]) -> Self {
-        String::from(s).into()
+    fn from(bytes: &Vec<u8>) -> String {
+        bytes.as_slice().into()
     }
 }
 
