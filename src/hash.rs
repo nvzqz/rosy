@@ -140,7 +140,7 @@ impl<K: Object, V: Object> Hash<K, V> {
 
     /// Creates a new hash table from `pairs`.
     ///
-    #[cfg_attr(not(nightly), doc = "**Requires:** Ruby 2.6+")]
+    #[cfg_attr(not(nightly), doc = "**Requires feature:** `ruby_2_6`")]
     ///
     /// # Examples
     ///
@@ -198,6 +198,8 @@ impl<K: Object, V: Object> Hash<K, V> {
     }
 
     /// Inserts `pairs` into `self` in bulk.
+    ///
+    #[cfg_attr(not(nightly), doc = "**Requires feature:** `ruby_2_6`")]
     ///
     /// # Safety
     ///
