@@ -1,7 +1,7 @@
 use std::{
     convert::{TryFrom, TryInto},
     error::Error,
-    ffi::{CStr, FromBytesWithNulError},
+    ffi::{CStr, CString, FromBytesWithNulError},
     fmt,
     os::raw::c_int,
 };
@@ -74,6 +74,15 @@ impl TryFrom<&CStr> for Encoding {
     }
 }
 
+impl TryFrom<&CString> for Encoding {
+    type Error = EncodingLookupError;
+
+    #[inline]
+    fn try_from(s: &CString) -> Result<Self, Self::Error> {
+        s.as_c_str().try_into()
+    }
+}
+
 impl TryFrom<&[u8]> for Encoding {
     type Error = EncodingLookupError;
 
@@ -83,12 +92,30 @@ impl TryFrom<&[u8]> for Encoding {
     }
 }
 
+impl TryFrom<&Vec<u8>> for Encoding {
+    type Error = EncodingLookupError;
+
+    #[inline]
+    fn try_from(bytes: &Vec<u8>) -> Result<Self, Self::Error> {
+        bytes.as_slice().try_into()
+    }
+}
+
 impl TryFrom<&str> for Encoding {
     type Error = EncodingLookupError;
 
     #[inline]
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         s.as_bytes().try_into()
+    }
+}
+
+impl TryFrom<&std::string::String> for Encoding {
+    type Error = EncodingLookupError;
+
+    #[inline]
+    fn try_from(s: &std::string::String) -> Result<Self, Self::Error> {
+        s.as_str().try_into()
     }
 }
 
