@@ -227,6 +227,12 @@ impl AnyObject {
         self.raw() as usize as _
     }
 
+    /// Casts the concrete slice `objects` into a slice of `AnyObject`.
+    #[inline]
+    pub fn convert_slice(objects: &[impl Object]) -> &[AnyObject] {
+        unsafe { &*(objects as *const [_] as *const _) }
+    }
+
     /// Calls `super` on the current receiver without any arguments in the
     /// context of a method.
     #[inline]
