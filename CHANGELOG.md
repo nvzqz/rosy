@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+
+## [0.0.3] - 2019-05-18
 ### Added
 - Typed keys and values for `Hash`
 - Fast encoding-checking methods to `String` that give `String::to_str` a ~7.5x
@@ -41,7 +43,8 @@ Initial release
 [Keep a Changelog]:    http://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: http://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/oceanpkg/rosy/compare/v0.0.2...HEAD
+[Unreleased]: https://github.com/oceanpkg/rosy/compare/v0.0.3...HEAD
+[0.0.3]: https://github.com/oceanpkg/rosy/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/oceanpkg/rosy/compare/v0.0.1...v0.0.2
 
 [`std::panic::catch_unwind`]: https://doc.rust-lang.org/std/panic/fn.catch_unwind.html
