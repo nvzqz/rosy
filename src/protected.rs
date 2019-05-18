@@ -133,8 +133,6 @@ pub unsafe fn protected_no_panic<F, O>(f: F) -> crate::Result<O>
 unsafe fn protected_no_panic_size_opt<F, O>(f: F) -> crate::Result<O>
     where F: FnOnce() -> O
 {
-    use mem::ManuallyDrop;
-
     unsafe extern "C" fn wrapper<F, O>(ctx: ruby::VALUE) -> ruby::VALUE
         where F: FnOnce() -> O
     {
