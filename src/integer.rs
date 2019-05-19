@@ -228,6 +228,33 @@ impl Integer {
         }
     }
 
+    /// Converts `self` to its inner value as `W`, truncating on too large or
+    /// small of a value.
+    ///
+    /// # Examples
+    ///
+    /// This has the same exact behavior as an
+    /// [`as` cast](https://doc.rust-lang.org/stable/reference/expressions/operator-expr.html#type-cast-expressions)
+    /// between integer primitives in Rust:
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// # rosy::protected(|| {
+    /// let val = u16::max_value();
+    /// let int = rosy::Integer::from(val);
+    ///
+    /// assert_eq!(int.to_truncated::<u16>(), val);
+    /// assert_eq!(int.to_truncated::<u8>(), 255);
+    /// assert_eq!(int.to_truncated::<i8>(), -1);
+    /// # }).unwrap();
+    /// ```
+    #[inline]
+    pub fn to_truncated<W: Word>(self) -> W {
+        let mut val = W::ZERO;
+        self.pack(slice::from_mut(&mut val));
+        val
+    }
+
     /// Packs the contents of `self` into `buf` with the platform's native byte
     /// order.
     ///
@@ -443,12 +470,17 @@ impl PackSign {
 pub unsafe trait Word: Copy {
     /// Whether the type is a signed integer.
     const IS_SIGNED: bool;
+
+    /// `Self` instantiated as 0.
+    const ZERO: Self;
 }
 
 macro_rules! impl_word {
     ($signed:expr => $($t:ty)+) => { $(
         unsafe impl Word for $t {
             const IS_SIGNED: bool = $signed;
+
+            const ZERO: Self = 0;
         }
     )+ }
 }
