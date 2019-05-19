@@ -1,6 +1,7 @@
 //! Ruby integers.
 
 use std::{
+    cmp::Ordering,
     ffi::c_void,
     fmt,
     mem,
@@ -168,6 +169,45 @@ macro_rules! forward_from {
 }
 
 forward_from! {
+    usize u128 u64 u32 u16 u8
+    isize i128 i64 i32 i16 i8
+}
+
+macro_rules! forward_cmp {
+    ($($t:ty)+) => { $(
+        impl PartialEq<$t> for Integer {
+            #[inline]
+            fn eq(&self, int: &$t) -> bool {
+                if let Some(this) = self.to_value::<$t>() {
+                    this == *int
+                } else {
+                    false
+                }
+            }
+        }
+
+        impl PartialOrd<$t> for Integer {
+            #[inline]
+            fn partial_cmp(&self, other: &$t) -> Option<Ordering> {
+                let (can_represent, is_negative) = self._can_represent::<$t>();
+
+                if can_represent {
+                    let mut this: $t = 0;
+                    let sign = self.pack(slice::from_mut(&mut this));
+                    debug_assert!(!sign.did_overflow(), "Overflow on {}", self);
+
+                    Some(this.cmp(other))
+                } else if is_negative {
+                    Some(Ordering::Less)
+                } else {
+                    Some(Ordering::Greater)
+                }
+            }
+        }
+    )+ }
+}
+
+forward_cmp! {
     usize u128 u64 u32 u16 u8
     isize i128 i64 i32 i16 i8
 }
@@ -383,7 +423,7 @@ impl Integer {
         }
     }
 
-    fn _can_represent(self, signed: bool, word_size: usize) -> bool {
+    fn _can_represent_raw(self, signed: bool, word_size: usize) -> (bool, bool) {
         // Taken from documentation of `rb_absint_singlebit_p`
         let is_negative = self.is_negative();
         let raw = self.raw();
@@ -391,7 +431,7 @@ impl Integer {
         let mut nlz_bits = 0;
         let mut size = unsafe { ruby::rb_absint_size(raw, &mut nlz_bits) };
 
-        if signed {
+        let can_represent = if signed {
             let single_bit = unsafe { ruby::rb_absint_singlebit_p(raw) != 0 };
             if nlz_bits == 0 && !(is_negative && single_bit) {
                 size += 1
@@ -401,13 +441,19 @@ impl Integer {
             false
         } else {
             size <= word_size
-        }
+        };
+        (can_represent, is_negative)
+    }
+
+    #[inline]
+    fn _can_represent<W: Word>(self) -> (bool, bool) {
+        self._can_represent_raw(W::IS_SIGNED, mem::size_of::<W>())
     }
 
     /// Returns whether `self` can represent the word type `W`.
     #[inline]
     pub fn can_represent<W: Word>(self) -> bool {
-        self._can_represent(W::IS_SIGNED, mem::size_of::<W>())
+        self._can_represent::<W>().0
     }
 }
 
@@ -552,7 +598,7 @@ impl PackSign {
 
 /// A type whose bytes can be directly used as a word when packing an
 /// [`Integer`](struct.Integer.html).
-pub unsafe trait Word: Copy {
+pub unsafe trait Word: Copy + PartialEq + PartialOrd {
     /// Whether the type is a signed integer.
     const IS_SIGNED: bool;
 
