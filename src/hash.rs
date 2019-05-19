@@ -120,6 +120,7 @@ impl<K: Object, V: Object> Hash<K, V> {
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
+    /// # rosy::protected(|| {
     /// use std::collections::HashMap;
     /// use rosy::prelude::*;
     ///
@@ -128,6 +129,7 @@ impl<K: Object, V: Object> Hash<K, V> {
     ///
     /// let hash = Hash::<String, AnyObject>::from_map(&map);
     /// assert_eq!(hash.get("is_working").unwrap(), true);
+    /// # }).unwrap();
     /// ```
     ///
     /// [`HashMap`]: https://doc.rust-lang.org/std/collections/struct.HashMap.html
@@ -154,6 +156,7 @@ impl<K: Object, V: Object> Hash<K, V> {
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
+    /// # rosy::protected(|| {
     /// use rosy::{Hash, String};
     ///
     /// let hash = Hash::<String, String>::from_pairs(&[
@@ -163,6 +166,7 @@ impl<K: Object, V: Object> Hash<K, V> {
     ///
     /// assert_eq!(hash.get("user").unwrap(), "nvzqz");
     /// assert_eq!(hash.get("name").unwrap(), "Nikolai Vazquez");
+    /// # }).unwrap();
     /// ```
     #[cfg(feature = "ruby_2_6")]
     #[cfg_attr(nightly, doc(cfg(feature = "ruby_2_6")))]
@@ -186,12 +190,14 @@ impl<K: Object, V: Object> Hash<K, V> {
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
+    /// # rosy::protected(|| {
     /// use rosy::prelude::*;
     ///
     /// let hash = Hash::<String, AnyObject>::new();
     /// unsafe { hash.insert("should_eat", true) };
     ///
     /// assert_eq!(hash.to_s(), r#"{"should_eat"=>true}"#);
+    /// # }).unwrap();
     /// ```
     #[inline]
     pub unsafe fn insert(self, key: impl Into<K>, val: impl Into<V>) {
@@ -256,6 +262,7 @@ impl<K: Object, V: Object> Hash<K, V> {
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
+    /// # rosy::protected(|| {
     /// use rosy::prelude::*;
     ///
     /// let hash = Hash::<String, AnyObject>::new();
@@ -265,6 +272,7 @@ impl<K: Object, V: Object> Hash<K, V> {
     ///     hash.insert("is_here", true);
     ///     assert_eq!(hash.remove("is_here").unwrap(), true);
     /// }
+    /// # }).unwrap();
     /// ```
     #[inline]
     pub unsafe fn remove(self, key: impl Into<K>) -> Option<V> {

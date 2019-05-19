@@ -113,6 +113,7 @@ impl InstrSeq {
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
+    /// # rosy::protected(|| {
     /// use rosy::{vm::InstrSeq, String};
     ///
     /// let script = "'hi' * 3";
@@ -121,6 +122,7 @@ impl InstrSeq {
     /// let seq2 = unsafe { InstrSeq::from_binary(seq1.to_binary()) };
     ///
     /// assert_eq!(String::from("hihihi"), seq2.eval().unwrap());
+    /// # }).unwrap();
     /// ```
     #[inline]
     pub unsafe fn from_binary(binary: impl Into<String>) -> Self {

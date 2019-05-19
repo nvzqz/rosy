@@ -28,6 +28,7 @@ use crate::{
 ///
 /// ```
 /// # rosy::vm::init().unwrap();
+/// # rosy::protected(|| {
 /// use rosy::prelude::*;
 ///
 /// let s = String::from("hellooo");
@@ -38,6 +39,7 @@ use crate::{
 /// for obj in a {
 ///     assert_eq!(obj, s);
 /// }
+/// # }).unwrap();
 /// ```
 ///
 /// Because the `Iterator` for `Array` performs a volatile read of the
@@ -47,6 +49,7 @@ use crate::{
 ///
 /// ```
 /// # rosy::vm::init().unwrap();
+/// # rosy::protected(|| {
 /// # use rosy::prelude::*;
 /// # let s = String::from("hellooo");
 /// # let a = Array::from_slice(&[s, s, s]);
@@ -60,6 +63,7 @@ use crate::{
 /// }
 ///
 /// assert_eq!(num_iter, 2);
+/// # }).unwrap();
 /// ```
 ///
 /// Just like [`Vec`], one can even safely [`collect`] an iterator into an
@@ -67,10 +71,12 @@ use crate::{
 ///
 /// ```
 /// # rosy::vm::init().unwrap();
+/// # rosy::protected(|| {
 /// # use rosy::prelude::*;
 /// let array: Array = (0..10).collect();
 ///
 /// assert_eq!(array.to_s(), "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]");
+/// # }).unwrap();
 /// ```
 ///
 /// [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
@@ -243,12 +249,14 @@ impl<O: Object> Array<O> {
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
+    /// # rosy::protected(|| {
     /// use rosy::{Array, String};
     ///
     /// let s = String::from("hi");
     /// let a = Array::from_slice(&[s, s, s]);
     ///
     /// assert_eq!(a.len(), 3);
+    /// # }).unwrap();
     /// ```
     #[inline]
     pub fn len(self) -> usize {
@@ -375,6 +383,7 @@ impl<O: Object> Array<O> {
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
+    /// # rosy::protected(|| {
     /// use rosy::{Array, String};
     ///
     /// let s = String::from("Hi");
@@ -384,6 +393,7 @@ impl<O: Object> Array<O> {
     ///     assert!(!a.pop().is_nil());
     ///     assert!(a.pop().is_nil());
     /// }
+    /// # }).unwrap();
     /// ```
     #[inline]
     pub unsafe fn pop(self) -> AnyObject {
@@ -398,12 +408,14 @@ impl<O: Object> Array<O> {
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
+    /// # rosy::protected(|| {
     /// use rosy::{Array, String};
     ///
     /// let s = String::from("hi");
     /// let a = Array::from_slice(&[String::from("yo"), s]);
     ///
     /// assert!(a.contains(s));
+    /// # }).unwrap();
     /// ```
     // SAFETY: The use of `impl Object` is fine here since this method is not
     // inserting it into `self`
@@ -469,12 +481,14 @@ impl<O: Object> Array<O> {
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
+    /// # rosy::protected(|| {
     /// use rosy::{Array, String};
     ///
     /// let s = String::from("-");
     /// let a = Array::from_slice(&[s, s, s]);
     ///
     /// assert_eq!(a.join("."), "-.-.-");
+    /// # }).unwrap();
     /// ```
     #[inline]
     pub fn join(self, separator: impl Into<String>) -> String {
