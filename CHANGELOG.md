@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog] and this project adheres to
   - Methods:
     - `pack` and `unpack` for converting to and from words respectively
     - `to_truncated` for converting similarly to `as` with primitives
+    - `to_value` for converting similarly to `TryFrom` on primitives
+      - Has `can_represent` helper method
 - [`Debug`] requirement for `Object` trait
 
 ## [0.0.3] - 2019-05-18

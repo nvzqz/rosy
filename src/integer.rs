@@ -1,8 +1,8 @@
 //! Ruby integers.
 
 use std::{
-    fmt,
     ffi::c_void,
+    fmt,
     mem,
     os::raw::c_int,
     slice,
@@ -10,7 +10,7 @@ use std::{
 use crate::{
     prelude::*,
     object::{NonNullObject, Ty},
-    ruby::self,
+    ruby,
 };
 
 /// An instance of Ruby's `Integer` class.
@@ -274,6 +274,18 @@ impl Integer {
         }
     }
 
+    /// Converts `self` to `W` if it can represent be represented as `W`.
+    #[inline]
+    pub fn to_value<W: Word>(self) -> Option<W> {
+        if !self.can_represent::<W>() {
+            return None;
+        }
+        let mut val = W::ZERO;
+        let sign = self.pack(slice::from_mut(&mut val));
+        debug_assert!(!sign.did_overflow());
+        Some(val)
+    }
+
     /// Converts `self` to its inner value as `W`, truncating on too large or
     /// small of a value.
     ///
@@ -369,6 +381,33 @@ impl Integer {
             -1 => PackSign::Negative { did_overflow: false },
             _  => PackSign::Negative { did_overflow: true },
         }
+    }
+
+    fn _can_represent(self, signed: bool, word_size: usize) -> bool {
+        // Taken from documentation of `rb_absint_singlebit_p`
+        let is_negative = self.is_negative();
+        let raw = self.raw();
+
+        let mut nlz_bits = 0;
+        let mut size = unsafe { ruby::rb_absint_size(raw, &mut nlz_bits) };
+
+        if signed {
+            let single_bit = unsafe { ruby::rb_absint_singlebit_p(raw) != 0 };
+            if nlz_bits == 0 && !(is_negative && single_bit) {
+                size += 1
+            }
+            size <= word_size
+        } else if is_negative {
+            false
+        } else {
+            size <= word_size
+        }
+    }
+
+    /// Returns whether `self` can represent the word type `W`.
+    #[inline]
+    pub fn can_represent<W: Word>(self) -> bool {
+        self._can_represent(W::IS_SIGNED, mem::size_of::<W>())
     }
 }
 
@@ -552,6 +591,10 @@ mod tests {
                 for &value in &values {
                     let int = Integer::from(value);
                     assert_eq!(int.to_s(), value.to_string());
+
+                    let converted = int.to_value::<$t>()
+                        .expect(&format!("{} cannot represent {}", int, value));
+                    assert_eq!(converted, value);
 
                     let mut buf: [$t; 1] = [0];
                     let sign = int.pack(&mut buf);

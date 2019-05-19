@@ -44,4 +44,20 @@ extern "C" {
         nails: usize,
         flags: c_int,
     ) -> VALUE;
+
+    // int rb_big_sign(VALUE x)
+    pub fn rb_big_sign(x: VALUE) -> c_int;
+
+    // int rb_absint_singlebit_p(VALUE val)
+    pub fn rb_absint_singlebit_p(val: VALUE) -> c_int;
+
+    // size_t rb_absint_size(VALUE val, int *nlz_bits_ret)
+    pub fn rb_absint_size(val: VALUE, nlz_bits_ret: *mut c_int) -> usize;
+
+    // size_t rb_absint_numwords(VALUE val, size_t word_numbits, size_t *nlz_bits_ret)
+    pub fn rb_absint_numwords(
+        val: VALUE,
+        word_numbits: usize,
+        nlz_bits_ret: *mut usize,
+    ) -> usize;
 }
