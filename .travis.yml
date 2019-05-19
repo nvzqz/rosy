@@ -49,4 +49,6 @@ before_script:
 - rustc -Vv
 - ./scripts/travis/print_ruby_config.sh
 script:
-- cargo test --no-default-features --features="$FEATURES"
+  # Normal tests share the same address space while doc tests don't
+- cargo test tests --no-default-features --features="$FEATURES" -- --test-threads=1
+- cargo test --doc --no-default-features --features="$FEATURES"
