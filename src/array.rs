@@ -164,14 +164,14 @@ impl<T: Object, U: Object> PartialOrd<Array<U>> for Array<T> {
     }
 }
 
-impl<O: Object> FromIterator<O> for Array<O> {
+impl<O: Object, A: Into<O>> FromIterator<A> for Array<O> {
     #[inline]
-    fn from_iter<T: IntoIterator<Item=O>>(iter: T) -> Self {
+    fn from_iter<I: IntoIterator<Item = A>>(iter: I) -> Self {
         let iter = iter.into_iter();
         let (size, _) = iter.size_hint();
-        let array = Array::with_capacity(size);
+        let array = Self::with_capacity(size);
         for obj in iter {
-            unsafe { array.push(obj) };
+            unsafe { array.push(obj.into()) };
         }
         array
     }
