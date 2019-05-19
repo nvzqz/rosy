@@ -23,7 +23,7 @@ use crate::{
 ///
 /// # Examples
 ///
-/// Ruby arrays can be treated as somewhat like a `Vec` without the borrow
+/// Ruby arrays can be treated as somewhat like a [`Vec`] without the borrow
 /// checker.
 ///
 /// ```
@@ -61,6 +61,20 @@ use crate::{
 ///
 /// assert_eq!(num_iter, 2);
 /// ```
+///
+/// Just like [`Vec`], one can even safely [`collect`] an iterator into an
+/// `Array`:
+///
+/// ```
+/// # rosy::vm::init().unwrap();
+/// # use rosy::Array;
+/// let array: Array = (0..10).collect();
+///
+/// assert_eq!(array.to_s(), "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]");
+/// ```
+///
+/// [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
+/// [`collect`]: https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.collect
 #[repr(transparent)]
 pub struct Array<O = AnyObject> {
     inner: NonNullObject,
