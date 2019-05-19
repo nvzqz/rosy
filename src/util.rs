@@ -1,8 +1,4 @@
-use std::{
-    ffi::c_void,
-    os::raw::c_long,
-    mem,
-};
+use std::os::raw::c_long;
 use crate::{
     object::{AnyObject, Ty},
     ruby::{
@@ -159,19 +155,6 @@ pub fn value_is_class(v: VALUE) -> bool {
 #[inline]
 pub fn value_is_module(v: VALUE) -> bool {
     value_is_built_in_type(v, value_type::MODULE)
-}
-
-// Converts `word` into an `Integer`
-#[inline]
-pub fn unpack_word<W: Copy>(word: W, signed: bool) -> VALUE {
-    use ruby::integer_flags::*;
-
-    let size = mem::size_of::<W>();
-    let flag_2comp = if signed { PACK_2COMP } else { 0 };
-    let flags = flag_2comp | PACK_NATIVE_BYTE_ORDER;
-    let word_ptr = &word as *const W as *const c_void;
-
-    unsafe { ruby::rb_integer_unpack(word_ptr, 1, size, 0, flags) }
 }
 
 pub trait Sealed {}

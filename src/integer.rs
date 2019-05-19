@@ -2,12 +2,15 @@
 
 use std::{
     fmt,
+    ffi::c_void,
     mem,
+    os::raw::c_int,
+    slice,
 };
 use crate::{
     prelude::*,
     object::{NonNullObject, Ty},
-    ruby,
+    ruby::self,
 };
 
 /// An instance of Ruby's `Integer` class.
@@ -78,14 +81,14 @@ impl From<isize> for Integer {
 impl From<u128> for Integer {
     #[inline]
     fn from(int: u128) -> Self {
-        unsafe { Self::from_raw(crate::util::unpack_word(int, false)) }
+        Self::unpack(slice::from_ref(&int))
     }
 }
 
 impl From<i128> for Integer {
     #[inline]
     fn from(int: i128) -> Self {
-        unsafe { Self::from_raw(crate::util::unpack_word(int, true)) }
+        Self::unpack(slice::from_ref(&int))
     }
 }
 
@@ -95,7 +98,7 @@ impl From<u64> for Integer {
         if mem::size_of::<u64>() == mem::size_of::<usize>() {
             (int as usize).into()
         } else {
-            unsafe { Self::from_raw(crate::util::unpack_word(int, false)) }
+            Self::unpack(slice::from_ref(&int))
         }
     }
 }
@@ -106,7 +109,7 @@ impl From<i64> for Integer {
         if mem::size_of::<i64>() == mem::size_of::<isize>() {
             (int as isize).into()
         } else {
-            unsafe { Self::from_raw(crate::util::unpack_word(int, true)) }
+            Self::unpack(slice::from_ref(&int))
         }
     }
 }
@@ -177,6 +180,32 @@ impl fmt::Display for Integer {
 }
 
 impl Integer {
+    /// Unpacks the contents of `buf` into a new instance, making the result
+    /// negative if `is_negative`.
+    #[inline]
+    pub fn unpack<W: Word>(buf: &[W]) -> Self {
+        Self::unpack_using(buf, PackOptions::default())
+    }
+
+    /// Unpacks the contents of `buf` into a new instance using `options`,
+    /// making the result negative if `is_negative`.
+    #[inline]
+    pub fn unpack_using<W: Word>(buf: &[W], options: PackOptions) -> Self {
+        use ruby::integer_flags::*;
+
+        let ptr = buf.as_ptr() as *const c_void;
+        let len = buf.len();
+        let size = mem::size_of::<W>();
+
+        let two = (W::IS_SIGNED as c_int) * PACK_2COMP;
+        let neg = (options.is_negative as c_int) * PACK_NEGATIVE;
+        let flags = options.flags() | two | neg;
+
+        unsafe {
+            Self::from_raw(ruby::rb_integer_unpack(ptr, len, size, 0, flags))
+        }
+    }
+
     /// Returns whether `self` is a variable-sized integer.
     #[inline]
     pub fn is_bignum(self) -> bool {
@@ -198,7 +227,234 @@ impl Integer {
             None
         }
     }
+
+    /// Packs the contents of `self` into `buf` with the platform's native byte
+    /// order.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// # rosy::protected(|| {
+    /// use std::slice;
+    /// use rosy::Integer;
+    ///
+    /// let value = u128::max_value() / 0xF00F;
+    /// let integer = Integer::from(value);
+    ///
+    /// let mut buf = [0u128; 2];
+    /// integer.pack(&mut buf);
+    /// assert_eq!(buf[0], value);
+    /// # }).unwrap();
+    /// ```
+    #[inline]
+    pub fn pack<W: Word>(self, buf: &mut [W]) -> PackSign {
+        self.pack_using(PackOptions::default(), buf)
+    }
+
+    /// Packs the contents of `self` into `buf` using `options`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// # rosy::protected(|| {
+    /// use std::slice;
+    /// use rosy::integer::{Integer, PackOptions};
+    ///
+    /// let value = u128::max_value() / 0xF00F;
+    /// let integer = Integer::from(value);
+    ///
+    /// let mut be_buf = [0u128; 1];
+    /// integer.pack_using(PackOptions::big_endian(), &mut be_buf);
+    /// assert_eq!(be_buf[0], value.to_be());
+    ///
+    /// let mut le_buf = [0u128; 1];
+    /// integer.pack_using(PackOptions::little_endian(), &mut le_buf);
+    /// assert_eq!(le_buf[0], value.to_le());
+    /// # }).unwrap();
+    /// ```
+    #[inline]
+    pub fn pack_using<W: Word>(
+        self,
+        options: PackOptions,
+        buf: &mut [W],
+    ) -> PackSign {
+        use ruby::integer_flags::*;
+
+        let raw = self.raw();
+        let ptr = buf.as_mut_ptr() as *mut c_void;
+        let num = buf.len();
+        let size = mem::size_of::<W>();
+
+        let flags = options.flags() | ((W::IS_SIGNED as c_int) * PACK_2COMP);
+
+        match unsafe { ruby::rb_integer_pack(raw, ptr, num, size, 0, flags) } {
+            02 => PackSign::Positive { did_overflow: true },
+            01 => PackSign::Positive { did_overflow: false },
+            00 => PackSign::Zero,
+            -1 => PackSign::Negative { did_overflow: false },
+            _  => PackSign::Negative { did_overflow: true },
+        }
+    }
 }
+
+/// Options to use when packing/unpacking.
+#[derive(Clone, Copy, Debug)]
+pub struct PackOptions {
+    byte_order: Order,
+    word_order: Order,
+    is_negative: bool,
+}
+
+impl Default for PackOptions {
+    #[inline]
+    fn default() -> Self {
+        PackOptions {
+            word_order: Order::Least,
+
+            #[cfg(target_endian = "little")]
+            byte_order: Order::Least,
+
+            #[cfg(target_endian = "big")]
+            byte_order: Order::Most,
+
+            is_negative: false,
+        }
+    }
+}
+
+impl PackOptions {
+    #[inline]
+    fn flags(self) -> c_int {
+        use ruby::integer_flags::*;
+
+        let byte_order = match self.byte_order {
+            Order::Least => PACK_LSBYTE_FIRST,
+            Order::Most  => PACK_MSBYTE_FIRST,
+        };
+        let word_order = match self.word_order {
+            Order::Least => PACK_LSWORD_FIRST,
+            Order::Most  => PACK_MSWORD_FIRST,
+        };
+
+        word_order | byte_order
+    }
+
+    /// Returns a new instance for big-endian byte order.
+    #[inline]
+    pub fn big_endian() -> Self {
+        Self::default().byte_order(Order::Most)
+    }
+
+    /// Returns a new instance for little-endian byte order.
+    #[inline]
+    pub fn little_endian() -> Self {
+        Self::default().byte_order(Order::Least)
+    }
+
+    /// Sets the [endianness](https://en.wikipedia.org/wiki/Endianness) for each
+    /// word.
+    ///
+    /// The default is the platform's native byte order:
+    #[cfg_attr(target_endian = "little", doc = "**little-endian**.")]
+    #[cfg_attr(target_endian = "big",    doc = "**big-endian**.")]
+    #[inline]
+    #[must_use]
+    pub fn byte_order(mut self, order: Order) -> Self {
+        self.byte_order = order;
+        self
+    }
+
+    /// Sets the order in which words should be packed.
+    ///
+    /// The default is least-significant first.
+    #[inline]
+    #[must_use]
+    pub fn word_order(mut self, order: Order) -> Self {
+        self.word_order = order;
+        self
+    }
+
+    /// Makes the `Integer` instance negative. This is only used when unpacking.
+    #[inline]
+    pub fn is_negative(mut self) -> Self {
+        self.is_negative = true;
+        self
+    }
+}
+
+/// An order for arranging words and the bytes of those words when calling
+/// [`pack_using`](struct.Integer.html#method.pack_using).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Order {
+    /// Least-significant first.
+    Least,
+    /// Most-significant first.
+    Most,
+}
+
+/// The sign of an [`Integer`](struct.Integer.html) value returned after
+/// [`pack`](struct.Integer.html#method.pack)ing one into a buffer.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PackSign {
+    /// Packing resulted in a value equal to 0.
+    Zero,
+    /// Packing resulted in a positive value.
+    Positive {
+        /// An overflow occurred when packing an
+        /// [`Integer`](struct.Integer.html) into a buffer.
+        did_overflow: bool,
+    },
+    /// Packing resulted in a negative value.
+    Negative {
+        /// An overflow occurred when packing an
+        /// [`Integer`](struct.Integer.html) into a buffer.
+        did_overflow: bool,
+    },
+}
+
+impl PackSign {
+    /// Returns whether an overflow occurred when packing an
+    /// [`Integer`](struct.Integer.html) into a buffer.
+    #[inline]
+    pub fn did_overflow(&self) -> bool {
+        use PackSign::*;
+        match *self {
+            Zero => false,
+            Positive { did_overflow } |
+            Negative { did_overflow } => did_overflow,
+        }
+    }
+
+    /// Returns whether the sign is negative.
+    #[inline]
+    pub fn is_negative(&self) -> bool {
+        if let PackSign::Negative { .. } = *self {
+            true
+        } else {
+            false
+        }
+    }
+}
+
+/// A type whose bytes can be directly used as a word when packing an
+/// [`Integer`](struct.Integer.html).
+pub unsafe trait Word: Copy {
+    /// Whether the type is a signed integer.
+    const IS_SIGNED: bool;
+}
+
+macro_rules! impl_word {
+    ($signed:expr => $($t:ty)+) => { $(
+        unsafe impl Word for $t {
+            const IS_SIGNED: bool = $signed;
+        }
+    )+ }
+}
+
+impl_word! { false => usize u128 u64 u32 u16 u8 }
+impl_word! { true  => isize i128 i64 i32 i16 i8 }
 
 #[cfg(test)]
 mod tests {
@@ -218,6 +474,17 @@ mod tests {
                 for &value in &values {
                     let int = Integer::from(value);
                     assert_eq!(int.to_s(), value.to_string());
+
+                    let mut buf: [$t; 1] = [0];
+                    let sign = int.pack(&mut buf);
+                    assert!(
+                        !sign.did_overflow(),
+                        "Packing {} from {} overflowed as {:?}",
+                        int,
+                        value,
+                        sign,
+                    );
+                    assert_eq!(buf[0], value);
                 }
             })+ }
         }

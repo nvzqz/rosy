@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog] and this project adheres to
 - `Integer` object type
   - Features `From` conversions for every native Rust integer type, including
     `u128` and `i128`
+  - Includes `pack` and `unpack` methods for converting to and from words
+    respectively
 - [`Debug`] requirement for `Object` trait
 
 ## [0.0.3] - 2019-05-18

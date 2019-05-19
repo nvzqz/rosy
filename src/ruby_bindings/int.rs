@@ -26,6 +26,16 @@ extern "C" {
     // VALUE rb_int2inum(intptr_t n)
     pub fn rb_int2inum(n: isize) -> VALUE;
 
+    // int rb_integer_pack(VALUE val, void *words, size_t numwords, size_t wordsize, size_t nails, int flags)
+    pub fn rb_integer_pack(
+        val: VALUE,
+        words: *mut c_void,
+        numwords: usize,
+        wordsize: usize,
+        nails: usize,
+        flags: c_int,
+    ) -> c_int;
+
     // VALUE rb_integer_unpack(const void *words, size_t numwords, size_t wordsize, size_t nails, int flags)
     pub fn rb_integer_unpack(
         words: *const c_void,
