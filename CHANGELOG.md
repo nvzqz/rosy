@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 - `Integer` object type
   - Features `From` conversions for every native Rust integer type, including
     `u128` and `i128`
+- [`Debug`] requirement for `Object` trait
 
 ## [0.0.3] - 2019-05-18
 ### Added
@@ -51,4 +52,5 @@ Initial release
 [0.0.3]: https://github.com/oceanpkg/rosy/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/oceanpkg/rosy/compare/v0.0.1...v0.0.2
 
+[`Debug`]: https://doc.rust-lang.org/std/fmt/trait.Debug.html
 [`std::panic::catch_unwind`]: https://doc.rust-lang.org/std/panic/fn.catch_unwind.html
