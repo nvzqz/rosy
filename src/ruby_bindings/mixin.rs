@@ -127,6 +127,15 @@ extern "C" {
         argc: c_int,
     );
 
+    // TODO: implement custom argument parsing rules
+    // int rb_scan_args(int argc, const VALUE *argv, const char *fmt, ...)
+    pub fn rb_scan_args(
+        argc: c_int,
+        argv: *const VALUE,
+        fmt: *const c_char,
+        ...
+    ) -> c_int;
+
     // VALUE rb_define_class_id_under(VALUE outer, ID id, VALUE super)
     pub fn rb_define_class_id_under(outer: VALUE, id: ID, sup: VALUE) -> VALUE;
     // VALUE rb_define_class_id_under(VALUE outer, ID id)
