@@ -160,7 +160,9 @@ impl AnyException {
         class: impl Into<Class>,
         message: impl Into<String>,
     ) -> Self {
-        Self::cast_unchecked(class.into().new_instance(&[message.into()]))
+        Self::cast_unchecked(class.into().new_instance_with_unchecked(&[
+            message.into()
+        ]))
     }
 
     /// Returns the current pending exception.

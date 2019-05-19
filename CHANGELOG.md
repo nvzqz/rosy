@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+### Added
+- Variants of `Class::new_instance` that are `unsafe` or take arguments
+
+### Fixed
+- Safety of `Class::new_instance`
 
 ## [0.0.4] - 2019-05-19
 ### Added

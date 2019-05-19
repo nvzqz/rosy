@@ -207,14 +207,51 @@ impl Class {
         }
     }
 
-    /// Creates a new instance from `args` to pass into `#initialize`.
+    /// Creates a new instance without arguments.
     #[inline]
-    pub fn new_instance(self, args: &[impl Object]) -> AnyObject {
-        unsafe { AnyObject::from_raw(ruby::rb_class_new_instance(
+    pub fn new_instance(self) -> Result<AnyObject> {
+        let args: &[AnyObject] = &[];
+        self.new_instance_with(args)
+    }
+
+    /// Creates a new instance without arguments.
+    ///
+    /// # Safety
+    ///
+    /// An exception may be thrown if the class expected arguments.
+    #[inline]
+    pub unsafe fn new_instance_unchecked(self) -> AnyObject {
+        let args: &[AnyObject] = &[];
+        self.new_instance_with_unchecked(args)
+    }
+
+    /// Creates a new instance from `args`.
+    #[inline]
+    pub fn new_instance_with<O: Object>(self, args: &[O]) -> Result<AnyObject> {
+        // monomorphization
+        fn new_instance_with(c: Class, a: &[AnyObject]) -> Result<AnyObject> {
+            unsafe {
+                crate::protected_no_panic(|| c.new_instance_with_unchecked(a))
+            }
+        }
+        new_instance_with(self, AnyObject::convert_slice(args))
+    }
+
+    /// Creates a new instance from `args`.
+    ///
+    /// # Safety
+    ///
+    /// An exception may be thrown if the class expected arguments.
+    #[inline]
+    pub unsafe fn new_instance_with_unchecked<O: Object>(
+        self,
+        args: &[O],
+    ) -> AnyObject {
+        AnyObject::from_raw(ruby::rb_class_new_instance(
             args.len() as c_int,
             args.as_ptr() as *const ruby::VALUE,
             self.raw(),
-        )) }
+        ))
     }
 
     /// Returns the parent class of `self`.
