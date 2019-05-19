@@ -60,4 +60,7 @@ extern "C" {
         word_numbits: usize,
         nlz_bits_ret: *mut usize,
     ) -> usize;
+
+    // VALUE rb_big_cmp(VALUE x, VALUE y);
+    pub fn rb_big_cmp(x: VALUE, y: VALUE) -> VALUE;
 }

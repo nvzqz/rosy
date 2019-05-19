@@ -35,6 +35,23 @@ impl<O: Object> PartialEq<O> for Integer {
     }
 }
 
+impl Eq for Integer {}
+
+impl PartialOrd for Integer {
+    #[inline]
+    fn partial_cmp(&self, other: &Integer) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Integer {
+    #[inline]
+    fn cmp(&self, other: &Integer) -> Ordering {
+        let raw = unsafe { ruby::rb_big_cmp(self.raw(), other.raw()) };
+        crate::util::value_to_fixnum(raw).cmp(&0)
+    }
+}
+
 unsafe impl Object for Integer {
     #[inline]
     fn unique_id() -> Option<u128> {
