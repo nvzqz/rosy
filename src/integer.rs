@@ -37,8 +37,13 @@ unsafe impl Object for Integer {
         Some(!((Ty::Fixnum as u128) | ((Ty::Bignum as u128) << 8)))
     }
 
+    #[inline]
     fn cast<A: Object>(object: A) -> Option<Self> {
-        unimplemented!()
+        if object.into_any_object().is_integer() {
+            unsafe { Some(Self::cast_unchecked(object)) }
+        } else {
+            None
+        }
     }
 
     #[inline]

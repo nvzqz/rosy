@@ -293,11 +293,7 @@ impl AnyObject {
     /// Returns `self` as an `Integer` if it is one.
     #[inline]
     pub fn to_integer(self) -> Option<Integer> {
-        if self.is_integer() {
-            unsafe { Some(Integer::cast_unchecked(self)) }
-        } else {
-            None
-        }
+        Integer::cast(self)
     }
 
     /// Returns whether `self` is a floating point number type.
