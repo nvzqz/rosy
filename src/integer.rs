@@ -293,15 +293,13 @@ impl fmt::Display for Integer {
 }
 
 impl Integer {
-    /// Unpacks the contents of `buf` into a new instance, making the result
-    /// negative if `is_negative`.
+    /// Unpacks the contents of `buf` into a new instance.
     #[inline]
     pub fn unpack<W: Word>(buf: &[W]) -> Self {
         Self::unpack_using(buf, PackOptions::default())
     }
 
-    /// Unpacks the contents of `buf` into a new instance using `options`,
-    /// making the result negative if `is_negative`.
+    /// Unpacks the contents of `buf` into a new instance using `options`.
     #[inline]
     pub fn unpack_using<W: Word>(buf: &[W], options: PackOptions) -> Self {
         use ruby::integer_flags::*;
