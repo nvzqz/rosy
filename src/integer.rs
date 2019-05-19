@@ -5,6 +5,7 @@ use std::{
     ffi::c_void,
     fmt,
     mem,
+    ops,
     os::raw::c_int,
     slice,
 };
@@ -15,6 +16,30 @@ use crate::{
 };
 
 /// An instance of Ruby's `Integer` class.
+///
+/// # Logical Binary Operations
+///
+/// The logical operations [AND], [OR], and [XOR] are all supported:
+///
+/// ```
+/// # rosy::vm::init().unwrap();
+/// # rosy::protected(|| {
+/// use rosy::Integer;
+///
+/// let a_val = 0b1101;
+/// let b_val = 0b0111;
+/// let a_int = Integer::from(a_val);
+/// let b_int = Integer::from(b_val);
+///
+/// assert_eq!(a_int & b_int, a_val & b_val);
+/// assert_eq!(a_int | b_int, a_val | b_val);
+/// assert_eq!(a_int ^ b_int, a_val ^ b_val);
+/// # }).unwrap();
+/// ```
+///
+/// [AND]: https://en.wikipedia.org/wiki/Logical_conjunction
+/// [OR]:  https://en.wikipedia.org/wiki/Logical_disjunction
+/// [XOR]: https://en.wikipedia.org/wiki/Exclusive_or
 #[derive(Clone, Copy, Debug)]
 pub struct Integer(NonNullObject);
 
@@ -227,6 +252,37 @@ macro_rules! forward_cmp {
 forward_cmp! {
     usize u128 u64 u32 u16 u8
     isize i128 i64 i32 i16 i8
+}
+
+macro_rules! impl_bit_ops {
+    ($($op:ident, $f:ident, $r:ident;)+) => { $(
+        impl ops::$op for Integer {
+            type Output = Self;
+
+            #[inline]
+            fn $f(self, rhs: Self) -> Self {
+                let (a, b) = if self.is_fixnum() {
+                    if rhs.is_fixnum() {
+                        let a = crate::util::value_to_fixnum(self.raw());
+                        let b = crate::util::value_to_fixnum(rhs.raw());
+                        let val = crate::util::fixnum_to_value(a.$f(b));
+                        return unsafe { Self::from_raw(val) };
+                    } else {
+                        (rhs, self)
+                    }
+                } else {
+                    (self, rhs)
+                };
+                unsafe { Self::from_raw(ruby::$r(a.raw(), b.raw())) }
+            }
+        }
+    )+ }
+}
+
+impl_bit_ops! {
+    BitAnd, bitand, rb_big_and;
+    BitOr,  bitor,  rb_big_or;
+    BitXor, bitxor, rb_big_xor;
 }
 
 impl fmt::Display for Integer {
@@ -671,6 +727,43 @@ mod tests {
                     assert_eq!(buf[0], value);
                 }
             })+ }
+        }
+
+        crate::protected(|| {
+            test! {
+                usize u128 u64 u32 u16 u8
+                isize i128 i64 i32 i16 i8
+            }
+        }).unwrap();
+    }
+
+    #[test]
+    fn bit_ops() {
+        crate::vm::init().unwrap();
+
+        macro_rules! test {
+            ($($t:ty)+) => { $({
+                let min = <$t>::min_value();
+                let max = <$t>::max_value();
+
+                let min_int = Integer::from(min);
+                let max_int = Integer::from(max);
+
+                assert_eq!(min_int & min_int, min & min);
+                assert_eq!(min_int & max_int, min & max);
+                assert_eq!(max_int & min_int, max & min);
+                assert_eq!(max_int & max_int, max & max);
+
+                assert_eq!(min_int | min_int, min | min);
+                assert_eq!(min_int | max_int, min | max);
+                assert_eq!(max_int | min_int, max | min);
+                assert_eq!(max_int | max_int, max | max);
+
+                assert_eq!(min_int ^ min_int, min ^ min);
+                assert_eq!(min_int ^ max_int, min ^ max);
+                assert_eq!(max_int ^ min_int, max ^ min);
+                assert_eq!(max_int ^ max_int, max ^ max);
+            })+ };
         }
 
         crate::protected(|| {

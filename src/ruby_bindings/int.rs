@@ -63,4 +63,10 @@ extern "C" {
 
     // VALUE rb_big_cmp(VALUE x, VALUE y);
     pub fn rb_big_cmp(x: VALUE, y: VALUE) -> VALUE;
+    // VALUE rb_big_and(VALUE x, VALUE y);
+    pub fn rb_big_and(x: VALUE, y: VALUE) -> VALUE;
+    // VALUE rb_big_or(VALUE x, VALUE y);
+    pub fn rb_big_or(x: VALUE, y: VALUE) -> VALUE;
+    // VALUE rb_big_xor(VALUE x, VALUE y);
+    pub fn rb_big_xor(x: VALUE, y: VALUE) -> VALUE;
 }

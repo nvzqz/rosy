@@ -108,6 +108,11 @@ pub fn value_flag(v: VALUE) -> VALUE {
 }
 
 #[inline]
+pub fn fixnum_to_value(i: c_long) -> VALUE {
+    ((i as VALUE) << 1) | FIXNUM_FLAG
+}
+
+#[inline]
 pub fn value_to_fixnum(v: VALUE) -> c_long {
     ((v & !(FIXNUM_FLAG as VALUE)) >> 1) as c_long
 }
