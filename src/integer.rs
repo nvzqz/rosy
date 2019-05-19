@@ -206,6 +206,52 @@ impl Integer {
         }
     }
 
+    /// Returns whether `self >= 0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use rosy::Integer;
+    ///
+    /// let big = Integer::from(u128::max_value());
+    /// let fix = Integer::from(isize::max_value() / 2);
+    /// # assert!(big.is_bignum());
+    /// # assert!(fix.is_fixnum());
+    ///
+    /// assert!(big.is_positive());
+    /// assert!(fix.is_positive());
+    /// ```
+    #[inline]
+    pub fn is_positive(self) -> bool {
+        !self.is_negative()
+    }
+
+    /// Returns whether `self < 0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use rosy::Integer;
+    ///
+    /// let big = Integer::from(i128::min_value());
+    /// let fix = Integer::from(isize::min_value() / 2);
+    /// # assert!(big.is_bignum());
+    /// # assert!(fix.is_fixnum());
+    ///
+    /// assert!(big.is_negative());
+    /// assert!(fix.is_negative());
+    /// ```
+    #[inline]
+    pub fn is_negative(self) -> bool {
+        if self.is_fixnum() {
+            (self.raw() as isize) < 0
+        } else {
+            unsafe { ruby::rb_big_sign(self.raw()) == 0 }
+        }
+    }
+
     /// Returns whether `self` is a variable-sized integer.
     #[inline]
     pub fn is_bignum(self) -> bool {
