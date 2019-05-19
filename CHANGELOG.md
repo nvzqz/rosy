@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+### Added
+- `Integer` object type
+  - Features `From` conversions for every native Rust integer type, including
+    `u128` and `i128`
 
 ## [0.0.3] - 2019-05-18
 ### Added

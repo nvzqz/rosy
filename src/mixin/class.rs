@@ -482,6 +482,7 @@ macro_rules! built_in_classes {
 }
 
 built_in_classes! {
+    // "Fixnum" is obsolete; use Integer
     "BasicObject",   basic_object,   rb_cBasicObject;
     "Object",        object,         rb_cObject;
     "Array",         array,          rb_cArray;
@@ -494,7 +495,6 @@ built_in_classes! {
     "Enumerator",    enumerator,     rb_cEnumerator;
     "FalseClass",    false_class,    rb_cFalseClass;
     "File",          file,           rb_cFile;
-    // "Fixnum",        class_fixnum,         rb_cFixnum;
     "Complex",       complex,        rb_cComplex;
     "Float",         float,          rb_cFloat;
     "Hash",          hash,           rb_cHash;

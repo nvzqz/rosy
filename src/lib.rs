@@ -106,6 +106,7 @@ pub mod array;
 pub mod exception;
 pub mod gc;
 pub mod hash;
+pub mod integer;
 pub mod mixin;
 pub mod object;
 pub mod prelude;
@@ -121,6 +122,7 @@ pub use self::{
     array::Array,
     exception::{AnyException, Exception},
     hash::Hash,
+    integer::Integer,
     mixin::{Mixin, Class, Module},
     object::{AnyObject, Object, RosyObject},
     rosy::Rosy,

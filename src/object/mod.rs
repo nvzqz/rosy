@@ -396,8 +396,9 @@ mod tests {
             } }
         }
         let ids: &[(&str, _)] = &ids! {
-            AnyObject,
             AnyException,
+            AnyObject,
+            Integer,
             String,
             Symbol,
             crate::vm::InstrSeq,
