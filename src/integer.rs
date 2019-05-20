@@ -407,7 +407,7 @@ impl Integer {
         }
     }
 
-    /// Converts `self` to `W` if it can represent be represented as `W`.
+    /// Converts `self` to `W` if it can be represented as `W`.
     #[inline]
     pub fn to_value<W: Word>(self) -> Option<W> {
         if !self.can_represent::<W>() {
