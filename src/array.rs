@@ -75,7 +75,9 @@ use crate::{
 /// # use rosy::prelude::*;
 /// let array: Array = (0..10).collect();
 ///
-/// assert_eq!(array.to_s(), "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]");
+/// for (i, obj) in array.into_iter().enumerate() {
+///     assert_eq!(obj, i);
+/// }
 /// # }).unwrap();
 /// ```
 ///
