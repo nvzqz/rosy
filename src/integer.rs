@@ -691,7 +691,7 @@ impl PackSign {
 
 /// A type whose bytes can be directly used as a word when packing an
 /// [`Integer`](struct.Integer.html).
-pub unsafe trait Word: Copy + PartialEq + PartialOrd {
+pub unsafe trait Word: Copy {
     /// Whether the type is a signed integer.
     const IS_SIGNED: bool;
 

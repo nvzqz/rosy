@@ -16,6 +16,9 @@ The format is based on [Keep a Changelog] and this project adheres to
 - Safety of `Class::new_instance`
 - Indexing into a heap-allocated `Array`
 
+### Removed
+- `PartialEq + PartialOrd` from `Word`
+
 ## [0.0.4] - 2019-05-19
 ### Added
 - `Integer` object type
