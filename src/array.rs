@@ -166,6 +166,14 @@ impl<O: Object> From<&[O]> for Array<O> {
     }
 }
 
+impl<O, A> PartialEq<[A]> for Array<O>
+    where O: Object + PartialEq<A>,
+{
+    fn eq(&self, other: &[A]) -> bool {
+        unsafe { self.as_slice().eq(other) }
+    }
+}
+
 impl<T: Object, U: Object> PartialEq<Array<U>> for Array<T> {
     #[inline]
     fn eq(&self, other: &Array<U>) -> bool {
