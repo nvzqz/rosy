@@ -228,6 +228,17 @@ macro_rules! forward_cmp {
             }
         }
 
+        impl PartialEq<$t> for AnyObject {
+            #[inline]
+            fn eq(&self, int: &$t) -> bool {
+                if let Some(integer) = self.to_integer() {
+                    integer == *int
+                } else {
+                    false
+                }
+            }
+        }
+
         impl PartialOrd<$t> for Integer {
             #[inline]
             fn partial_cmp(&self, other: &$t) -> Option<Ordering> {
@@ -243,6 +254,17 @@ macro_rules! forward_cmp {
                     Some(Ordering::Less)
                 } else {
                     Some(Ordering::Greater)
+                }
+            }
+        }
+
+        impl PartialOrd<$t> for AnyObject {
+            #[inline]
+            fn partial_cmp(&self, other: &$t) -> Option<Ordering> {
+                if let Some(integer) = self.to_integer() {
+                    integer.partial_cmp(other)
+                } else {
+                    None
                 }
             }
         }

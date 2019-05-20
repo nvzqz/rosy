@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 ### Added
 - Variants of `Class::new_instance` that are `unsafe` or take arguments
 - `PartialEq<[A]>` implementation for `Array<O>` where `O: PartialEq<A>`
+- `Partial{Eq|Cmp}` implementation over integers for `AnyObject`
 
 ### Fixed
 - Safety of `Class::new_instance`
