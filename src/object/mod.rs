@@ -410,6 +410,7 @@ mod tests {
         let ids: &[(&str, _)] = &ids! {
             AnyException,
             AnyObject,
+            Float,
             Integer,
             String,
             Symbol,

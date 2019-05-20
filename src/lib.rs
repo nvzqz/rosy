@@ -104,6 +104,7 @@ mod protected;
 mod util;
 pub mod array;
 pub mod exception;
+pub mod float;
 pub mod gc;
 pub mod hash;
 pub mod integer;
@@ -121,6 +122,7 @@ pub use protected::*;
 pub use self::{
     array::Array,
     exception::{AnyException, Exception},
+    float::Float,
     hash::Hash,
     integer::Integer,
     mixin::{Mixin, Class, Module},

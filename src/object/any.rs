@@ -144,20 +144,6 @@ impl<O: Into<AnyObject>, E: Into<AnyObject>> From<Result<O, E>> for AnyObject {
     }
 }
 
-impl From<f32> for AnyObject {
-    #[inline]
-    fn from(f: f32) -> Self {
-        (f as f64).into()
-    }
-}
-
-impl From<f64> for AnyObject {
-    #[inline]
-    fn from(f: f64) -> Self {
-        unsafe { AnyObject::from_raw(ruby::rb_float_new(f)) }
-    }
-}
-
 impl From<bool> for AnyObject {
     #[inline]
     fn from(b: bool) -> Self {
@@ -300,6 +286,12 @@ impl AnyObject {
     #[inline]
     pub fn is_float(self) -> bool {
         crate::util::value_is_float(self.raw())
+    }
+
+    /// Returns `self` as a `Float` if it is one.
+    #[inline]
+    pub fn to_float(self) -> Option<Float> {
+        Float::cast(self)
     }
 
     /// Returns whether `self` is a `String`.

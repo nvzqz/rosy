@@ -48,7 +48,7 @@ unsafe impl<K: Object, V: Object> Object for Hash<K, V> {
         let key = K::unique_id()?;
         let val = V::unique_id()?;
         let hash = !(Ty::Hash as u128);
-        Some(key.rotate_left(1) ^ val.rotate_right(7) ^ hash)
+        Some(key.rotate_left(11) ^ val.rotate_right(7) ^ hash)
     }
 
     #[inline]

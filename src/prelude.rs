@@ -19,6 +19,7 @@
 pub use crate::{
     array::Array,
     exception::{AnyException, Exception},
+    float::Float,
     hash::Hash,
     integer::Integer,
     mixin::{Mixin, Class, Module},

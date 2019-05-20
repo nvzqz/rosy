@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog] and this project adheres to
   - `MethodFn` now looks similar type-wise to [`FnOnce`] in that it now has an
     associated `Output` type and has `Receiver` instead of `Args`
 - Ability to specify the receiver type in `def_method[_unchecked]!`
+- `Float` object type
+  - Supports arithmetic operations
 
 ## [0.0.5] - 2019-05-20
 ### Added
