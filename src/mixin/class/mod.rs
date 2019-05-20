@@ -382,32 +382,42 @@ impl<O: Object> Class<O> {
     /// **Note:** This method can be unwieldy to use and so it is recommended to
     /// instead call the convenience macro [`def_method!`].
     ///
-    /// Note that `MethodFn` functions can return any type that implements
-    /// the `Object` trait.
+    /// # About `MethodFn`
     ///
-    /// Unfortunately, because `MethodFn` is defined on `extern "C" fn` types
-    /// and these function declarations don't implicitly resolve to those types,
-    /// an `as` cast is required for `f`.
+    /// - The first argument is _always_ of type `O`. This means that if `self`
+    ///   is a typed class, then no casting is required within the method.
+    ///
+    /// - Up to 15 arguments may be passed. If more or a variable amount is
+    ///   needed, see the below examples.
+    ///
+    /// - They can return any type that implements the `Object` trait.
+    ///
+    /// - Unfortunately, because `MethodFn` is defined on `extern "C" fn` types
+    ///   and these function declarations don't implicitly resolve to those
+    ///   types, an `as` cast is required for `f`.
     ///
     /// # Examples
     ///
     /// Every method takes `this` (equivalent of `self`) as the first argument,
-    /// which can then be followed with up to 15 arguments:
+    /// which may be followed by up to 15 arguments.
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
     /// use rosy::prelude::*;
     ///
-    /// let class = Class::array();
-    /// let array = Array::from_slice(&[String::from("hello")]);
-    ///
-    /// extern "C" fn my_eq(this: AnyObject, that: AnyObject) -> AnyObject {
+    /// extern "C" fn my_eql(this: Array, that: AnyObject) -> AnyObject {
     ///     AnyObject::from(this == that)
     /// }
+    /// let my_eql: extern fn(_, _) -> _ = my_eql;
     ///
-    /// class.def_method("my_eq?", my_eq as extern fn(_, _) -> _).unwrap();
+    /// Class::of::<Array>()
+    ///     .def_method("my_eql?", my_eql)
+    ///     .unwrap();
     ///
-    /// assert!(array.call_with("my_eq?", &[array]).unwrap().is_true());
+    /// let array: Array = (0..10).collect();
+    /// let value = array.call_with("my_eql?", &[array]).unwrap();
+    ///
+    /// assert!(value.is_true());
     /// ```
     ///
     /// Passing in the wrong number of arguments will result in an
@@ -416,13 +426,13 @@ impl<O: Object> Class<O> {
     /// ```
     /// # rosy::vm::init().unwrap();
     /// # use rosy::prelude::*;
-    /// # extern "C" fn my_eq(this: AnyObject, that: AnyObject) -> AnyObject {
+    /// # extern "C" fn my_eq(this: Array, that: AnyObject) -> AnyObject {
     /// #     AnyObject::from(this == that)
     /// # }
-    /// # let class = Class::array();
+    /// # let class = Class::of::<Array>();
     /// # let array = Array::from_slice(&[String::from("hello")]);
-    /// # class.def_method("my_eq?", my_eq as extern fn(_, _) -> _).unwrap();
-    /// assert!(array.call("my_eq?").unwrap_err().is_arg_error());
+    /// # class.def_method("my_eql?", my_eq as extern fn(_, _) -> _).unwrap();
+    /// assert!(array.call("my_eql?").unwrap_err().is_arg_error());
     /// ```
     ///
     /// ## Variable Arguments
@@ -462,12 +472,12 @@ impl<O: Object> Class<O> {
     /// # rosy::vm::init().unwrap();
     /// use rosy::prelude::*;
     ///
-    /// unsafe extern "C" fn joining(this: AnyObject, args: Array) -> String {
-    ///     args.join(String::cast_unchecked(this))
+    /// unsafe extern "C" fn joining(this: String, args: Array) -> String {
+    ///     args.join(this)
     /// }
     /// let joining: unsafe extern fn(_, _) -> _ = joining;
     ///
-    /// let class = Class::string();
+    /// let class = Class::of::<String>();
     /// class.def_method("joining", joining).unwrap();
     ///
     /// let string = String::from(", ");
@@ -481,7 +491,7 @@ impl<O: Object> Class<O> {
     pub fn def_method<N, F>(self, name: N, f: F) -> Result
     where
         N: Into<SymbolId>,
-        F: MethodFn,
+        F: MethodFn<O>,
     {
         unsafe { self._def_method(name.into(), f.raw_fn(), F::ARITY) }
     }
@@ -504,7 +514,7 @@ impl<O: Object> Class<O> {
     pub unsafe fn def_method_unchecked<N, F>(self, name: N, f: F)
     where
         N: Into<SymbolId>,
-        F: MethodFn,
+        F: MethodFn<O>,
     {
         self._def_method_unchecked(name.into(), f.raw_fn(), F::ARITY)
     }

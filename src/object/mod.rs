@@ -168,9 +168,13 @@ pub unsafe trait Object: Copy
     fn def_singleton_method<N, F>(self, name: N, f: F) -> Result
     where
         N: Into<SymbolId>,
-        F: MethodFn
+        F: MethodFn<Self>,
     {
-        self.singleton_class().def_method(name, f)
+        // TODO: Create `SingletonClass` type
+        let class = unsafe {
+            Class::<Self>::cast_unchecked(self.singleton_class())
+        };
+        class.def_method(name, f)
     }
 
     /// Defines a method for `name` on the singleton class of `self` that calls
@@ -184,9 +188,11 @@ pub unsafe trait Object: Copy
     unsafe fn def_singleton_method_unchecked<N, F>(self, name: N, f: F)
     where
         N: Into<SymbolId>,
-        F: MethodFn
+        F: MethodFn<Self>,
     {
-        self.singleton_class().def_method_unchecked(name, f);
+        // TODO: Create `SingletonClass` type
+        let class = Class::<Self>::cast_unchecked(self.singleton_class());
+        class.def_method_unchecked(name, f);
     }
 
     /// Calls `method` on `self` and returns the result.

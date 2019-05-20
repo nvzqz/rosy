@@ -9,7 +9,10 @@ use crate::{
 
 /// An `extern "C" fn` that can be used as a method in
 /// [`Class::def_method`](struct.Class.html#method.def_method).
-pub unsafe trait MethodFn {
+pub unsafe trait MethodFn<Receiver: Object> {
+    /// The type that the method returns.
+    type Output: Object;
+
     /// The number of arguments taken by `self`.
     const ARITY: c_int;
 
@@ -33,10 +36,9 @@ pub unsafe trait MethodFn {
 /// # rosy::protected(|| {
 /// use rosy::prelude::*;
 ///
-/// let class = Class::string();
+/// let class = Class::of::<String>();
 ///
-/// rosy::def_method!(class, "blank?", |this| unsafe {
-///     let this = String::cast_unchecked(this);
+/// rosy::def_method!(class, "blank?", |this: String| {
 ///     this.is_whitespace()
 /// }).unwrap();
 ///
@@ -75,10 +77,10 @@ pub unsafe trait MethodFn {
 /// # rosy::protected(|| {
 /// use rosy::prelude::*;
 ///
-/// let class = Class::array();
+/// let class = Class::of::<Array>();
 ///
-/// rosy::def_method!(class, "plus_args", |this, args: Array| unsafe {
-///     Array::cast_unchecked(this).plus(args)
+/// rosy::def_method!(class, "plus_args", |this: Array, args: Array| {
+///     this.plus(args)
 /// }).unwrap();
 ///
 /// let expected: &[i32] = &[0, 1, 2, 3, 4, 5, 6];
@@ -101,9 +103,15 @@ macro_rules! def_method {
     (
         $class:expr,
         $name:expr,
-        |$this:ident $(, $args:ident $(: $t:ty)?)* $(,)?| $body:expr
+        |
+                $this:ident $(: $this_ty:ty)?
+            $(, $args:ident $(: $args_ty:ty)?)*
+            $(,)?
+        |
+        $body:expr
     ) => { {
         type __AnyObject = $crate::AnyObject;
+        type __Class = $crate::Class;
 
         macro_rules! _replace {
             ($__t:tt $sub:tt) => { $sub }
@@ -112,14 +120,20 @@ macro_rules! def_method {
             () => { __AnyObject };
             ($__t:ty) => { $__t };
         }
+        macro_rules! _cast_class {
+            ($c:expr,) => { __Class::into_any_class($c) };
+            ($c:expr, $_t:ty) => { $c };
+        }
 
         extern "C" fn _method(
-            $this: $crate::AnyObject,
-            $( $args : _substitute_any_object!($($t)?) ),*
+               $this : _substitute_any_object!($($this_ty)?),
+            $( $args : _substitute_any_object!($($args_ty)?) ),*
         ) -> AnyObject { $body.into() }
 
         let _method: extern "C" fn(_, $( _replace!($args _) ),*) -> _ = _method;
-        $crate::Class::def_method($class, $name, _method)
+
+        let _class = _cast_class!($class, $($this_ty)?);
+        $crate::Class::def_method(_class, $name, _method)
     } };
 }
 
@@ -141,9 +155,15 @@ macro_rules! def_method_unchecked {
     (
         $class:expr,
         $name:expr,
-        |$this:ident $(, $args:ident)* $(,)?| $body:expr
+        |
+                $this:ident $(: $this_ty:ty)?
+            $(, $args:ident $(: $args_ty:ty)?)*
+            $(,)?
+        |
+        $body:expr
     ) => { {
         type __AnyObject = $crate::AnyObject;
+        type __Class = $crate::Class;
 
         macro_rules! _replace {
             ($__t:tt $sub:tt) => { $sub }
@@ -152,24 +172,32 @@ macro_rules! def_method_unchecked {
             () => { __AnyObject };
             ($__t:ty) => { $__t };
         }
+        macro_rules! _cast_class {
+            ($c:expr,) => { __Class::into_any_class($c) };
+            ($c:expr, $_t:ty) => { $c };
+        }
 
         extern "C" fn _method(
-            $this: $crate::AnyObject,
-            $( $args : _substitute_any_object!($($t)?) ),*
+               $this : _substitute_any_object!($($this_ty)?),
+            $( $args : _substitute_any_object!($($args_ty)?) ),*
         ) -> AnyObject { $body.into() }
 
         let _method: extern "C" fn(_, $( _replace!($args _) ),*) -> _ = _method;
-        $crate::Class::def_method_unchecked($class, $name, _method)
+
+        let _class = _cast_class!($class, $($this_ty)?);
+        $crate::Class::def_method_unchecked(_class, $name, _method)
     } };
 }
 
 macro_rules! impl_trait {
     ($($a:expr $(,$args:ty)*;)+) => { $(
-        impl_trait!(@fn $a, unsafe extern "C" fn(this: AnyObject $(,$args)*));
-        impl_trait!(@fn $a,        extern "C" fn(this: AnyObject $(,$args)*));
+        impl_trait!(@fn $a, unsafe extern "C" fn(this: R $(,$args)*));
+        impl_trait!(@fn $a,        extern "C" fn(this: R $(,$args)*));
     )+ };
     (@fn $a:expr, $($f:tt)+) => {
-        unsafe impl<O: Object> MethodFn for $($f)+ -> O {
+        unsafe impl<R: Object, O: Object> MethodFn<R> for $($f)+ -> O {
+            type Output = O;
+
             const ARITY: c_int = $a;
 
             #[inline]

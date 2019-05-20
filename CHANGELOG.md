@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog] and this project adheres to
 ### Added
 - Explicit typing to `Class`
 - `Classify` trait for getting a typed `Class` instance for `Self`
+- Defining methods on a typed class takes the class's wrapped type as a receiver
+  - `MethodFn` now looks similar type-wise to [`FnOnce`] in that it now has an
+    associated `Output` type and has `Receiver` instead of `Args`
+- Ability to specify the receiver type in `def_method[_unchecked]!`
 
 ## [0.0.5] - 2019-05-20
 ### Added
@@ -81,4 +85,5 @@ Initial release
 [0.0.2]: https://github.com/oceanpkg/rosy/compare/v0.0.1...v0.0.2
 
 [`Debug`]: https://doc.rust-lang.org/std/fmt/trait.Debug.html
+[`FnOnce`]: https://doc.rust-lang.org/std/ops/trait.FnOnce.html
 [`std::panic::catch_unwind`]: https://doc.rust-lang.org/std/panic/fn.catch_unwind.html
