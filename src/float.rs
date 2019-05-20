@@ -152,47 +152,18 @@ impl From<Float> for f64 {
     }
 }
 
-impl From<u32> for Float {
-    #[inline]
-    fn from(i: u32) -> Self {
-        f64::from(i).into()
-    }
+macro_rules! forward_from_int {
+    ($($i:ty)+) => { $(
+        impl From<$i> for Float {
+            #[inline]
+            fn from(i: $i) -> Self {
+                f64::from(i).into()
+            }
+        }
+    )+ }
 }
 
-impl From<i32> for Float {
-    #[inline]
-    fn from(i: i32) -> Self {
-        f64::from(i).into()
-    }
-}
-
-impl From<u16> for Float {
-    #[inline]
-    fn from(i: u16) -> Self {
-        f64::from(i).into()
-    }
-}
-
-impl From<i16> for Float {
-    #[inline]
-    fn from(i: i16) -> Self {
-        f64::from(i).into()
-    }
-}
-
-impl From<u8> for Float {
-    #[inline]
-    fn from(i: u8) -> Self {
-        f64::from(i).into()
-    }
-}
-
-impl From<i8> for Float {
-    #[inline]
-    fn from(i: i8) -> Self {
-        f64::from(i).into()
-    }
-}
+forward_from_int! { u32 i32 u16 i16 u8 i8 }
 
 macro_rules! impl_ops {
     ($($op:ident, $op_f:ident;)+) => { $(
