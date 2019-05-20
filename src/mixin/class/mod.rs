@@ -3,6 +3,7 @@
 use std::{
     cmp::Ordering,
     fmt,
+    marker::PhantomData,
     os::raw::c_int,
 };
 use crate::{
@@ -10,6 +11,14 @@ use crate::{
     object::{NonNullObject, Ty},
     prelude::*,
     ruby,
+};
+
+mod classify;
+mod inheritance;
+
+pub use self::{
+    classify::*,
+    inheritance::*,
 };
 
 /// An instance of Ruby's `Class` type.
@@ -42,21 +51,45 @@ use crate::{
 ///   end
 /// end
 /// ```
-#[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
-pub struct Class(NonNullObject);
-
-impl AsRef<AnyObject> for Class {
-    #[inline]
-    fn as_ref(&self) -> &AnyObject { self.0.as_ref() }
+pub struct Class<O = AnyObject> {
+    inner: NonNullObject,
+    _marker: PhantomData<fn() -> O>,
 }
 
-impl From<Class> for AnyObject {
-    #[inline]
-    fn from(object: Class) -> AnyObject { object.0.into() }
+impl<O> Clone for Class<O> {
+    fn clone(&self) -> Self { *self }
 }
 
-unsafe impl Object for Class {
+impl<O> Copy for Class<O> {}
+
+impl<O: Object> AsRef<AnyObject> for Class<O> {
+    #[inline]
+    fn as_ref(&self) -> &AnyObject { self.inner.as_ref() }
+}
+
+impl<O: Object> From<Class<O>> for AnyObject {
+    #[inline]
+    fn from(object: Class<O>) -> AnyObject { object.inner.into() }
+}
+
+impl<O: Object> fmt::Debug for Class<O> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_tuple("Class")
+            .field(&self.inner)
+            .finish()
+    }
+}
+
+impl<O: Object> fmt::Display for Class<O> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.as_any_object().fmt(f)
+    }
+}
+
+unsafe impl<O: Object> Object for Class<O> {
     #[inline]
     fn unique_id() -> Option<u128> {
         Some(!(Ty::Class as u128))
@@ -80,25 +113,18 @@ unsafe impl Object for Class {
 
 impl crate::util::Sealed for Class {}
 
-impl fmt::Display for Class {
+impl<O: Object, P: Object> PartialEq<P> for Class<O> {
     #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.as_any_object().fmt(f)
-    }
-}
-
-impl<O: Object> PartialEq<O> for Class {
-    #[inline]
-    fn eq(&self, other: &O) -> bool {
+    fn eq(&self, other: &P) -> bool {
         self.raw() == other.raw()
     }
 }
 
-impl Eq for Class {}
+impl<O: Object> Eq for Class<O> {}
 
-impl PartialOrd for Class {
+impl<O: Object, P: Object> PartialOrd<Class<P>> for Class<O> {
     #[inline]
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Class<P>) -> Option<Ordering> {
         if self == other {
             Some(Ordering::Equal)
         } else {
@@ -111,22 +137,22 @@ impl PartialOrd for Class {
     }
 
     #[inline]
-    fn lt(&self, other: &Self) -> bool {
+    fn lt(&self, other: &Class<P>) -> bool {
         other.inheritance(*self).is_super()
     }
 
     #[inline]
-    fn le(&self, other: &Self) -> bool {
+    fn le(&self, other: &Class<P>) -> bool {
         self.inheritance(*other).is_sub_eq()
     }
 
     #[inline]
-    fn gt(&self, other: &Self) -> bool {
+    fn gt(&self, other: &Class<P>) -> bool {
         self.inheritance(*other).is_super()
     }
 
     #[inline]
-    fn ge(&self, other: &Self) -> bool {
+    fn ge(&self, other: &Class<P>) -> bool {
         other.inheritance(*self).is_sub_eq()
     }
 }
@@ -147,6 +173,25 @@ impl Class {
             name.raw(),
             superclass.raw(),
         ))) }
+    }
+
+    /// Returns the typed class of some type that implements `Classify`.
+    ///
+    /// # Examples
+    ///
+    /// We can see from getting the untyped version of the `Array` class that
+    /// they both point to the same class:
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use rosy::{Array, Class};
+    ///
+    /// let class = Class::of::<Array>();
+    /// assert_eq!(class, Class::array());
+    /// ```
+    #[inline]
+    pub fn of<O: Classify>() -> Class<O> {
+        <O as Classify>::class()
     }
 
     /// Defines a new top-level class with `name`.
@@ -206,10 +251,18 @@ impl Class {
             }
         }
     }
+}
+
+impl<O: Object> Class<O> {
+    /// Converts `self` into an untyped class.
+    #[inline]
+    pub fn into_any_class(self) -> Class {
+        Class { inner: self.inner, _marker: PhantomData }
+    }
 
     /// Creates a new instance without arguments.
     #[inline]
-    pub fn new_instance(self) -> Result<AnyObject> {
+    pub fn new_instance(self) -> Result<O> {
         let args: &[AnyObject] = &[];
         self.new_instance_with(args)
     }
@@ -220,21 +273,23 @@ impl Class {
     ///
     /// An exception may be thrown if the class expected arguments.
     #[inline]
-    pub unsafe fn new_instance_unchecked(self) -> AnyObject {
+    pub unsafe fn new_instance_unchecked(self) -> O {
         let args: &[AnyObject] = &[];
         self.new_instance_with_unchecked(args)
     }
 
     /// Creates a new instance from `args`.
     #[inline]
-    pub fn new_instance_with<O: Object>(self, args: &[O]) -> Result<AnyObject> {
+    pub fn new_instance_with<A: Object>(self, args: &[A]) -> Result<O> {
         // monomorphization
         fn new_instance_with(c: Class, a: &[AnyObject]) -> Result<AnyObject> {
             unsafe {
                 crate::protected_no_panic(|| c.new_instance_with_unchecked(a))
             }
         }
-        new_instance_with(self, AnyObject::convert_slice(args))
+        let class = self.into_any_class();
+        let object = new_instance_with(class, AnyObject::convert_slice(args))?;
+        unsafe { Ok(O::cast_unchecked(object)) }
     }
 
     /// Creates a new instance from `args`.
@@ -243,11 +298,11 @@ impl Class {
     ///
     /// An exception may be thrown if the class expected arguments.
     #[inline]
-    pub unsafe fn new_instance_with_unchecked<O: Object>(
+    pub unsafe fn new_instance_with_unchecked<A: Object>(
         self,
-        args: &[O],
-    ) -> AnyObject {
-        AnyObject::from_raw(ruby::rb_class_new_instance(
+        args: &[A],
+    ) -> O {
+        O::from_raw(ruby::rb_class_new_instance(
             args.len() as c_int,
             args.as_ptr() as *const ruby::VALUE,
             self.raw(),
@@ -265,7 +320,7 @@ impl Class {
     pub fn subclass(
         self,
         name: impl Into<SymbolId>,
-    ) -> Result<Self, DefMixinError> {
+    ) -> Result<Class, DefMixinError> {
         self.subclass_under(Class::object(), name)
     }
 
@@ -275,13 +330,13 @@ impl Class {
         self,
         namespace: impl Mixin,
         name: impl Into<SymbolId>,
-    ) -> Result<Self, DefMixinError> {
+    ) -> Result<Class, DefMixinError> {
         namespace.def_subclass(self, name)
     }
 
     /// Returns the inheritance relationship between `self` and `other`.
     #[inline]
-    pub fn inheritance(self, other: Class) -> Inheritance {
+    pub fn inheritance<P: Object>(self, other: Class<P>) -> Inheritance {
         let v = unsafe { ruby::rb_class_inherited_p(self.raw(), other.raw()) };
         match v {
             crate::util::TRUE_VALUE  => Inheritance::SubEq,
@@ -290,9 +345,9 @@ impl Class {
         }
     }
 
-    /// Returns whether the relationship between `self` and `other` is `A < B`.
+    /// Returns whether the relationship between `self` and `other` is `A <= B`.
     #[inline]
-    pub fn inherits(self, other: Class) -> bool {
+    pub fn inherits<P: Object>(self, other: Class<P>) -> bool {
         self <= other
     }
 
@@ -452,38 +507,6 @@ impl Class {
         F: MethodFn,
     {
         self._def_method_unchecked(name.into(), f.raw_fn(), F::ARITY)
-    }
-}
-
-/// The [`inheritance`](struct.Class.html#method.inheritance) relationship
-/// between two classes.
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-pub enum Inheritance {
-    /// There is no relationship between the two classes.
-    None,
-    /// The first class inherits or is the same as the second; `A < B`.
-    SubEq,
-    /// The second class inherits the first; `B < A`.
-    Super,
-}
-
-impl Inheritance {
-    /// Returns whether there's no relationship between the classes.
-    #[inline]
-    pub fn is_none(self) -> bool {
-        self == Inheritance::None
-    }
-
-    /// Returns whether the first class inherits or is the same as the second.
-    #[inline]
-    pub fn is_sub_eq(self) -> bool {
-        self == Inheritance::SubEq
-    }
-
-    /// Returns whether the second class inherits the first.
-    #[inline]
-    pub fn is_super(self) -> bool {
-        self == Inheritance::Super
     }
 }
 

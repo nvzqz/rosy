@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+### Added
+- Explicit typing to `Class`
+- `Classify` trait for getting a typed `Class` instance for `Self`
 
 ## [0.0.5] - 2019-05-20
 ### Added

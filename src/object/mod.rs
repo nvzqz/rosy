@@ -408,7 +408,6 @@ mod tests {
             String,
             Symbol,
             crate::vm::InstrSeq,
-            RosyObject<std::string::String>,
         };
         for a in ids {
             for b in ids {

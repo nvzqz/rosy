@@ -37,7 +37,7 @@ unsafe impl Object for InstrSeq {
 
     #[inline]
     fn cast<A: Object>(obj: A) -> Option<Self> {
-        if obj.class().inherits(Class::instr_seq()) {
+        if obj.class().inherits(Class::of::<Self>()) {
             unsafe { Some(Self::cast_unchecked(obj)) }
         } else {
             None

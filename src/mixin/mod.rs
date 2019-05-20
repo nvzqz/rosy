@@ -94,12 +94,12 @@ pub trait Mixin: Object + Sealed {
 
     /// Defines a new subclass of `superclass` under `self` with `name`.
     #[inline]
-    fn def_subclass(
+    fn def_subclass<S: Object>(
         self,
-        superclass: Class,
+        superclass: Class<S>,
         name: impl Into<SymbolId>,
     ) -> Result<Class, DefMixinError> {
-        Class::_def_under(self, superclass, name.into())
+        Class::_def_under(self, superclass.into_any_class(), name.into())
     }
 
     /// Returns the existing `Class` with `name` in `self`.
