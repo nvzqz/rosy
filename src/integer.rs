@@ -435,8 +435,8 @@ impl Integer {
     /// let int = rosy::Integer::from(val);
     ///
     /// assert_eq!(int.to_truncated::<u16>(), val);
-    /// assert_eq!(int.to_truncated::<u8>(), 255);
-    /// assert_eq!(int.to_truncated::<i8>(), -1);
+    /// assert_eq!(int.to_truncated::<u8>(),  255);
+    /// assert_eq!(int.to_truncated::<i8>(),   -1);
     /// # }).unwrap();
     /// ```
     #[inline]
