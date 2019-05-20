@@ -41,6 +41,7 @@ use crate::{
 /// [OR]:  https://en.wikipedia.org/wiki/Logical_disjunction
 /// [XOR]: https://en.wikipedia.org/wiki/Exclusive_or
 #[derive(Clone, Copy, Debug)]
+#[repr(transparent)]
 pub struct Integer(NonNullObject);
 
 impl AsRef<AnyObject> for Integer {
