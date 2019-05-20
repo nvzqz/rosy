@@ -324,6 +324,9 @@ impl Class {
 
     /// Defines a method for `name` on `self` that calls `f` when invoked.
     ///
+    /// **Note:** This method can be unwieldy to use and so it is recommended to
+    /// instead call the convenience macro [`def_method!`].
+    ///
     /// Note that `MethodFn` functions can return any type that implements
     /// the `Object` trait.
     ///
@@ -417,6 +420,9 @@ impl Class {
     ///
     /// assert_eq!(output, ", , , ");
     /// ```
+    ///
+    // Link to docs.rs since `Class` may either be in `class` module or root
+    /// [`def_method!`]: https://docs.rs/rosy/0.0.4/rosy/macro.def_method.html
     pub fn def_method<N, F>(self, name: N, f: F) -> Result
     where
         N: Into<SymbolId>,
@@ -427,10 +433,18 @@ impl Class {
 
     /// Defines a method for `name` on `self` that calls `f` when invoked.
     ///
+    /// **Note:** This method can be unwieldy to use and so it is recommended to
+    /// instead call the convenience macro [`def_method_unchecked!`].
+    ///
+    /// See [`def_method`](#method.def_method) for usage info.
+    ///
     /// # Safety
     ///
     /// The caller must ensure that `self` is not frozen or else a `FrozenError`
     /// exception will be raised.
+    ///
+    // Link to docs.rs since `Class` may either be in `class` module or root
+    /// [`def_method_unchecked!`]: https://docs.rs/rosy/0.0.4/rosy/macro.def_method_unchecked.html
     #[inline]
     pub unsafe fn def_method_unchecked<N, F>(self, name: N, f: F)
     where

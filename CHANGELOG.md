@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog] and this project adheres to
 - Variants of `Class::new_instance` that are `unsafe` or take arguments
 - `PartialEq<[A]>` implementation for `Array<O>` where `O: PartialEq<A>`
 - `Partial{Eq|Cmp}` implementation over integers for `AnyObject`
+- `def_method[_unchecked]!` macros for convenience over
+  `Class::def_method[_unchecked]`
 
 ### Fixed
 - Safety of `Class::new_instance`
