@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 - Ability to specify the receiver type in `def_method[_unchecked]!`
 - `Float` object type
   - Supports arithmetic operations
+- Functions for evaluating Ruby scripts to the `vm` module
 
 ## [0.0.5] - 2019-05-20
 ### Added

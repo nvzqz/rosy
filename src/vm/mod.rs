@@ -1,7 +1,14 @@
 //! Interacting with the Ruby VM directly.
 
-use std::{error::Error, fmt};
-use crate::ruby;
+use std::{
+    error::Error,
+    ffi::CStr,
+    fmt,
+};
+use crate::{
+    prelude::*,
+    ruby,
+};
 
 mod instr_seq;
 pub use instr_seq::*;
@@ -47,6 +54,56 @@ pub unsafe fn destroy() -> Result<(), i32> {
 #[inline]
 pub fn init_load_path() {
     unsafe { ruby::ruby_init_loadpath() };
+}
+
+/// Evaluates `script` in an isolated binding, returning an exception if one is
+/// raised.
+///
+/// Variables:
+/// - `__FILE__`: "(eval)"
+/// - `__LINE__`: starts at 1
+#[inline]
+pub fn eval(script: &CStr) -> Result<AnyObject> {
+    unsafe {
+        let mut err = 0;
+        let raw = ruby::rb_eval_string_protect(script.as_ptr(), &mut err);
+        match raw {
+            0 => Ok(AnyObject::from_raw(raw)),
+            _ => Err(AnyException::_take_current()),
+        }
+    }
+}
+
+/// Evaluates `script` under a module binding in an isolated binding, returning
+/// an exception if one is raised.
+///
+/// Variables:
+/// - `__FILE__`: "(eval)"
+/// - `__LINE__`: starts at 1
+#[inline]
+pub fn eval_wrapped(script: &CStr) -> Result<AnyObject> {
+    unsafe {
+        let mut err = 0;
+        let raw = ruby::rb_eval_string_wrap(script.as_ptr(), &mut err);
+        match raw {
+            0 => Ok(AnyObject::from_raw(raw)),
+            _ => Err(AnyException::_take_current()),
+        }
+    }
+}
+
+/// Evaluates `script` in an isolated binding without handling exceptions.
+///
+/// Variables:
+/// - `__FILE__`: "(eval)"
+/// - `__LINE__`: starts at 1
+///
+/// # Safety
+///
+/// Any raised errors must be handled in Rust-land.
+#[inline]
+pub unsafe fn eval_unchecked(script: &CStr) -> AnyObject {
+    AnyObject::from_raw(ruby::rb_eval_string(script.as_ptr()))
 }
 
 /// An error indicating that [`init`](fn.init.html) failed.
