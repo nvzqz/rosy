@@ -133,15 +133,21 @@ pub unsafe trait Object: Copy
     }
 
     /// Returns the `Class` for `self`.
+    ///
+    /// Note that if `Self` implements `Classify`, `Self::class()` may not be
+    /// equal to the result of this method.
     #[inline]
-    fn class(self) -> Class {
+    fn class(self) -> Class<Self> {
         unsafe { Class::from_raw(ruby::rb_obj_class(self.raw())) }
     }
 
     /// Returns the singleton `Class` of `self`, creating one if it doesn't
     /// exist already.
+    ///
+    /// Note that `Class::new_instance` does not work on singleton classes due
+    /// to the class being attached to the specific object instance for `self`.
     #[inline]
-    fn singleton_class(self) -> Class {
+    fn singleton_class(self) -> Class<Self> {
         unsafe { Class::from_raw(ruby::rb_singleton_class(self.raw())) }
     }
 
@@ -170,11 +176,7 @@ pub unsafe trait Object: Copy
         N: Into<SymbolId>,
         F: MethodFn<Self>,
     {
-        // TODO: Create `SingletonClass` type
-        let class = unsafe {
-            Class::<Self>::cast_unchecked(self.singleton_class())
-        };
-        class.def_method(name, f)
+        self.singleton_class().def_method(name, f)
     }
 
     /// Defines a method for `name` on the singleton class of `self` that calls
@@ -190,9 +192,7 @@ pub unsafe trait Object: Copy
         N: Into<SymbolId>,
         F: MethodFn<Self>,
     {
-        // TODO: Create `SingletonClass` type
-        let class = Class::<Self>::cast_unchecked(self.singleton_class());
-        class.def_method_unchecked(name, f);
+        self.singleton_class().def_method_unchecked(name, f)
     }
 
     /// Calls `method` on `self` and returns the result.

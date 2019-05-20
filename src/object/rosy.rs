@@ -78,7 +78,7 @@ unsafe impl<R: Rosy> Object for RosyObject<R> {
     }
 
     #[inline]
-    fn class(self) -> Class {
+    fn class(self) -> Class<Self> {
         unsafe { Class::from_raw((*self.rdata()).basic.klass) }
     }
 }

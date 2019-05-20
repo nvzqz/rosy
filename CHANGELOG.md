@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 ## [Unreleased]
 ### Added
 - Explicit typing to `Class`
+  - `Object::class` and `Object::singleton_class` now return `Class<Self>`
 - `Classify` trait for getting a typed `Class` instance for `Self`
 - Defining methods on a typed class takes the class's wrapped type as a receiver
   - `MethodFn` now looks similar type-wise to [`FnOnce`] in that it now has an
