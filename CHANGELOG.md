@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 
 ### Fixed
 - Safety of `Class::new_instance`
+- Indexing into a heap-allocated `Array`
 
 ## [0.0.4] - 2019-05-19
 ### Added

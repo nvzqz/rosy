@@ -65,8 +65,8 @@ pub union RArrayAs {
 #[derive(Clone, Copy)]
 pub struct RArrayHeap {
     pub len: c_long,
-    pub ptr: *const VALUE,
     pub aux: RArrayHeapAux,
+    pub ptr: *const VALUE,
 }
 
 #[repr(C)]
