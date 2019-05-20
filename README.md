@@ -4,6 +4,7 @@
 ![Lines of code][loc-badge]
 [![crates.io][crate-badge] ![downloads][dl-badge]][crate]
 [![docs.rs][docs-badge]][docs]
+[![MIT or Apache 2.0][license-badge]][license]
 
 High-level bindings of [Ruby]'s C API for [Rust].
 
@@ -55,23 +56,24 @@ assert_eq!(string, "hello");
 
 ## License
 
-This project is released under either:
-
-- [MIT License](https://github.com/nvzqz/rosy/blob/master/LICENSE-MIT)
-
-- [Apache License (Version 2.0)](https://github.com/nvzqz/rosy/blob/master/LICENSE-APACHE)
-
+This project is made available under either the conditions of the
+[MIT License](https://choosealicense.com/licenses/mit/) or
+[Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/)
 at your choosing.
 
-[Ruby]:         https://www.ruby-lang.org
-[Rust]:         https://www.rust-lang.org
-[`Cargo.toml`]: https://doc.rust-lang.org/cargo/reference/manifest.html
+See [`LICENSE.md`][license].
 
-[travis]:       https://travis-ci.com/oceanpkg/rosy
-[travis-badge]: https://travis-ci.com/oceanpkg/rosy.svg?branch=master
-[loc-badge]:    https://tokei.rs/b1/github/oceanpkg/rosy?category=code
-[crate]:        https://crates.io/crates/rosy
-[crate-badge]:  https://img.shields.io/crates/v/rosy.svg
-[dl-badge]:     https://img.shields.io/crates/d/rosy.svg
-[docs]:         https://docs.rs/rosy
-[docs-badge]:   https://docs.rs/rosy/badge.svg
+[Ruby]:          https://www.ruby-lang.org
+[Rust]:          https://www.rust-lang.org
+[`Cargo.toml`]:  https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[travis]:        https://travis-ci.com/oceanpkg/rosy
+[travis-badge]:  https://travis-ci.com/oceanpkg/rosy.svg?branch=master
+[loc-badge]:     https://tokei.rs/b1/github/oceanpkg/rosy?category=code
+[crate]:         https://crates.io/crates/rosy
+[crate-badge]:   https://img.shields.io/crates/v/rosy.svg
+[dl-badge]:      https://img.shields.io/crates/d/rosy.svg
+[docs]:          https://docs.rs/rosy
+[docs-badge]:    https://docs.rs/rosy/badge.svg
+[license]:       https://github.com/oceanpkg/rosy/blob/master/LICENSE.md
+[license-badge]: https://img.shields.io/badge/license-MIT%20or%20Apache%202.0-blue.svg
