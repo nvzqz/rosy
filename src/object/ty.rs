@@ -15,10 +15,7 @@ impl From<value_type> for Ty {
 impl fmt::Debug for Ty {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let name = match self.name() {
-            Some(name) => name,
-            None => "Unknown"
-        };
+        let name = self.name().unwrap_or("Unknown");
         f.debug_tuple("Ty").field(&name).finish()
     }
 }
