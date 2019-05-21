@@ -245,17 +245,16 @@ Rust acts as a high-level language.
 
 #### Rosy vs Rutie
 
-[Rutie] is a Rust library that tries to be less magical than Helix. It takes an
-excellent approach to wrapping Ruby's C API in Rust by exposing Ruby classes as
-Rust `struct`s. This inspired the layout and design of Rosy to some extent.
-Rutie is actually a continuation of the work done on [ruru], which is no longer
-maintained as of the end of 2017. Rutie even exports its low-level C bindings in
-a module that can be used to write functionality that Rutie have.
+[Rutie] is a Rust library that tries to be less magical than Helix. It is a
+continuation of the work done on [ruru], which is no longer maintained as of the
+end of 2017. Rutie takes an excellent approach to wrapping Ruby's C API in Rust
+by exposing Ruby classes as Rust `struct`s. This inspired the layout and design
+of Rosy to some extent.
 
-Unlike Rutie, Rosy doesn't expose the lower-level C library. The reasoning is
-that if certain functionality is missing from Rosy, it should be added to the
-core library by either requesting it through [an issue][issues] or submitting a
-[pull request][pulls] with an implementation.
+However, unlike Rutie, Rosy doesn't expose the lower-level C bindings. The
+reasoning is that if certain functionality is missing from Rosy, it should be
+added to the core library by either requesting it through an [issue][issues] or
+submitting a [pull request][pulls] with an implementation.
 
 Rosy is also designed to enable you to write the most performant code possible
 such that it can't be beaten by using the C API directly. This aligns with the
