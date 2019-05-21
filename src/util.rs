@@ -62,7 +62,7 @@ pub fn value_ty(v: VALUE) -> Ty {
         } else if let Some(built_in) = value_built_in_ty(v) {
             built_in
         } else {
-            Ty::NONE
+            Ty::_UNKNOWN
         }
     }
 }

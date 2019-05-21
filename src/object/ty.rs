@@ -21,6 +21,8 @@ impl fmt::Debug for Ty {
 }
 
 impl Ty {
+    pub(crate) const _UNKNOWN: Ty = Ty(value_type::_Unknown as i32);
+
     /// None type.
     pub const NONE:     Ty = Ty(value_type::NONE as i32);
     /// Object type.

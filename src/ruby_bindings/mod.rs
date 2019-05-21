@@ -165,6 +165,9 @@ pub enum value_type {
     ZOMBIE = 0x1d,
 
     MASK   = 0x1f,
+
+    // Defined here to ensure that no other values conflict
+    _Unknown = !0,
 }
 
 extern "C" {
