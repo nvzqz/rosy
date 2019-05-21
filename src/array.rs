@@ -253,6 +253,12 @@ impl<O: Object> Array<O> {
         unsafe { Self::from_raw(ruby::rb_ary_new_capa(capacity as _)) }
     }
 
+    /// Duplicates the contents of `self` into a new instance.
+    #[inline]
+    pub fn duplicate(self) -> Self {
+        unsafe { Self::from_raw(ruby::rb_ary_dup(self.raw())) }
+    }
+
     /// Returns the number of elements in `self`.
     ///
     /// # Examples

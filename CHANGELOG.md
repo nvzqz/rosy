@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+### Added
+- `duplicate` methods to `Array` and `Hash`
+
 ### Changed
 - Where `Float` and `Integer` are located; both now reside in a `num` module
   - Also moved types related to `Integer::[un_]pack` into `num::pack`.

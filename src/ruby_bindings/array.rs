@@ -88,7 +88,8 @@ pub mod rarray_flags {
 extern "C" {
     // void rb_ary_modify(VALUE ary)
     pub fn rb_ary_modify(ary: VALUE);
-
+    // VALUE rb_ary_dup(VALUE ary)
+    pub fn rb_ary_dup(ary: VALUE) -> VALUE;
     // VALUE rb_ary_cat(VALUE ary, const VALUE *argv, long len)
     pub fn rb_ary_cat(ary: VALUE, argv: *const VALUE, len: c_long) -> VALUE;
     // VALUE rb_ary_clear(VALUE ary)

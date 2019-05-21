@@ -305,6 +305,12 @@ impl String {
         ))
     }
 
+    /// Duplicates the contents of `self` into a new instance.
+    #[inline]
+    pub fn duplicate(self) -> Self {
+        unsafe { Self::from_raw(ruby::rb_str_dup(self.raw())) }
+    }
+
     /// Returns how the bytes of `self` are encoded.
     ///
     /// # Examples
@@ -591,12 +597,6 @@ impl String {
     #[inline]
     pub unsafe fn push_str(self, s: &str) {
         ruby::rb_str_cat(self.raw(), s.as_ptr() as *const _, s.len() as _);
-    }
-
-    /// Duplicates the contents of `self` into a new instance.
-    #[inline]
-    pub fn duplicate(self) -> Self {
-        unsafe { Self::from_raw(ruby::rb_str_dup(self.raw())) }
     }
 
     /// Returns the contents of `self` with an ellipsis (three dots) if it's

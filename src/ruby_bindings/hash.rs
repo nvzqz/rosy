@@ -15,4 +15,6 @@ extern "C" {
     pub fn rb_hash_new() -> VALUE;
     // size_t rb_hash_size_num(VALUE hash)
     pub fn rb_hash_size_num(hash: VALUE) -> usize;
+    // VALUE rb_hash_dup(VALUE hash)
+    pub fn rb_hash_dup(hash: VALUE) -> VALUE;
 }

@@ -177,6 +177,12 @@ impl<K: Object, V: Object> Hash<K, V> {
         hash
     }
 
+    /// Duplicates the contents of `self` into a new instance.
+    #[inline]
+    pub fn duplicate(self) -> Self {
+        unsafe { Self::from_raw(ruby::rb_hash_dup(self.raw())) }
+    }
+
     /// Associates `val` with `key`.
     ///
     /// # Safety
