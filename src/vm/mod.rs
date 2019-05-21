@@ -67,7 +67,7 @@ pub fn eval(script: &CStr) -> Result<AnyObject> {
     unsafe {
         let mut err = 0;
         let raw = ruby::rb_eval_string_protect(script.as_ptr(), &mut err);
-        match raw {
+        match err {
             0 => Ok(AnyObject::from_raw(raw)),
             _ => Err(AnyException::_take_current()),
         }
@@ -85,7 +85,7 @@ pub fn eval_wrapped(script: &CStr) -> Result<AnyObject> {
     unsafe {
         let mut err = 0;
         let raw = ruby::rb_eval_string_wrap(script.as_ptr(), &mut err);
-        match raw {
+        match err {
             0 => Ok(AnyObject::from_raw(raw)),
             _ => Err(AnyException::_take_current()),
         }

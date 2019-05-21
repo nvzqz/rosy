@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog] and this project adheres to
 - Where `Float` and `Integer` are located; both now reside in a `num` module
   - Also moved types related to `Integer::[un_]pack` into `num::pack`.
 
+### Fixed
+- `vm::eval` error checking
+
 ## [0.0.6] - 2019-05-21
 ### Added
 - Explicit typing to `Class`
