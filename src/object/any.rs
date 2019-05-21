@@ -151,6 +151,13 @@ impl From<bool> for AnyObject {
     }
 }
 
+impl From<()> for AnyObject {
+    #[inline]
+    fn from(_nil: ()) -> Self {
+        Self::nil()
+    }
+}
+
 impl AnyObject {
     #[inline]
     pub(crate) fn _ptr(self) -> *mut std::ffi::c_void {
