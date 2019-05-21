@@ -106,6 +106,7 @@ pub mod array;
 pub mod exception;
 pub mod gc;
 pub mod hash;
+pub mod meta;
 pub mod mixin;
 pub mod num;
 pub mod object;

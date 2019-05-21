@@ -166,3 +166,13 @@ pub enum value_type {
 
     MASK   = 0x1f,
 }
+
+extern "C" {
+    pub static ruby_version:      [prelude::c_char; 0];
+    pub static ruby_release_date: [prelude::c_char; 0];
+    pub static ruby_platform:     [prelude::c_char; 0];
+    pub static ruby_patchlevel:   [prelude::c_char; 0];
+    pub static ruby_description:  [prelude::c_char; 0];
+    pub static ruby_copyright:    [prelude::c_char; 0];
+    pub static ruby_engine:       [prelude::c_char; 0];
+}
