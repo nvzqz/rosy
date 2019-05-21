@@ -242,6 +242,10 @@ at your choosing.
 
 See [`LICENSE.md`][license].
 
+----
+
+[Back to top](#rosy)
+
 [Ruby]:         https://www.ruby-lang.org
 [Rust]:         https://www.rust-lang.org
 [`Cargo.toml`]: https://doc.rust-lang.org/cargo/reference/manifest.html
