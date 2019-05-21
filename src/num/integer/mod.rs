@@ -60,7 +60,20 @@ impl From<Integer> for AnyObject {
 impl<O: Object> PartialEq<O> for Integer {
     #[inline]
     fn eq(&self, other: &O) -> bool {
-        self.as_any_object() == other
+        let other = other.as_any_object();
+        let other_id = O::unique_id();
+
+        let is_num =
+            other_id == Self::unique_id() ||
+            other_id == Float::unique_id() ||
+            other.is_float() ||
+            other.is_integer();
+
+        if is_num {
+            unsafe { ruby::rb_big_eq(self.raw(), other.raw()) != 0 }
+        } else {
+            self.as_any_object() == other
+        }
     }
 }
 
