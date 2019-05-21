@@ -153,6 +153,16 @@ impl InstrSeq {
         self.call("eval")
     }
 
+    /// Evaluates `self` and returns the result.
+    ///
+    /// # Safety
+    ///
+    /// If this instruction sequence throws an exception, it must be caught.
+    #[inline]
+    pub unsafe fn eval_unchecked(self) -> AnyObject {
+        self.call_unchecked("eval")
+    }
+
     /// Returns the serialized binary data.
     #[inline]
     pub fn to_binary(self) -> String {
