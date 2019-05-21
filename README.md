@@ -291,6 +291,8 @@ See [`LICENSE.md`][license].
 
 ----
 
+Congrats on making it this far! ʕﾉ•ᴥ•ʔﾉ🌹
+
 [Back to top](#top)
 
 [Ruby]:           https://www.ruby-lang.org
