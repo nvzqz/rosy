@@ -19,10 +19,9 @@
 pub use crate::{
     array::Array,
     exception::{AnyException, Exception},
-    float::Float,
     hash::Hash,
-    integer::Integer,
     mixin::{Mixin, Class, Module},
+    num::{Float, Integer},
     object::{AnyObject, Object, RosyObject},
     Result,
     rosy::Rosy,

@@ -104,11 +104,10 @@ mod protected;
 mod util;
 pub mod array;
 pub mod exception;
-pub mod float;
 pub mod gc;
 pub mod hash;
-pub mod integer;
 pub mod mixin;
+pub mod num;
 pub mod object;
 pub mod prelude;
 pub mod string;
@@ -122,10 +121,9 @@ pub use protected::*;
 pub use self::{
     array::Array,
     exception::{AnyException, Exception},
-    float::Float,
     hash::Hash,
-    integer::Integer,
     mixin::{Mixin, Class, Module},
+    num::{Float, Integer},
     object::{AnyObject, Object, RosyObject},
     rosy::Rosy,
     string::String,

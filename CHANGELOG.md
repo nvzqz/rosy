@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+### Changed
+- Where `Float` and `Integer` are located; both now reside in a `num` module
+  - Also moved types related to `Integer::[un_]pack` into `num::pack`.
 
 ## [0.0.6] - 2019-05-21
 ### Added
