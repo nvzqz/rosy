@@ -247,11 +247,11 @@ Rosy's [`Cargo.toml`] like so:
 aloxide = { path = "path/to/aloxide", version = "0.0.8", default-features = false }
 ```
 
-### Library Comparison
+## Library Comparison
 
 Like with most technologies, Rosy isn't the first of its kind.
 
-#### Rosy vs Helix
+### Rosy vs Helix
 
 [Helix] is a Rust library built on top of macros. Interaction with the Ruby
 runtime is done via a `ruby!` macro which features a [DSL] that's a mix between
@@ -265,7 +265,7 @@ convenient and high-level while trying not to hide the low-level details that
 can allow you to write better-optimized code. This is parallel to the way that
 Rust acts as a high-level language.
 
-#### Rosy vs Rutie
+### Rosy vs Rutie
 
 [Rutie] is a Rust library that tries to be less magical than Helix. It is a
 continuation of the work done on [ruru], which is no longer maintained as of the
