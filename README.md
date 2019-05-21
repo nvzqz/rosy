@@ -291,7 +291,7 @@ See [`LICENSE.md`][license].
 
 ----
 
-[Back to top](#rosy)
+[Back to top](#top)
 
 [Ruby]:           https://www.ruby-lang.org
 [Rust]:           https://www.rust-lang.org
