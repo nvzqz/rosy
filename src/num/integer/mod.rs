@@ -236,23 +236,19 @@ macro_rules! forward_cmp {
     ($($t:ty)+) => { $(
         impl PartialEq<$t> for Integer {
             #[inline]
-            fn eq(&self, int: &$t) -> bool {
+            fn eq(&self, other: &$t) -> bool {
                 if let Some(this) = self.to_value::<$t>() {
-                    this == *int
+                    this == *other
                 } else {
                     false
                 }
             }
         }
 
-        impl PartialEq<$t> for AnyObject {
+        impl PartialEq<Integer> for $t {
             #[inline]
-            fn eq(&self, int: &$t) -> bool {
-                if let Some(integer) = self.to_integer() {
-                    integer == *int
-                } else {
-                    false
-                }
+            fn eq(&self, other: &Integer) -> bool {
+                other == self
             }
         }
 
@@ -275,14 +271,10 @@ macro_rules! forward_cmp {
             }
         }
 
-        impl PartialOrd<$t> for AnyObject {
+        impl PartialOrd<Integer> for $t {
             #[inline]
-            fn partial_cmp(&self, other: &$t) -> Option<Ordering> {
-                if let Some(integer) = self.to_integer() {
-                    integer.partial_cmp(other)
-                } else {
-                    None
-                }
+            fn partial_cmp(&self, other: &Integer) -> Option<Ordering> {
+                Some(other.partial_cmp(self)?.reverse())
             }
         }
     )+ }

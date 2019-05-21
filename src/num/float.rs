@@ -26,11 +26,18 @@ impl From<Float> for AnyObject {
     fn from(obj: Float) -> Self { obj.0.into() }
 }
 
-impl<O: Object> PartialEq<O> for Float {
+impl PartialEq for Float {
     #[inline]
-    fn eq(&self, other: &O) -> bool {
-        if let Some(other) = Self::cast(*other) {
-            self.to_f64() == other.to_f64()
+    fn eq(&self, other: &Float) -> bool {
+        self.to_f64() == other.to_f64()
+    }
+}
+
+impl PartialEq<AnyObject> for Float {
+    #[inline]
+    fn eq(&self, other: &AnyObject) -> bool {
+        if let Some(other) = other.to_float() {
+            *self == other
         } else {
             false
         }
@@ -65,14 +72,10 @@ impl PartialEq<Float> for f32 {
     }
 }
 
-impl<O: Object> PartialOrd<O> for Float {
+impl PartialOrd for Float {
     #[inline]
-    fn partial_cmp(&self, other: &O) -> Option<Ordering> {
-        if let Some(other) = Self::cast(*other) {
-            self.to_f64().partial_cmp(&other.to_f64())
-        } else {
-            None
-        }
+    fn partial_cmp(&self, other: &Float) -> Option<Ordering> {
+        self.to_f64().partial_cmp(&other.to_f64())
     }
 }
 
@@ -83,10 +86,24 @@ impl PartialOrd<f64> for Float {
     }
 }
 
+impl PartialOrd<f32> for Float {
+    #[inline]
+    fn partial_cmp(&self, other: &f32) -> Option<Ordering> {
+        self.partial_cmp(&(*other as f64))
+    }
+}
+
 impl PartialOrd<Float> for f64 {
     #[inline]
     fn partial_cmp(&self, other: &Float) -> Option<Ordering> {
         self.partial_cmp(&other.to_f64())
+    }
+}
+
+impl PartialOrd<Float> for f32 {
+    #[inline]
+    fn partial_cmp(&self, other: &Float) -> Option<Ordering> {
+        Some(other.partial_cmp(self)?.reverse())
     }
 }
 

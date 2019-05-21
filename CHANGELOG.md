@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 ## [Unreleased]
 ### Added
 - `duplicate` methods to `Array` and `Hash`
+- More `PartialEq` and `PartialOrd` implementations to `Float` and `Integer`
 
 ### Changed
 - Where `Float` and `Integer` are located; both now reside in a `num` module
