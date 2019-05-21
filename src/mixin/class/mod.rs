@@ -487,7 +487,7 @@ impl<O: Object> Class<O> {
     /// ```
     ///
     // Link to docs.rs since `Class` may either be in `class` module or root
-    /// [`def_method!`]: https://docs.rs/rosy/0.0.5/rosy/macro.def_method.html
+    /// [`def_method!`]: https://docs.rs/rosy/0.0.6/rosy/macro.def_method.html
     pub fn def_method<N, F>(self, name: N, f: F) -> Result
     where
         N: Into<SymbolId>,
@@ -509,7 +509,7 @@ impl<O: Object> Class<O> {
     /// exception will be raised.
     ///
     // Link to docs.rs since `Class` may either be in `class` module or root
-    /// [`def_method_unchecked!`]: https://docs.rs/rosy/0.0.5/rosy/macro.def_method_unchecked.html
+    /// [`def_method_unchecked!`]: https://docs.rs/rosy/0.0.6/rosy/macro.def_method_unchecked.html
     #[inline]
     pub unsafe fn def_method_unchecked<N, F>(self, name: N, f: F)
     where

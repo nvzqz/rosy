@@ -7,7 +7,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! rosy = "0.0.5"
+//! rosy = "0.0.6"
 //! ```
 //!
 //! Rosy has functionality that is only available for certain Ruby versions. The
@@ -19,7 +19,7 @@
 //!
 //! ```toml
 //! [dependencies.rosy]
-//! version = "0.0.5"
+//! version = "0.0.6"
 //! features = ["ruby_2_6"]
 //! ```
 //!

@@ -89,7 +89,7 @@ following to your project's [`Cargo.toml`]:
 
 ```toml
 [dependencies]
-rosy = "0.0.5"
+rosy = "0.0.6"
 ```
 
 Rosy has functionality that is only available for certain Ruby versions. The
@@ -101,7 +101,7 @@ For example:
 
 ```toml
 [dependencies.rosy]
-version = "0.0.5"
+version = "0.0.6"
 features = ["ruby_2_6"]
 ```
 
@@ -174,7 +174,7 @@ assert_eq!(array, Class::array());
 ```
 
 To get an existing named class if it's not a
-[built-in class](https://docs.rs/rosy/0.0.5/rosy/struct.Class.html#impl-1),
+[built-in class](https://docs.rs/rosy/0.0.6/rosy/struct.Class.html#impl-1),
 one should call [`Class::get`]:
 
 ```rust
@@ -268,23 +268,23 @@ See [`LICENSE.md`][license].
 [`FnOnce`]: https://doc.rust-lang.org/std/ops/trait.FnOnce.html
 [`panic!`]: https://doc.rust-lang.org/stable/std/macro.panic.html
 
-[`AnyObject`]:              https://docs.rs/rosy/0.0.5/rosy/struct.AnyObject.html
-[`Array`]:                  https://docs.rs/rosy/0.0.5/rosy/struct.Array.html
-[`Class::def_method`]:      https://docs.rs/rosy/0.0.5/rosy/struct.Class.html#method.def_method
-[`Class::get_or_def`]:      https://docs.rs/rosy/0.0.5/rosy/struct.Class.html#method.get_or_def
-[`Class::get`]:             https://docs.rs/rosy/0.0.5/rosy/struct.Class.html#method.get
-[`Class::new_instance`]:    https://docs.rs/rosy/0.0.5/rosy/struct.Class.html#method.new_instances
-[`Class::subclass`]:        https://docs.rs/rosy/0.0.5/rosy/struct.Class.html#method.subclass
-[`Class`]:                  https://docs.rs/rosy/0.0.5/rosy/struct.Class.html
-[`def_method_unchecked!`]:  https://docs.rs/rosy/0.0.5/rosy/macro.def_method_unchecked.html
-[`def_method!`]:            https://docs.rs/rosy/0.0.5/rosy/macro.def_method.html
-[`Hash`]:                   https://docs.rs/rosy/0.0.5/rosy/struct.Hash.html
-[`mark`]:                   https://docs.rs/rosy/0.0.5/rosy/gc/fn.mark.html
-[`Mixin::def_class`]:       https://docs.rs/rosy/0.0.5/rosy/trait.Mixin.html#method.def_class
-[`Mixin::def_subclass`]:    https://docs.rs/rosy/0.0.5/rosy/trait.Mixin.html#method.def_subclass
-[`Object::call_unchecked`]: https://docs.rs/rosy/0.0.5/rosy/trait.Object.html#method.call_unchecked
-[`Object::call`]:           https://docs.rs/rosy/0.0.5/rosy/trait.Object.html#method.call
-[`Object`]:                 https://docs.rs/rosy/0.0.5/rosy/trait.Object.html
-[`protected`]:              https://docs.rs/rosy/0.0.5/rosy/fn.protected.html
-[`protected_no_panic`]:     https://docs.rs/rosy/0.0.5/rosy/fn.protected_no_panic.html
-[`vm::init`]:               https://docs.rs/rosy/0.0.5/rosy/vm/fn.init.html
+[`AnyObject`]:              https://docs.rs/rosy/0.0.6/rosy/struct.AnyObject.html
+[`Array`]:                  https://docs.rs/rosy/0.0.6/rosy/struct.Array.html
+[`Class::def_method`]:      https://docs.rs/rosy/0.0.6/rosy/struct.Class.html#method.def_method
+[`Class::get_or_def`]:      https://docs.rs/rosy/0.0.6/rosy/struct.Class.html#method.get_or_def
+[`Class::get`]:             https://docs.rs/rosy/0.0.6/rosy/struct.Class.html#method.get
+[`Class::new_instance`]:    https://docs.rs/rosy/0.0.6/rosy/struct.Class.html#method.new_instances
+[`Class::subclass`]:        https://docs.rs/rosy/0.0.6/rosy/struct.Class.html#method.subclass
+[`Class`]:                  https://docs.rs/rosy/0.0.6/rosy/struct.Class.html
+[`def_method_unchecked!`]:  https://docs.rs/rosy/0.0.6/rosy/macro.def_method_unchecked.html
+[`def_method!`]:            https://docs.rs/rosy/0.0.6/rosy/macro.def_method.html
+[`Hash`]:                   https://docs.rs/rosy/0.0.6/rosy/struct.Hash.html
+[`mark`]:                   https://docs.rs/rosy/0.0.6/rosy/gc/fn.mark.html
+[`Mixin::def_class`]:       https://docs.rs/rosy/0.0.6/rosy/trait.Mixin.html#method.def_class
+[`Mixin::def_subclass`]:    https://docs.rs/rosy/0.0.6/rosy/trait.Mixin.html#method.def_subclass
+[`Object::call_unchecked`]: https://docs.rs/rosy/0.0.6/rosy/trait.Object.html#method.call_unchecked
+[`Object::call`]:           https://docs.rs/rosy/0.0.6/rosy/trait.Object.html#method.call
+[`Object`]:                 https://docs.rs/rosy/0.0.6/rosy/trait.Object.html
+[`protected`]:              https://docs.rs/rosy/0.0.6/rosy/fn.protected.html
+[`protected_no_panic`]:     https://docs.rs/rosy/0.0.6/rosy/fn.protected_no_panic.html
+[`vm::init`]:               https://docs.rs/rosy/0.0.6/rosy/vm/fn.init.html
