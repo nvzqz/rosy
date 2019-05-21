@@ -168,6 +168,7 @@ pub enum value_type {
 }
 
 extern "C" {
+    pub static ruby_api_version:  [prelude::c_int;  3];
     pub static ruby_version:      [prelude::c_char; 0];
     pub static ruby_release_date: [prelude::c_char; 0];
     pub static ruby_platform:     [prelude::c_char; 0];

@@ -6,6 +6,15 @@ use std::{
 };
 use crate::ruby;
 
+/// Ruby's API version.
+///
+/// Note that this may differ from the result of `version_str`.
+#[inline]
+pub fn api_version() -> (u16, u16, u16) {
+    let [major, minor, teeny] = unsafe { ruby::ruby_api_version };
+    (major as u16, minor as u16, teeny as u16)
+}
+
 /// Ruby's version info as a UTF-8 string.
 #[inline]
 pub fn version_str<'a>() -> &'a str {
