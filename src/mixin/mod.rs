@@ -492,16 +492,16 @@ impl DefMixinError {
 
     #[inline]
     fn _get(m: impl Mixin, name: SymbolId) -> Option<Self> {
-        use ruby::value_type::*;
+        use crate::object::Ty;
         use DefMixinError::*;
 
         let existing = _get_const(m, name)?;
         let raw = existing.raw();
-        let err = match crate::util::value_built_in_type(raw) {
-            Some(MODULE) => unsafe {
+        let err = match crate::util::value_built_in_ty(raw) {
+            Some(Ty::MODULE) => unsafe {
                 ExistingModule(Module::from_raw(raw))
             },
-            Some(CLASS) => unsafe {
+            Some(Ty::CLASS) => unsafe {
                 ExistingClass(Class::from_raw(raw))
             },
             Some(_) | None => ExistingConst(existing),

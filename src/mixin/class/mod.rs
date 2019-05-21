@@ -92,12 +92,12 @@ impl<O: Object> fmt::Display for Class<O> {
 unsafe impl<O: Object> Object for Class<O> {
     #[inline]
     fn unique_id() -> Option<u128> {
-        Some(!(Ty::Class as u128))
+        Some(!(Ty::CLASS.id() as u128))
     }
 
     #[inline]
     fn cast<A: Object>(obj: A) -> Option<Self> {
-        if obj.is_ty(Ty::Class) {
+        if obj.is_ty(Ty::CLASS) {
             unsafe { Some(Self::cast_unchecked(obj)) }
         } else {
             None
@@ -105,10 +105,10 @@ unsafe impl<O: Object> Object for Class<O> {
     }
 
     #[inline]
-    fn ty(self) -> Ty { Ty::Class }
+    fn ty(self) -> Ty { Ty::CLASS }
 
     #[inline]
-    fn is_ty(self, ty: Ty) -> bool { ty == Ty::Class }
+    fn is_ty(self, ty: Ty) -> bool { ty == Ty::CLASS }
 }
 
 impl crate::util::Sealed for Class {}

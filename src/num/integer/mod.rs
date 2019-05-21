@@ -97,7 +97,7 @@ impl Ord for Integer {
 unsafe impl Object for Integer {
     #[inline]
     fn unique_id() -> Option<u128> {
-        Some(!((Ty::Fixnum as u128) | ((Ty::Bignum as u128) << 8)))
+        Some(!((Ty::FIXNUM.id() as u128) | ((Ty::BIGNUM.id() as u128) << 8)))
     }
 
     #[inline]
@@ -112,9 +112,9 @@ unsafe impl Object for Integer {
     #[inline]
     fn ty(self) -> Ty {
         if self.is_fixnum() {
-            Ty::Fixnum
+            Ty::FIXNUM
         } else {
-            Ty::Bignum
+            Ty::BIGNUM
         }
     }
 

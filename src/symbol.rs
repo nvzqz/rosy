@@ -37,7 +37,7 @@ impl PartialEq<AnyObject> for Symbol {
 unsafe impl Object for Symbol {
     #[inline]
     fn cast<A: Object>(obj: A) -> Option<Self> {
-        if obj.is_ty(Ty::Symbol) {
+        if obj.is_ty(Ty::SYMBOL) {
             unsafe { Some(Self::cast_unchecked(obj)) }
         } else {
             None
@@ -45,10 +45,10 @@ unsafe impl Object for Symbol {
     }
 
     #[inline]
-    fn ty(self) -> Ty { Ty::Symbol }
+    fn ty(self) -> Ty { Ty::SYMBOL }
 
     #[inline]
-    fn is_ty(self, ty: Ty) -> bool { ty == Ty::Symbol }
+    fn is_ty(self, ty: Ty) -> bool { ty == Ty::SYMBOL }
 }
 
 impl fmt::Display for Symbol {

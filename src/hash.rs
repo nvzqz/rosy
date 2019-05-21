@@ -47,13 +47,13 @@ unsafe impl<K: Object, V: Object> Object for Hash<K, V> {
     fn unique_id() -> Option<u128> {
         let key = K::unique_id()?;
         let val = V::unique_id()?;
-        let hash = !(Ty::Hash as u128);
+        let hash = !(Ty::HASH.id() as u128);
         Some(key.rotate_left(11) ^ val.rotate_right(7) ^ hash)
     }
 
     #[inline]
     fn cast<A: Object>(obj: A) -> Option<Self> {
-        if obj.is_ty(Ty::Hash) {
+        if obj.is_ty(Ty::HASH) {
             unsafe { Some(Self::from_raw(obj.raw())) }
         } else {
             None
@@ -61,10 +61,10 @@ unsafe impl<K: Object, V: Object> Object for Hash<K, V> {
     }
 
     #[inline]
-    fn ty(self) -> Ty { Ty::Hash }
+    fn ty(self) -> Ty { Ty::HASH }
 
     #[inline]
-    fn is_ty(self, ty: Ty) -> bool { ty == Ty::Hash }
+    fn is_ty(self, ty: Ty) -> bool { ty == Ty::HASH }
 }
 
 impl<K: Object, V: Object> fmt::Display for Hash<K, V> {

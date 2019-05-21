@@ -26,12 +26,12 @@ impl From<Module> for AnyObject {
 unsafe impl Object for Module {
     #[inline]
     fn unique_id() -> Option<u128> {
-        Some(!(Ty::Module as u128))
+        Some(!(Ty::MODULE.id() as u128))
     }
 
     #[inline]
     fn cast<A: Object>(obj: A) -> Option<Self> {
-        if obj.is_ty(Ty::Module) {
+        if obj.is_ty(Ty::MODULE) {
             unsafe { Some(Self::cast_unchecked(obj)) }
         } else {
             None
@@ -39,10 +39,10 @@ unsafe impl Object for Module {
     }
 
     #[inline]
-    fn ty(self) -> Ty { Ty::Module }
+    fn ty(self) -> Ty { Ty::MODULE }
 
     #[inline]
-    fn is_ty(self, ty: Ty) -> bool { ty == Ty::Module }
+    fn is_ty(self, ty: Ty) -> bool { ty == Ty::MODULE }
 }
 
 impl crate::util::Sealed for Module {}

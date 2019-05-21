@@ -1,6 +1,6 @@
 use std::os::raw::c_long;
 use crate::{
-    object::{AnyObject, Ty},
+    object::Ty,
     ruby::{
         self,
         RBasic,
@@ -32,43 +32,37 @@ pub fn test_value(v: VALUE) -> bool {
 
 pub fn value_is_ty(v: VALUE, ty: Ty) -> bool {
     match ty {
-        Ty::Fixnum => value_is_fixnum(v),
-        Ty::Float  => value_is_float(v),
-        Ty::Symbol => value_is_sym(v),
-        Ty::True   => v == TRUE_VALUE,
-        Ty::False  => v == FALSE_VALUE,
-        Ty::Nil    => v == NIL_VALUE,
-        Ty::Undef  => v == UNDEF_VALUE,
-        _ => if let Some(t) = value_built_in_type(v) {
-            t as u32 == ty as u32
+        Ty::FIXNUM => value_is_fixnum(v),
+        Ty::FLOAT  => value_is_float(v),
+        Ty::SYMBOL => value_is_sym(v),
+        Ty::TRUE   => v == TRUE_VALUE,
+        Ty::FALSE  => v == FALSE_VALUE,
+        Ty::NIL    => v == NIL_VALUE,
+        Ty::UNDEF  => v == UNDEF_VALUE,
+        _ => if let Some(t) = value_built_in_ty(v) {
+            t == ty
         } else {
             false
         }
     }
 }
 
-pub fn value_type(v: VALUE) -> value_type {
+pub fn value_ty(v: VALUE) -> Ty {
     match v {
-        NIL_VALUE => value_type::NIL,
-        TRUE_VALUE => value_type::TRUE,
-        FALSE_VALUE => value_type::FALSE,
-        UNDEF_VALUE => value_type::UNDEF,
+        NIL_VALUE   => Ty::NIL,
+        TRUE_VALUE  => Ty::TRUE,
+        FALSE_VALUE => Ty::FALSE,
+        UNDEF_VALUE => Ty::UNDEF,
         _ => if value_is_sym(v) {
-            value_type::SYMBOL
+            Ty::SYMBOL
         } else if value_is_float(v) {
-            value_type::FLOAT
+            Ty::FLOAT
         } else if value_is_fixnum(v) {
-            value_type::FIXNUM
-        } else if let Some(built_in) = value_built_in_type(v) {
+            Ty::FIXNUM
+        } else if let Some(built_in) = value_built_in_ty(v) {
             built_in
         } else {
-            debug_assert!(
-                false,
-                "Unknown type of {:?} (raw: {})",
-                unsafe { AnyObject::from_raw(v) },
-                v,
-            );
-            value_type::NONE
+            Ty::NONE
         }
     }
 }
@@ -79,27 +73,22 @@ pub unsafe fn value_flags(v: VALUE) -> VALUE {
 }
 
 #[inline]
-pub unsafe fn value_built_in_type_unchecked(v: VALUE) -> value_type {
+pub unsafe fn value_built_in_ty_unchecked(v: VALUE) -> Ty {
     std::mem::transmute((value_flags(v) & value_type::MASK as VALUE) as u32)
 }
 
 #[inline]
-pub fn value_built_in_type(v: VALUE) -> Option<value_type> {
+pub fn value_built_in_ty(v: VALUE) -> Option<Ty> {
     if value_is_special_const(v) {
         None
     } else {
-        unsafe { Some(value_built_in_type_unchecked(v)) }
+        unsafe { Some(value_built_in_ty_unchecked(v)) }
     }
 }
 
 #[inline]
 pub fn value_is_built_in_ty(v: VALUE, ty: Ty) -> bool {
-    value_is_built_in_type(v, ty.into())
-}
-
-#[inline]
-pub fn value_is_built_in_type(v: VALUE, t: value_type) -> bool {
-    value_built_in_type(v) == Some(t)
+    value_built_in_ty(v) == Some(ty)
 }
 
 #[inline]
@@ -124,7 +113,7 @@ pub fn value_is_fixnum(v: VALUE) -> bool {
 
 #[inline]
 pub fn value_is_float(v: VALUE) -> bool {
-    ruby::rb_flonum_p(v) || value_is_built_in_type(v, value_type::FLOAT)
+    ruby::rb_flonum_p(v) || value_is_built_in_ty(v, Ty::FLOAT)
 }
 
 #[inline]
@@ -144,7 +133,7 @@ pub fn value_is_static_sym(v: VALUE) -> bool {
 
 #[inline]
 pub fn value_is_dyn_sym(v: VALUE) -> bool {
-    value_is_built_in_type(v, value_type::SYMBOL)
+    value_is_built_in_ty(v, Ty::SYMBOL)
 }
 
 #[inline]
@@ -154,12 +143,12 @@ pub fn value_is_sym(v: VALUE) -> bool {
 
 #[inline]
 pub fn value_is_class(v: VALUE) -> bool {
-    value_is_built_in_type(v, value_type::CLASS)
+    value_is_built_in_ty(v, Ty::CLASS)
 }
 
 #[inline]
 pub fn value_is_module(v: VALUE) -> bool {
-    value_is_built_in_type(v, value_type::MODULE)
+    value_is_built_in_ty(v, Ty::MODULE)
 }
 
 pub trait Sealed {}

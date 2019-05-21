@@ -40,7 +40,7 @@ unsafe impl Object for AnyObject {
     }
 
     fn ty(self) -> Ty {
-        crate::util::value_type(self.raw()).into()
+        crate::util::value_ty(self.raw())
     }
 
     #[inline]
@@ -267,7 +267,7 @@ impl AnyObject {
     /// Returns whether `self` is a variable-sized number.
     #[inline]
     pub fn is_bignum(self) -> bool {
-        self.ty() == Ty::Bignum
+        self.ty() == Ty::BIGNUM
     }
 
     /// Returns whether `self` is a fixed-sized number.
@@ -297,7 +297,7 @@ impl AnyObject {
     /// Returns whether `self` is a `String`.
     #[inline]
     pub fn is_string(self) -> bool {
-        crate::util::value_is_built_in_ty(self.raw(), Ty::String)
+        crate::util::value_is_built_in_ty(self.raw(), Ty::STRING)
     }
 
     /// Returns `self` as a `String` if it is one.
@@ -329,7 +329,7 @@ impl AnyObject {
     /// Returns whether `self` is an `Array`.
     #[inline]
     pub fn is_array(self) -> bool {
-        crate::util::value_is_built_in_ty(self.raw(), Ty::Array)
+        crate::util::value_is_built_in_ty(self.raw(), Ty::ARRAY)
     }
 
     /// Returns `self` as an `Array` if it is one.

@@ -110,7 +110,7 @@ impl PartialOrd<Float> for f32 {
 unsafe impl Object for Float {
     #[inline]
     fn unique_id() -> Option<u128> {
-        Some(!(Ty::Float as u128))
+        Some(!(Ty::FLOAT.id() as u128))
     }
 
     #[inline]
@@ -125,7 +125,7 @@ unsafe impl Object for Float {
 
     #[inline]
     fn ty(self) -> Ty {
-        Ty::Float
+        Ty::FLOAT
     }
 
     #[inline]

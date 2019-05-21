@@ -35,7 +35,7 @@ impl fmt::Display for String {
 unsafe impl Object for String {
     #[inline]
     fn unique_id() -> Option<u128> {
-        Some(!(Ty::String as u128))
+        Some(!(Ty::STRING.id() as u128))
     }
 
     #[inline]
@@ -44,10 +44,10 @@ unsafe impl Object for String {
     }
 
     #[inline]
-    fn ty(self) -> Ty { Ty::String }
+    fn ty(self) -> Ty { Ty::STRING }
 
     #[inline]
-    fn is_ty(self, ty: Ty) -> bool { ty == Ty::String }
+    fn is_ty(self, ty: Ty) -> bool { ty == Ty::STRING }
 }
 
 impl AsRef<AnyObject> for String {

@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog] and this project adheres to
 ### Changed
 - Where `Float` and `Integer` are located; both now reside in a `num` module
   - Also moved types related to `Integer::[un_]pack` into `num::pack`.
+- `Ty` into a `struct` with associated constants instead of an `enum`
+  - This prevents the possibility of having an instance of `Ty` from Ruby that
+    isn't a valid `enum` variant
 
 ### Fixed
 - `vm::eval` error checking
