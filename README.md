@@ -16,6 +16,7 @@ High-level, zero (or low) cost bindings of [Ruby]'s C API for [Rust].
   - [Defining Ruby Classes](#defining-ruby-classes)
   - [Defining Ruby Subclasses](#defining-ruby-subclasses)
   - [Catching Ruby Exceptions](#catching-ruby-exceptions)
+- [Platform Support](#platform-support)
 - [Library Comparison](#library-comparison)
   - [Rosy vs Helix](#rosy-vs-helix)
   - [Rosy vs Rutie](#rosy-vs-rutie)
@@ -225,6 +226,27 @@ let result = protected(|| unsafe {
 assert!(result.unwrap_err().is_no_method_error());
 ```
 
+## Platform Support
+
+- [x] [Linux](https://github.com/oceanpkg/rosy/issues/1)
+
+- [x] [macOS](https://github.com/oceanpkg/rosy/issues/2)
+
+- [ ] [Windows](https://github.com/oceanpkg/rosy/issues/3)
+
+Rosy uses [`aloxide`] to find and link Ruby during its build phase. Because of
+that, Rosy's platform support is totally dependent on it. Changes that fix
+issues with linking (or in the future, building) Ruby should be submitted to
+that library for use in this one.
+
+To work locally on `aloxide` and Rosy in combination with each other, change
+Rosy's [`Cargo.toml`] like so:
+
+```toml
+[build-dependencies]
+aloxide = { path = "path/to/aloxide", version = "0.0.8", default-features = false }
+```
+
 ### Library Comparison
 
 Like with most technologies, Rosy isn't the first of its kind.
@@ -294,6 +316,7 @@ Congrats on making it this far! ʕﾉ•ᴥ•ʔﾉ🌹
 
 [Back to top](#top)
 
+[`aloxide`]:      https://github.com/oceanpkg/aloxide
 [Ruby]:           https://www.ruby-lang.org
 [Rust]:           https://www.rust-lang.org
 [`Cargo.toml`]:   https://doc.rust-lang.org/cargo/reference/manifest.html
