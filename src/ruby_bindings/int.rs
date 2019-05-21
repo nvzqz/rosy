@@ -45,6 +45,8 @@ extern "C" {
         flags: c_int,
     ) -> VALUE;
 
+    // VALUE rb_big_eq(VALUE x, VALUE y)
+    pub fn rb_big_eq(x: VALUE, y: VALUE) -> VALUE;
     // int rb_big_sign(VALUE x)
     pub fn rb_big_sign(x: VALUE) -> c_int;
 
