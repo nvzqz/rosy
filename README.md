@@ -16,6 +16,9 @@ High-level, zero (or low) cost bindings of [Ruby]'s C API for [Rust].
   - [Defining Ruby Classes](#defining-ruby-classes)
   - [Defining Ruby Subclasses](#defining-ruby-subclasses)
   - [Catching Ruby Exceptions](#catching-ruby-exceptions)
+- [Library Comparison](#library-comparison)
+  - [Rosy vs Helix](#rosy-vs-helix)
+  - [Rosy vs Rutie](#rosy-vs-rutie)
 - [Authors](#authors)
 - [License](#license)
 
@@ -73,8 +76,8 @@ High-level, zero (or low) cost bindings of [Ruby]'s C API for [Rust].
   this are:
 
   - Ruby's garbage collector de-allocating objects whose references don't live
-    on the stack if they are not [`mark`]ed. This may lead to a possible [use
-    after free].
+    on the stack if they are not [`mark`]ed. This may lead to a possible
+    [use after free].
 
   - _Many_ Ruby functions can throw exceptions. 😓
 
@@ -222,6 +225,50 @@ let result = protected(|| unsafe {
 assert!(result.unwrap_err().is_no_method_error());
 ```
 
+### Library Comparison
+
+Like with most technologies, Rosy isn't the first of its kind.
+
+#### Rosy vs Helix
+
+[Helix] is a Rust library built on top of macros. Interaction with the Ruby
+runtime is done via a `ruby!` macro which features a [DSL] that's a mix between
+Rust and Ruby syntax. To those coming from Ruby, they'll feel right at home.
+However, those coming from Rust may feel that the macro is a little _too_
+magical.
+
+Unlike Helix, for each of Rosy's macros, there's an alternative approach that
+can be taken purely through types, traits, and functions. Rosy is designed to be
+convenient and high-level while trying not to hide the low-level details that
+can allow you to write better-optimized code. This is parallel to the way that
+Rust acts as a high-level language.
+
+#### Rosy vs Rutie
+
+[Rutie] is a Rust library that tries to be less magical than Helix. It takes an
+excellent approach to wrapping Ruby's C API in Rust by exposing Ruby classes as
+Rust `struct`s. This inspired the layout and design of Rosy to some extent.
+Rutie is actually a continuation of the work done on [ruru], which is no longer
+maintained as of the end of 2017. Rutie even exports its low-level C bindings in
+a module that can be used to write functionality that Rutie have.
+
+Unlike Rutie, Rosy doesn't expose the lower-level C library. The reasoning is
+that if certain functionality is missing from Rosy, it should be added to the
+core library by either requesting it through [an issue][issues] or submitting a
+[pull request][pulls] with an implementation.
+
+Rosy is also designed to enable you to write the most performant code possible
+such that it can't be beaten by using the C API directly. This aligns with the
+notion of
+[zero-cost abstractions](https://boats.gitlab.io/blog/post/zero-cost-abstractions).
+However, not all of Rosy's _safe_ abstractions are zero-cost. Sometimes this is
+only possible by writing `unsafe` code since Rosy can't be made aware of certain
+aspects of the program state. For example, unlike Rutie, all functionality in
+Rosy that may throw an exception is marked as `unsafe`. Just like with Rutie,
+however, Rosy allows Rust code to be [`protected`] against raised exceptions.
+This, in combination with calling unchecked functions, allows for reducing the
+number of speed bumps in your code.
+
 ## Authors
 
 - **Creator:** [Nikolai Vazquez](https://github.com/nvzqz)
@@ -246,24 +293,30 @@ See [`LICENSE.md`][license].
 
 [Back to top](#rosy)
 
-[Ruby]:         https://www.ruby-lang.org
-[Rust]:         https://www.rust-lang.org
-[`Cargo.toml`]: https://doc.rust-lang.org/cargo/reference/manifest.html
+[Ruby]:           https://www.ruby-lang.org
+[Rust]:           https://www.rust-lang.org
+[`Cargo.toml`]:   https://doc.rust-lang.org/cargo/reference/manifest.html
+[Helix]:          https://usehelix.com
+[Rutie]:          https://github.com/danielpclark/rutie
+[ruru]:           https://github.com/d-unseductable/ruru
 
+[DSL]:            https://en.wikipedia.org/wiki/Domain-specific_language
+[panic-ffi-ub]:   https://doc.rust-lang.org/nomicon/ffi.html#ffi-and-panics
 [use after free]: https://cwe.mitre.org/data/definitions/416.html
 [UTF-8]:          https://en.wikipedia.org/wiki/UTF-8
-[panic-ffi-ub]:   https://doc.rust-lang.org/nomicon/ffi.html#ffi-and-panics
 
-[travis]:        https://travis-ci.com/oceanpkg/rosy
-[travis-badge]:  https://travis-ci.com/oceanpkg/rosy.svg?branch=master
-[loc-badge]:     https://tokei.rs/b1/github/oceanpkg/rosy?category=code
-[crate]:         https://crates.io/crates/rosy
-[crate-badge]:   https://img.shields.io/crates/v/rosy.svg
-[dl-badge]:      https://img.shields.io/crates/d/rosy.svg
-[docs]:          https://docs.rs/rosy
-[docs-badge]:    https://docs.rs/rosy/badge.svg
-[license]:       https://github.com/oceanpkg/rosy/blob/master/LICENSE.md
-[license-badge]: https://img.shields.io/badge/license-MIT%20or%20Apache%202.0-blue.svg
+[issues]:         https://github.com/oceanpkg/rosy/issues
+[pulls]:          https://github.com/oceanpkg/rosy/pulls
+[travis]:         https://travis-ci.com/oceanpkg/rosy
+[travis-badge]:   https://travis-ci.com/oceanpkg/rosy.svg?branch=master
+[loc-badge]:      https://tokei.rs/b1/github/oceanpkg/rosy?category=code
+[crate]:          https://crates.io/crates/rosy
+[crate-badge]:    https://img.shields.io/crates/v/rosy.svg
+[dl-badge]:       https://img.shields.io/crates/d/rosy.svg
+[docs]:           https://docs.rs/rosy
+[docs-badge]:     https://docs.rs/rosy/badge.svg
+[license]:        https://github.com/oceanpkg/rosy/blob/master/LICENSE.md
+[license-badge]:  https://img.shields.io/badge/license-MIT%20or%20Apache%202.0-blue.svg
 
 [`FnOnce`]: https://doc.rust-lang.org/std/ops/trait.FnOnce.html
 [`panic!`]: https://doc.rust-lang.org/stable/std/macro.panic.html
