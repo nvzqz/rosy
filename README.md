@@ -1,6 +1,7 @@
 # Rosy
 
 [![Build status][travis-badge]][travis]
+![Platforms][platform-badge]
 ![Lines of code][loc-badge]
 [![crates.io][crate-badge] ![downloads][dl-badge]][crate]
 [![docs.rs][docs-badge]][docs]
@@ -25,40 +26,49 @@ High-level, zero (or low) cost bindings of [Ruby]'s C API for [Rust].
 
 ## Features
 
-- Zero or very-low cost abstractions over Ruby's C API.
+- **Performance:**
 
-  If speed is of the utmost importance, Rosy has functionality that cannot be
-  beaten performance-wise when using the C API directly. However, this may
-  require carefully writing some `unsafe` code.
+  Rosy enables you to write the most performant code possible, such that using
+  the C API directly would not improve performance. In other words, it presents
+  [zero-cost abstractions](https://boats.gitlab.io/blog/post/zero-cost-abstractions).
+  However, not all of Rosy's _safe_ abstractions are zero-cost. Sometimes this
+  is only possible by writing some `unsafe` code since Rosy can't be made aware
+  of certain aspects of the program state.
 
   - For example, [`Object::call`] will catch any raised Ruby exceptions via
     the [`protected`] family of functions. On the other hand,
     [`Object::call_unchecked`] will allow any thrown exception propagate
     (which causes a segmentation fault in Rust-land) unless [`protected`].
 
-    Checking for exceptions via [`protected`] has a cost associated
-    with it and so it may be best to wrap multiple instances of
-    exception-throwing code with it rather than just one.
+    Checking for exceptions via [`protected`] has a cost associated with it.
+    It is best to wrap multiple instances of unchecked exception-throwing
+    functions. This allows for reducing the number of speed bumps in your code.
 
   - If it is known that no [`panic!`] will occur anywhere within
-    exception-checked code, then calling [`protected_no_panic`] will emit
-    fewer instructions at the cost of safety. The [`FnOnce`] passed into this
-    function is called within an FFI context, and [panicking here is undefined
-    behavior][panic-ffi-ub]. Panics in a normal [`protected`] call are safely
-    caught with the stack unwinding properly.
+    exception-checked code, then calling [`protected_no_panic`] will emit fewer
+    instructions at the cost of safety. The [`FnOnce`] passed into this function
+    is called within an FFI context; because of that, [panicking here is
+    undefined behavior][panic-ffi-ub]. Panics in a normal [`protected`] call are
+    safely caught with the stack unwinding properly.
 
-- Bindings that leverage Rust's type system to the fullest:
+  Note that `unsafe` functions suffixed with `_unchecked` always have a safe
+  counterpart. Before reaching for `unsafe` functions, consider using these
+  instead and profiling your code to find out whether it's actually necessary.
+
+- **Powerful Types:**
+
+  Rosy leverages Rust's type system to the fullest.
 
   - Rosy makes certain Ruby types generic over enclosing types:
 
-    - [`Array`] is generic over [`Object`] types that it contains, defaulting to
-      [`AnyObject`].
+    - [`Array<O>`][`Array`] is generic over [`Object`] types that it contains,
+      defaulting to [`AnyObject`].
 
-    - [`Hash`] is generic over [`Object`] keys and values, both defaulting to
-      [`AnyObject`].
+    - [`Hash<K, V>`] is generic over [`Object`] keys and values, both defaulting
+      to [`AnyObject`].
 
-    - [`Class`] is generic over an [`Object`] type that it may instantiate via
-      [`Class::new_instance`].
+    - [`Class<O>`][`Class`] is generic over an [`Object`] type that it may
+      instantiate via [`Class::new_instance`].
 
   - When defining methods via [`Class::def_method`] or [`def_method!`]:
 
@@ -70,21 +80,26 @@ High-level, zero (or low) cost bindings of [Ruby]'s C API for [Rust].
       pointer paired with a length. These allow for passing in a variable number
       of arguments.
 
-- Safety wherever possible.
+- **Safety:** <sup>*where possible</sup>
 
-  Unfortunately, due to the inherent nature of Ruby's C API, this isn't easily
-  achievable without a few compromises in performance. A few factors that cause
-  this are:
+  Rosy exposes safe abstractions over most of Ruby's C API. Wherever this isn't
+  possible, such functionality is marked as `unsafe` with a documented
+  explanation on safe usage.
 
-  - Ruby's garbage collector de-allocating objects whose references don't live
-    on the stack if they are not [`mark`]ed. This may lead to a possible
-    [use after free].
+  Unfortunately, due to the inherent nature of Ruby's C API, safety is often not
+  easily achievable without a few compromises.
 
-  - _Many_ Ruby functions can throw exceptions. 😓
+  - _Many_ Ruby functions can raise exceptions,
+    which trigger a [segmentation fault] in Rust-land. 😓
 
-    These cause a segmentation fault in Rust code that's not being called
-    originally from a Ruby context. Functions that may throw an exception are
-    marked as `unsafe` or have a safe exception-checking equivalent.
+    Functions that may raise an exception are marked as `unsafe` or have a safe
+    exception-checking equivalent via [`protected`]. However, checking for an
+    exception has a cost in performance.
+
+  - Ruby's garbage collector de-deallocates objects whose references don't live
+    on the stack, unless they are [`mark`]ed. This may lead to a possible
+    [use after free]. When wrapping Rust data, it is important to implement
+    [`Rosy::mark`] correctly.
 
 ## Installation
 
@@ -278,17 +293,12 @@ reasoning is that if certain functionality is missing from Rosy, it should be
 added to the core library by either requesting it through an [issue][issues] or
 submitting a [pull request][pulls] with an implementation.
 
-Rosy is also designed to enable you to write the most performant code possible
-such that it can't be beaten by using the C API directly. This aligns with the
-notion of
-[zero-cost abstractions](https://boats.gitlab.io/blog/post/zero-cost-abstractions).
-However, not all of Rosy's _safe_ abstractions are zero-cost. Sometimes this is
-only possible by writing `unsafe` code since Rosy can't be made aware of certain
-aspects of the program state. For example, unlike Rutie, all functionality in
-Rosy that may throw an exception is marked as `unsafe`. Just like with Rutie,
-however, Rosy allows Rust code to be [`protected`] against raised exceptions.
-This, in combination with calling unchecked functions, allows for reducing the
-number of speed bumps in your code.
+Also, unlike Rutie, Rosy marks all exception-throwing functions as `unsafe`. Not
+handling a Ruby exception from Rust-land results in a [segmentation fault]. One
+of the major reasons that some people choose to write Rust over C is to get away
+from these. The Rust philosophy is that safe code should not be able to trigger
+a segmentation fault. Just like with Rutie, Rosy allows Rust code to be
+[`protected`] against raised exceptions.
 
 ## Authors
 
@@ -324,16 +334,18 @@ Congrats on making it this far! ʕﾉ•ᴥ•ʔﾉ🌹
 [Rutie]:          https://github.com/danielpclark/rutie
 [ruru]:           https://github.com/d-unseductable/ruru
 
-[DSL]:            https://en.wikipedia.org/wiki/Domain-specific_language
-[panic-ffi-ub]:   https://doc.rust-lang.org/nomicon/ffi.html#ffi-and-panics
-[use after free]: https://cwe.mitre.org/data/definitions/416.html
-[UTF-8]:          https://en.wikipedia.org/wiki/UTF-8
+[DSL]:                https://en.wikipedia.org/wiki/Domain-specific_language
+[panic-ffi-ub]:       https://doc.rust-lang.org/nomicon/ffi.html#ffi-and-panics
+[segmentation fault]: https://en.wikipedia.org/wiki/Segmentation_fault
+[use after free]:     https://cwe.mitre.org/data/definitions/416.html
+[UTF-8]:              https://en.wikipedia.org/wiki/UTF-8
 
 [issues]:         https://github.com/oceanpkg/rosy/issues
 [pulls]:          https://github.com/oceanpkg/rosy/pulls
 [travis]:         https://travis-ci.com/oceanpkg/rosy
 [travis-badge]:   https://travis-ci.com/oceanpkg/rosy.svg?branch=master
 [loc-badge]:      https://tokei.rs/b1/github/oceanpkg/rosy?category=code
+[platform-badge]: https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey.svg
 [crate]:          https://crates.io/crates/rosy
 [crate-badge]:    https://img.shields.io/crates/v/rosy.svg
 [dl-badge]:       https://img.shields.io/crates/d/rosy.svg
@@ -355,13 +367,14 @@ Congrats on making it this far! ʕﾉ•ᴥ•ʔﾉ🌹
 [`Class`]:                  https://docs.rs/rosy/0.0.6/rosy/struct.Class.html
 [`def_method_unchecked!`]:  https://docs.rs/rosy/0.0.6/rosy/macro.def_method_unchecked.html
 [`def_method!`]:            https://docs.rs/rosy/0.0.6/rosy/macro.def_method.html
-[`Hash`]:                   https://docs.rs/rosy/0.0.6/rosy/struct.Hash.html
+[`Hash<K, V>`]:             https://docs.rs/rosy/0.0.6/rosy/struct.Hash.html
 [`mark`]:                   https://docs.rs/rosy/0.0.6/rosy/gc/fn.mark.html
 [`Mixin::def_class`]:       https://docs.rs/rosy/0.0.6/rosy/trait.Mixin.html#method.def_class
 [`Mixin::def_subclass`]:    https://docs.rs/rosy/0.0.6/rosy/trait.Mixin.html#method.def_subclass
 [`Object::call_unchecked`]: https://docs.rs/rosy/0.0.6/rosy/trait.Object.html#method.call_unchecked
 [`Object::call`]:           https://docs.rs/rosy/0.0.6/rosy/trait.Object.html#method.call
 [`Object`]:                 https://docs.rs/rosy/0.0.6/rosy/trait.Object.html
-[`protected`]:              https://docs.rs/rosy/0.0.6/rosy/fn.protected.html
 [`protected_no_panic`]:     https://docs.rs/rosy/0.0.6/rosy/fn.protected_no_panic.html
+[`protected`]:              https://docs.rs/rosy/0.0.6/rosy/fn.protected.html
+[`Rosy::mark`]:             https://docs.rs/rosy/0.0.6/rosy/trait.Rosy.html#tymethod.mark
 [`vm::init`]:               https://docs.rs/rosy/0.0.6/rosy/vm/fn.init.html
