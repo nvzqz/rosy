@@ -39,10 +39,11 @@ pub fn init() -> Result<(), InitError> {
 /// After this function is called, it will no longer be possible to call
 /// [`init`](fn.init.html).
 #[inline]
-pub unsafe fn destroy() -> Result<(), i32> {
-    match ruby::ruby_cleanup(0) {
-        0 => Ok(()),
-        e => Err(e),
+pub unsafe fn destroy() -> Result<(), DestroyError> {
+    if let Some(code) = NonZeroI32::new(ruby::ruby_cleanup(0) as i32) {
+        Err(DestroyError(code))
+    } else {
+        Ok(())
     }
 }
 
@@ -241,7 +242,7 @@ pub struct InitError(NonZeroI32);
 impl InitError {
     /// Returns the error code given by the VM.
     #[inline]
-    pub fn code(&self) -> i32 {
+    pub fn code(self) -> i32 {
         self.0.get()
     }
 }
@@ -257,5 +258,37 @@ impl Error for InitError {
     #[inline]
     fn description(&self) -> &str {
         "Failed to initialize Ruby"
+    }
+}
+
+/// An error indicating that [`destroy`](fn.destroy.html) failed.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct DestroyError(NonZeroI32);
+
+impl DestroyError {
+    /// Returns the error code given by the VM.
+    #[inline]
+    pub fn code(self) -> i32 {
+        self.0.get()
+    }
+
+    /// Exits the process with the returned error code.
+    #[inline]
+    pub fn exit_process(self) -> ! {
+        std::process::exit(self.code())
+    }
+}
+
+impl fmt::Display for DestroyError {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} (error code {})", self.description(), self.code())
+    }
+}
+
+impl Error for DestroyError {
+    #[inline]
+    fn description(&self) -> &str {
+        "Failed to destroy Ruby"
     }
 }

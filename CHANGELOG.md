@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog] and this project adheres to
 ### Added
 - `Array`-based `PartialEq<[A]>` and `PartialEq<Vec<A>>` implementations on
   `AnyObject`
+- `vm::DestroyError` type with the same [`NonZeroI32`] memory optimization as
+  `vm::InitError`
 
 ### Changed
 - Internal representation of `vm::InitError` to use [`NonZeroI32`]

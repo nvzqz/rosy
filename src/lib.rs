@@ -50,7 +50,7 @@
 //! ```
 //! # rosy::vm::init().unwrap();
 //! if let Err(code) = unsafe { rosy::vm::destroy() } {
-//!     std::process::exit(code);
+//!     code.exit_process();
 //! }
 //! ```
 //!
