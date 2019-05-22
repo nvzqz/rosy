@@ -71,12 +71,11 @@
 //!
 //! let string = String::from("hello\r\n");
 //!
-//! let value: usize = rosy::protected(|| unsafe {
+//! rosy::protected(|| unsafe {
 //!     string.call_unchecked("chomp!");
-//!     string.len()
 //! }).unwrap();
 //!
-//! assert_eq!(value, 5);
+//! assert_eq!(string.len(), 5);
 //! ```
 //!
 //! [`Cargo.toml`]: https://doc.rust-lang.org/cargo/reference/manifest.html
