@@ -171,13 +171,11 @@ To use a specific Ruby installation, you can do either of the following:
   - `ROSY_RUBY=rbenv:2.5.0`
 
   If the `:version` portion is not provided, then `ROSY_RUBY_VERSION` is used to
-  get the version number.
+  get the version number. For example:
 
-For example:
-
-```sh
-ROSY_RUBY=rvm ROSY_RUBY_VERSION=2.6.0 cargo build
-```
+  ```sh
+  ROSY_RUBY=rvm ROSY_RUBY_VERSION=2.6.0 cargo build
+  ```
 
 ## Usage
 
