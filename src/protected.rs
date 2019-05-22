@@ -126,9 +126,9 @@ pub unsafe fn protected_no_panic<F, O>(f: F) -> crate::Result<O>
     }
 }
 
-// A version of `protected` that makes use of the size and layout of `O`
-// matching that of `ruby::VALUE`. This slightly reduces the number of emitted
-// instructions and removes the need for stack-allocating `ctx`.
+// A version of `protected_no_panic` that makes use of the size and layout of
+// `O` matching that of `ruby::VALUE`. This slightly reduces the number of
+// emitted instructions and may even remove the need for stack-allocating `ctx`.
 #[inline]
 unsafe fn protected_no_panic_size_opt<F, O>(f: F) -> crate::Result<O>
     where F: FnOnce() -> O
