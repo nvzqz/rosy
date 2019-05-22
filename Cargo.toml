@@ -1,6 +1,6 @@
 [package]
 name = "rosy"
-version = "0.0.6"
+version = "0.0.7"
 authors = ["Nikolai Vazquez"]
 edition = "2018"
 description = "Ruby bindings for Rust."
