@@ -121,11 +121,7 @@ pub fn print_config(ruby: &Ruby) {
 pub fn get() -> Ruby {
     if let Some(driver) = Driver::get() {
         driver.ruby()
-    } else if let Some(ruby) = env::var_os("RUBY") {
-        Ruby::from_path(&ruby)
-            .expect(&format!("Could not get Ruby from {:?}", ruby))
     } else {
-        Ruby::current()
-            .expect("Could not get system Ruby in 'PATH'")
+        Ruby::current().expect("Could not get system Ruby in 'PATH'")
     }
 }

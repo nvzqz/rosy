@@ -15,7 +15,6 @@ fn rerun_if_env_changed(key: impl Display) {
 }
 
 fn main() {
-    rerun_if_env_changed("RUBY");
     rerun_if_env_changed("ROSY_RUBY");
     rerun_if_env_changed("ROSY_RUBY_VERSION");
     rerun_if_env_changed("ROSY_PRINT_RUBY_CONFIG");

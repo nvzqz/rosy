@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+### Removed
+- Falling back to `RUBY` environment variable if `ROSY_RUBY` is not set
 
 ## [0.0.7] - 2019-05-22
 ### Added
