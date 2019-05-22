@@ -153,6 +153,35 @@ pub unsafe fn require_with_unchecked(
     ruby::rb_require_safe(file.into().raw(), safe_level) != 0
 }
 
+/// Loads and executes the Ruby program `file`.
+///
+/// If the filename does not resolve to an absolute path, the file is searched
+/// for in the library directories listed in `$:`.
+///
+/// If `wrap` is `true`, the loaded script will be executed under an anonymous
+/// module, protecting the calling program's global namespace. In no
+/// circumstance will any local variables in the loaded file be propagated to
+/// the loading environment.
+#[inline]
+pub fn load(file: impl Into<String>, wrap: bool) -> Result {
+    unsafe {
+        let mut err = 0;
+        ruby::rb_load_protect(file.into().raw(), wrap as c_int, &mut err);
+        match err {
+            0 => Ok(()),
+            _ => Err(AnyException::_take_current()),
+        }
+    }
+}
+
+/// Loads and executes the Ruby program `file`, without checking for exceptions.
+///
+/// See [`load`](fn.load.html) for more info.
+#[inline]
+pub unsafe fn load_unchecked(file: impl Into<String>, wrap: bool) {
+    ruby::rb_load(file.into().raw(), wrap as c_int)
+}
+
 /// Evaluates `script` in an isolated binding, returning an exception if one is
 /// raised.
 ///

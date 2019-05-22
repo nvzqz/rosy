@@ -16,6 +16,11 @@ extern "C" {
     // VALUE rb_require_safe(VALUE fname, int safe)
     pub fn rb_require_safe(fname: VALUE, safe: c_int) -> VALUE;
 
+    // void rb_load(VALUE fname, int wrap)
+    pub fn rb_load(fname: VALUE, wrap: c_int);
+    // void rb_load_protect(VALUE fname, int wrap, int *pstate)
+    pub fn rb_load_protect(fname: VALUE, wrap: c_int, pstate: *mut c_int);
+
     // VALUE rb_eval_string(const char *str)
     pub fn rb_eval_string(str: *const c_char) -> VALUE;
     // VALUE rb_eval_string_protect(const char *str, int *pstate)

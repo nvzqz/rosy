@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 - `InstrSeq::eval_unchecked`
 - `vm::[set_]safe_level` for managing Ruby's level of paranoia
 - `vm::require` and friends that allow for importing files
+- `vm::load[_unchecked]` that allows for simply executing files
 
 ### Changed
 - Where `Float` and `Integer` are located; both now reside in a `num` module
