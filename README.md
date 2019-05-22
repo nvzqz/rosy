@@ -12,6 +12,7 @@ High-level, zero (or low) cost bindings of [Ruby]'s C API for [Rust].
 ## Index
 - [Features](#features)
 - [Installation](#installation)
+- [Building](#building)
 - [Usage](#usage)
   - [Defining Ruby Methods](#defining-ruby-methods)
   - [Defining Ruby Classes](#defining-ruby-classes)
@@ -103,8 +104,14 @@ High-level, zero (or low) cost bindings of [Ruby]'s C API for [Rust].
 
 ## Installation
 
-This crate is available [on crates.io][crate] and can be used by adding the
-following to your project's [`Cargo.toml`]:
+Rosy requires [`cargo`] and an existing Ruby installation:
+
+- `cargo` can be installed via [`rustup`](https://rustup.rs)
+
+- Ruby can be installed [`rvm`], [`rbenv`], or your favorite package manager
+
+The `rosy` crate is available [on crates.io][crate] and can be used by adding
+the following to your project's [`Cargo.toml`]:
 
 ```toml
 [dependencies]
@@ -128,6 +135,41 @@ Finally add this to your crate root (`main.rs` or `lib.rs`):
 
 ```rust
 extern crate rosy;
+```
+
+## Building
+
+Rosy can be compiled by simply running:
+
+```sh
+cargo build
+```
+
+It will automatically try to find the dynamic library via the current `ruby`
+installation.
+
+To enable static linking, specify the `static` feature flag:
+
+```toml
+[dependencies.rosy]
+version = "0.0.7"
+features = ["static"]
+```
+
+To use a specific Ruby installation, you can do either of the following:
+
+- Set `ROSY_RUBY=path/to/ruby`
+
+  This must point to an executable.
+
+- Set `ROSY_RUBY=rvm` or `ROSY_RUBY=rbenv`.
+
+  Then, set `ROSY_RUBY_VERSION` to the version number you'd like to use.
+
+For example:
+
+```sh
+ROSY_RUBY=rvm ROSY_RUBY_VERSION=2.6.0 cargo build
 ```
 
 ## Usage
@@ -329,7 +371,10 @@ Congrats on making it this far! ʕﾉ•ᴥ•ʔﾉ🌹
 [`aloxide`]:      https://github.com/oceanpkg/aloxide
 [Ruby]:           https://www.ruby-lang.org
 [Rust]:           https://www.rust-lang.org
+[`cargo`]:        https://doc.rust-lang.org/cargo/
 [`Cargo.toml`]:   https://doc.rust-lang.org/cargo/reference/manifest.html
+[`rvm`]:          https://rvm.io
+[`rbenv`]:        https://github.com/rbenv/rbenv
 [Helix]:          https://usehelix.com
 [Rutie]:          https://github.com/danielpclark/rutie
 [ruru]:           https://github.com/d-unseductable/ruru
