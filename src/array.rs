@@ -171,8 +171,58 @@ impl<O: Object> From<&[O]> for Array<O> {
 impl<O, A> PartialEq<[A]> for Array<O>
     where O: Object + PartialEq<A>,
 {
+    #[inline]
     fn eq(&self, other: &[A]) -> bool {
         unsafe { self.as_slice().eq(other) }
+    }
+}
+
+impl<O, A> PartialEq<Vec<A>> for Array<O>
+    where O: Object + PartialEq<A>,
+{
+    #[inline]
+    fn eq(&self, other: &Vec<A>) -> bool {
+        self == other.as_slice()
+    }
+}
+
+impl<A> PartialEq<[A]> for AnyObject
+    where AnyObject: PartialEq<A>
+{
+    #[inline]
+    fn eq(&self, other: &[A]) -> bool {
+        if let Some(array) = self.to_array() {
+            array == *other
+        } else {
+            false
+        }
+    }
+}
+
+impl<A> PartialEq<&[A]> for AnyObject
+    where AnyObject: PartialEq<A>
+{
+    #[inline]
+    fn eq(&self, other: &&[A]) -> bool {
+        PartialEq::<[A]>::eq(self, *other)
+    }
+}
+
+impl<A> PartialEq<Vec<A>> for AnyObject
+    where AnyObject: PartialEq<A>
+{
+    #[inline]
+    fn eq(&self, other: &Vec<A>) -> bool {
+        self == other.as_slice()
+    }
+}
+
+impl<A> PartialEq<&Vec<A>> for AnyObject
+    where AnyObject: PartialEq<A>
+{
+    #[inline]
+    fn eq(&self, other: &&Vec<A>) -> bool {
+        self == other.as_slice()
     }
 }
 

@@ -5,8 +5,14 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+### Added
+- `Array`-based `PartialEq<[A]>` and `PartialEq<Vec<A>>` implementations on
+  `AnyObject`
+
 ### Removed
 - Falling back to `RUBY` environment variable if `ROSY_RUBY` is not set
+- `String`-based `PartialEq<[u8]>` and `PartialEq<Vec<u8>>` implementations on
+  `AnyObject`
 
 ## [0.0.7] - 2019-05-22
 ### Added

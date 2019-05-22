@@ -102,8 +102,6 @@ macro_rules! impl_eq {
 }
 
 impl_eq! {
-    [u8],                   to_string;
-    Vec<u8>,                to_string;
     str,                    to_string;
     std::string::String,    to_string;
     CStr,                   to_string;
