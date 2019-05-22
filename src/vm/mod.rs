@@ -4,6 +4,7 @@ use std::{
     error::Error,
     ffi::CStr,
     fmt,
+    os::raw::c_int,
 };
 use crate::{
     prelude::*,
@@ -43,6 +44,22 @@ pub unsafe fn destroy() -> Result<(), i32> {
     }
 }
 
+/// Returns Ruby's level of paranoia. This is equivalent to reading `$SAFE`.
+#[inline]
+pub fn safe_level() -> c_int {
+    unsafe { ruby::rb_safe_level() }
+}
+
+/// Sets Ruby's level of paranoia. The default value is 0.
+///
+/// # Safety
+///
+/// An exception will be raised if `level` is either negative or not supported.
+#[inline]
+pub unsafe fn set_safe_level(level: c_int) {
+    ruby::rb_set_safe_level(level);
+}
+
 /// Initializes the load path for `require`-ing gems.
 ///
 /// # Examples
@@ -54,6 +71,86 @@ pub unsafe fn destroy() -> Result<(), i32> {
 #[inline]
 pub fn init_load_path() {
     unsafe { ruby::ruby_init_loadpath() };
+}
+
+// monomorphization
+fn _require(file: String, safe: c_int) -> Result<ruby::VALUE> {
+    unsafe {
+        crate::protected_no_panic(|| ruby::rb_require_safe(file.raw(), safe))
+    }
+}
+
+/// Loads `file` with the current `safe_level`.
+///
+/// This returns `true` if successful or `false` if already loaded.
+///
+/// See [`require_with`](fn.require_with.html) for more info.
+#[inline]
+pub fn require(file: impl Into<String>) -> Result<bool> {
+    require_with(file, safe_level())
+}
+
+/// Loads `file` with `safe_level`.
+///
+/// This returns `true` if successful or `false` if already loaded.
+///
+// Taken from docs on `rb_f_require` in Ruby's source code
+/// If the filename does not resolve to an absolute path, it will be searched
+/// for in the directories listed in`$LOAD_PATH` (`$:`).
+///
+/// If the filename has the extension `.rb`, it is loaded as a source file; if
+/// the extension is `.so`, `.o`, or `.dll`, or the default shared library
+/// extension on the current platform, Ruby loads the shared library as a Ruby
+/// extension. Otherwise, Ruby tries adding `.rb`, `.so`, and so on to the name
+/// until found. If the file named cannot be found, a `LoadError` will be
+/// returned.
+///
+/// For Ruby extensions the filename given may use any shared library extension.
+/// For example, on Linux the socket extension is `socket.so` and `require
+/// 'socket.dll'` will load the socket extension.
+///
+/// The absolute path of the loaded file is added to `$LOADED_FEATURES` (`$"`).
+/// A file will not be loaded again if its path already appears in `$"`.  For
+/// example, `require 'a'; require './a'` will not load `a.rb` again.
+///
+/// ```ruby
+/// require "my-library.rb"
+/// require "db-driver"
+/// ```
+///
+/// Any constants or globals within the loaded source file will be available in
+/// the calling program's global namespace. However, local variables will not be
+/// propagated to the loading environment.
+#[inline]
+pub fn require_with(
+    file: impl Into<String>,
+    safe_level: c_int,
+) -> Result<bool> {
+    // Convert to `bool` here for inlining
+    Ok(_require(file.into(), safe_level)? != 0)
+}
+
+/// Loads `file` with the current `safe_level`, without checking for exceptions.
+///
+/// This returns `true` if successful or `false` if already loaded.
+///
+/// See [`require_with`](fn.require_with.html) for more info.
+#[inline]
+pub unsafe fn require_unchecked(file: impl Into<String>) -> bool {
+    require_with_unchecked(file, safe_level())
+}
+
+/// Loads `file` with `safe_level`, without checking for exceptions.
+///
+/// This returns `true` if successful or `false` if already loaded.
+///
+/// See [`require_with`](fn.require_with.html) for more info.
+#[inline]
+pub unsafe fn require_with_unchecked(
+    file: impl Into<String>,
+    safe_level: c_int,
+) -> bool {
+    ruby::rb_require_safe(file.into().raw(), safe_level) != 0
 }
 
 /// Evaluates `script` in an isolated binding, returning an exception if one is

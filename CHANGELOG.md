@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog] and this project adheres to
 - `From<()>` implementation for `AnyObject`
   - Allows for not returning anything in `def_method[_unchecked]!`
 - `InstrSeq::eval_unchecked`
+- `vm::[set_]safe_level` for managing Ruby's level of paranoia
+- `vm::require` and friends that allow for importing files
 
 ### Changed
 - Where `Float` and `Integer` are located; both now reside in a `num` module

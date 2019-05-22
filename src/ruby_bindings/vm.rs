@@ -8,6 +8,14 @@ extern "C" {
     // int ruby_setup(void)
     pub fn ruby_setup() -> c_int;
 
+    // int rb_safe_level(void)
+    pub fn rb_safe_level() -> c_int;
+    // void rb_set_safe_level(int level)
+    pub fn rb_set_safe_level(level: c_int);
+
+    // VALUE rb_require_safe(VALUE fname, int safe)
+    pub fn rb_require_safe(fname: VALUE, safe: c_int) -> VALUE;
+
     // VALUE rb_eval_string(const char *str)
     pub fn rb_eval_string(str: *const c_char) -> VALUE;
     // VALUE rb_eval_string_protect(const char *str, int *pstate)
