@@ -164,9 +164,14 @@ To use a specific Ruby installation, you can do either of the following:
 
   This must point to an executable.
 
-- Set `ROSY_RUBY=rvm` or `ROSY_RUBY=rbenv`.
+- Set `ROSY_RUBY=client:version`. For example:
 
-  Then, set `ROSY_RUBY_VERSION` to the version number you'd like to use.
+  - `ROSY_RUBY=rvm:2.6.0`
+
+  - `ROSY_RUBY=rbenv:2.5.0`
+
+  If the `:version` portion is not provided, then `ROSY_RUBY_VERSION` is used to
+  get the version number.
 
 For example:
 

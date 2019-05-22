@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog] and this project adheres to
   `AnyObject`
 - `vm::DestroyError` type with the same [`NonZeroI32`] memory optimization as
   `vm::InitError`
+- Ability to specify a Ruby version via `ROSY_RUBY=client:version`; e.g.
+  `ROSY_RUBY=rvm:2.6.0`
 
 ### Changed
 - Internal representation of `vm::InitError` to use [`NonZeroI32`]

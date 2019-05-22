@@ -8,8 +8,48 @@ use std::{
 };
 use aloxide::{Ruby, Version};
 
+struct Manager {
+    client: ManagerClient,
+    version: Version,
+}
+
+impl Manager {
+    fn from_var(var: &OsStr) -> Option<Self> {
+        let var = var.to_str()?;
+
+        let (client_str, version_str) = match var.find(':') {
+            Some(index) => {
+                let (start, end) = var.split_at(index);
+                (start, Some(&end[1..]))
+            },
+            None => (var, None),
+        };
+
+        let client = match client_str {
+            "download" => ManagerClient::Download,
+            "rbenv"    => ManagerClient::Rbenv,
+            "rvm"      => ManagerClient::Rvm,
+            _          => panic!("Unknown Ruby client '{}'", client_str),
+        };
+
+        let version = match version_str {
+            Some(version) => {
+                version.parse::<Version>()
+                    .expect("Could not parse Ruby version")
+            },
+            None => version().expect("'ROSY_RUBY_VERSION' not set"),
+        };
+
+        Some(Manager { client, version })
+    }
+
+    fn ruby(&self) -> Ruby {
+        self.client.ruby(&self.version)
+    }
+}
+
 // An external tool that manages the Ruby installation
-enum Manager {
+enum ManagerClient {
     // Download and build Ruby ourselves
     Download,
     // https://www.github.com/rbenv/rbenv
@@ -18,28 +58,16 @@ enum Manager {
     Rvm,
 }
 
-impl Manager {
-    fn from_var(var: &OsStr) -> Option<Self> {
-        if var == "download" {
-            Some(Manager::Download)
-        } else if var == "rbenv" {
-            Some(Manager::Rbenv)
-        } else if var == "rvm" {
-            Some(Manager::Rvm)
-        } else {
-            None
-        }
-    }
-
-    fn ruby(self, v: &Version) -> Ruby {
+impl ManagerClient {
+    fn ruby(&self, v: &Version) -> Ruby {
         match self {
-            Manager::Rbenv => {
+            ManagerClient::Rbenv => {
                 Ruby::from_rbenv(v).expect("Could not get Ruby from 'rbenv'")
             },
-            Manager::Rvm => {
+            ManagerClient::Rvm => {
                 Ruby::from_rvm(v).expect("Could not get Ruby from 'rvm'")
             },
-            Manager::Download => download(),
+            ManagerClient::Download => download(v),
         }
     }
 }
@@ -62,17 +90,15 @@ impl Driver {
         }
     }
 
-    fn ruby(self) -> Ruby {
+    fn ruby(&self) -> Ruby {
         match self {
-            Driver::Manager(manager) => {
-                manager.ruby(&version().expect("'ROSY_RUBY_VERSION' not set"))
-            },
+            Driver::Manager(manager) => manager.ruby(),
             Driver::Path(ruby) => {
-                Ruby::from_bin(&ruby)
-                    .expect(&format!(
-                        "Could not get Ruby from '{}'",
-                        ruby.display(),
-                    ))
+                let error = format!(
+                    "Could not get Ruby from '{}'",
+                    ruby.display(),
+                );
+                Ruby::from_bin(ruby).expect(&error)
             }
         }
     }
@@ -103,13 +129,16 @@ pub fn write_version_const(version: &dyn Display, out_dir: &Path) {
 }
 
 #[cfg(feature = "download")]
-fn download() -> Ruby {
-    unimplemented!("Can't download yet")
+fn download(version: &Version) -> Ruby {
+    unimplemented!("Can't download Ruby {} yet", version)
 }
 
 #[cfg(not(feature = "download"))]
-fn download() -> Ruby {
-    panic!("Enable 'download' feature in 'Cargo.toml' to download Ruby");
+fn download(version: &Version) -> Ruby {
+    panic!(
+        "Enable 'download' feature in 'Cargo.toml' to download Ruby {}",
+        version
+    );
 }
 
 pub fn print_config(ruby: &Ruby) {
