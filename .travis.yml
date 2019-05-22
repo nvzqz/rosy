@@ -13,7 +13,7 @@ matrix:
   - os: linux
     rust: nightly
     env:
-    - ROSY_RUBY="rvm:2.6.3" FEATURES="ruby_2_6,version_check"
+    - ROSY_RUBY_VERSION="2.6.3" FEATURES="ruby_2_6,version_check"
     script:
     - cargo doc --all --no-deps --no-default-features --features="$FEATURES"
   - os: windows
