@@ -14,6 +14,8 @@ High-level, zero (or low) cost bindings of [Ruby]'s C API for [Rust].
 - [Installation](#installation)
 - [Building](#building)
 - [Usage](#usage)
+  - [Managing Ruby's Virtual Machine](#managing-rubys-virtual-machine)
+  - [Calling Ruby Methods](#calling-ruby-methods)
   - [Defining Ruby Methods](#defining-ruby-methods)
   - [Defining Ruby Classes](#defining-ruby-classes)
   - [Defining Ruby Subclasses](#defining-ruby-subclasses)
@@ -177,16 +179,50 @@ ROSY_RUBY=rvm ROSY_RUBY_VERSION=2.6.0 cargo build
 Rosy allows you to perform _many_ operations over Ruby objects in a way that
 feels very natural in Rust.
 
+### Managing Ruby's Virtual Machine
+
+The virtual machine must be initialized via [`vm::init`] before doing anything:
+
+```rust
+rosy::vm::init().expect("Could not initialize Ruby");
+```
+
+Once finished with Ruby, you can clean up its resources permanently via
+[`vm::destroy`]:
+
+```rust
+if let Err(code) = unsafe { rosy::vm::destroy() } {
+    std::process::exit(code);
+}
+```
+
+Note that you can no longer use Ruby once the VM has been destroyed.
+
+### Calling Ruby Methods
+
+Using [`Object::call`], any method can be invoked on the receiving object:
+
 ```rust
 use rosy::String;
-
-// The VM must be initialized before doing anything
-rosy::vm::init().expect("Could not initialize Ruby");
 
 let string = String::from("hello\r\n");
 string.call("chomp!").unwrap();
 
 assert_eq!(string, "hello");
+```
+
+To pass in arguments, use [`Object::call_with`]:
+
+```rust
+use rosy::{Array, Integer, Object};
+
+let array: Array<Integer> = (10..20).collect();
+
+let args: &[Integer] = &[1.into(), 5.into(), 9.into()];
+
+let values = array.call_with("values_at", args).unwrap();
+
+assert_eq!(values, [11, 15, 19][..]);
 ```
 
 ### Defining Ruby Methods
@@ -417,9 +453,13 @@ Congrats on making it this far! ʕﾉ•ᴥ•ʔﾉ🌹
 [`Mixin::def_class`]:       https://docs.rs/rosy/0.0.7/rosy/trait.Mixin.html#method.def_class
 [`Mixin::def_subclass`]:    https://docs.rs/rosy/0.0.7/rosy/trait.Mixin.html#method.def_subclass
 [`Object::call_unchecked`]: https://docs.rs/rosy/0.0.7/rosy/trait.Object.html#method.call_unchecked
+[`Object::call_with`]:      https://docs.rs/rosy/0.0.7/rosy/trait.Object.html#method.call_with
+[`Object::call`]:           https://docs.rs/rosy/0.0.7/rosy/trait.Object.html#method.call
 [`Object::call`]:           https://docs.rs/rosy/0.0.7/rosy/trait.Object.html#method.call
 [`Object`]:                 https://docs.rs/rosy/0.0.7/rosy/trait.Object.html
 [`protected_no_panic`]:     https://docs.rs/rosy/0.0.7/rosy/fn.protected_no_panic.html
 [`protected`]:              https://docs.rs/rosy/0.0.7/rosy/fn.protected.html
 [`Rosy::mark`]:             https://docs.rs/rosy/0.0.7/rosy/trait.Rosy.html#tymethod.mark
+[`vm::destroy`]:            https://docs.rs/rosy/0.0.7/rosy/vm/fn.destroy.html
 [`vm::init`]:               https://docs.rs/rosy/0.0.7/rosy/vm/fn.init.html
+
