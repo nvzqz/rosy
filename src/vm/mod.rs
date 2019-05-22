@@ -4,6 +4,7 @@ use std::{
     error::Error,
     ffi::CStr,
     fmt,
+    num::NonZeroI32,
     os::raw::c_int,
 };
 use crate::{
@@ -17,9 +18,10 @@ pub use instr_seq::*;
 /// Initializes the Ruby VM, returning an error code if it failed.
 #[inline]
 pub fn init() -> Result<(), InitError> {
-    match unsafe { ruby::ruby_setup() } {
-        0 => Ok(()),
-        e => Err(InitError(e)),
+    if let Some(code) = NonZeroI32::new(unsafe { ruby::ruby_setup() as i32 }) {
+        Err(InitError(code))
+    } else {
+        Ok(())
     }
 }
 
@@ -234,13 +236,13 @@ pub unsafe fn eval_unchecked(script: &CStr) -> AnyObject {
 
 /// An error indicating that [`init`](fn.init.html) failed.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct InitError(i32);
+pub struct InitError(NonZeroI32);
 
 impl InitError {
     /// Returns the error code given by the VM.
     #[inline]
     pub fn code(&self) -> i32 {
-        self.0
+        self.0.get()
     }
 }
 

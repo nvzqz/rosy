@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog] and this project adheres to
 - `Array`-based `PartialEq<[A]>` and `PartialEq<Vec<A>>` implementations on
   `AnyObject`
 
+### Changed
+- Internal representation of `vm::InitError` to use [`NonZeroI32`]
+
 ### Removed
 - Falling back to `RUBY` environment variable if `ROSY_RUBY` is not set
 - `String`-based `PartialEq<[u8]>` and `PartialEq<Vec<u8>>` implementations on
@@ -125,3 +128,4 @@ Initial release
 [`Debug`]: https://doc.rust-lang.org/std/fmt/trait.Debug.html
 [`FnOnce`]: https://doc.rust-lang.org/std/ops/trait.FnOnce.html
 [`std::panic::catch_unwind`]: https://doc.rust-lang.org/std/panic/fn.catch_unwind.html
+[`NonZeroI32`]: https://doc.rust-lang.org/std/num/struct.NonZeroI32.html
