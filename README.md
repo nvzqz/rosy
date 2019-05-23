@@ -1,11 +1,25 @@
-# Rosy
-
-[![Build status][travis-badge]][travis]
-![Platforms][platform-badge]
-![Lines of code][loc-badge]
-[![crates.io][crate-badge] ![downloads][dl-badge]][crate]
-[![docs.rs][docs-badge]][docs]
-[![MIT or Apache 2.0][license-badge]][license]
+<p align="center">
+  <a href="https://github.com/oceanpkg/rosy">
+    <img width="800" src="https://github.com/oceanpkg/rosy/raw/assets/banner.svg?sanitize=true" alt="rosy banner">
+  </a>
+  <br>
+  <a href="https://travis-ci.com/oceanpkg/rosy">
+    <img src="https://travis-ci.com/oceanpkg/rosy.svg?branch=master" alt="travis badge">
+  </a>
+  <img src="https://tokei.rs/b1/github/oceanpkg/rosy?category=code" alt="lines of code">
+  <a href="https://crates.io/crates/rosy">
+    <img src="https://img.shields.io/crates/v/rosy.svg" alt="crates.io">
+    <img src="https://img.shields.io/crates/d/rosy.svg" alt="downloads">
+  </a>
+  <a href="https://docs.rs/rosy">
+    <img src="https://docs.rs/rosy/badge.svg" alt="API docs">
+  </a>
+  <br>
+  <img src="https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey.svg" alt="platforms">
+  <a href="https://github.com/oceanpkg/rosy/blob/master/LICENSE.md">
+    <img src="https://img.shields.io/badge/license-MIT%20or%20Apache%202.0-blue.svg" alt="MIT or Apache 2.0">
+  </a>
+</p>
 
 High-level, zero (or low) cost bindings of [Ruby]'s C API for [Rust].
 
@@ -424,19 +438,10 @@ Congrats on making it this far! ʕﾉ•ᴥ•ʔﾉ🌹
 [use after free]:     https://cwe.mitre.org/data/definitions/416.html
 [UTF-8]:              https://en.wikipedia.org/wiki/UTF-8
 
-[issues]:         https://github.com/oceanpkg/rosy/issues
-[pulls]:          https://github.com/oceanpkg/rosy/pulls
-[travis]:         https://travis-ci.com/oceanpkg/rosy
-[travis-badge]:   https://travis-ci.com/oceanpkg/rosy.svg?branch=master
-[loc-badge]:      https://tokei.rs/b1/github/oceanpkg/rosy?category=code
-[platform-badge]: https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey.svg
-[crate]:          https://crates.io/crates/rosy
-[crate-badge]:    https://img.shields.io/crates/v/rosy.svg
-[dl-badge]:       https://img.shields.io/crates/d/rosy.svg
-[docs]:           https://docs.rs/rosy
-[docs-badge]:     https://docs.rs/rosy/badge.svg
-[license]:        https://github.com/oceanpkg/rosy/blob/master/LICENSE.md
-[license-badge]:  https://img.shields.io/badge/license-MIT%20or%20Apache%202.0-blue.svg
+[issues]:  https://github.com/oceanpkg/rosy/issues
+[pulls]:   https://github.com/oceanpkg/rosy/pulls
+[crate]:   https://crates.io/crates/rosy
+[license]: https://github.com/oceanpkg/rosy/blob/master/LICENSE.md
 
 [`FnOnce`]: https://doc.rust-lang.org/std/ops/trait.FnOnce.html
 [`panic!`]: https://doc.rust-lang.org/stable/std/macro.panic.html

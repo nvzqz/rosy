@@ -1,3 +1,5 @@
+//! [![Banner](https://raw.githubusercontent.com/oceanpkg/rosy/assets/banner.png)](https://github.com/oceanpkg/rosy)
+//!
 //! This crate provides high-level bindings to the [Ruby] virtual machine.
 //!
 //! # Installation
@@ -89,6 +91,8 @@
 #![cfg_attr(nightly, feature(doc_cfg))]
 #![deny(missing_docs)]
 #![cfg_attr(all(test, nightly), feature(test))]
+
+#![doc(html_logo_url = "https://raw.githubusercontent.com/oceanpkg/rosy/assets/icon.svg?sanitize=true")]
 
 #[cfg(all(test, nightly))]
 extern crate test;
