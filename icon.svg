@@ -2,28 +2,28 @@
 <svg width="400px" height="400px" viewBox="0 0 400 400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
         <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-1">
-            <stop stop-color="#DE2B45" offset="0%"></stop>
-            <stop stop-color="#5C0714" offset="100%"></stop>
+            <stop stop-color="#E33059" offset="0%"></stop>
+            <stop stop-color="#54000E" offset="100%"></stop>
         </linearGradient>
         <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-2">
-            <stop stop-color="#F3284F" offset="0%"></stop>
-            <stop stop-color="#87071F" offset="100%"></stop>
+            <stop stop-color="#F93260" offset="0%"></stop>
+            <stop stop-color="#7C0021" offset="100%"></stop>
         </linearGradient>
-        <linearGradient x1="50%" y1="0%" x2="50%" y2="99.0155194%" id="linearGradient-3">
-            <stop stop-color="#ED2952" offset="0%"></stop>
-            <stop stop-color="#BD092C" offset="100%"></stop>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-3">
+            <stop stop-color="#EB2855" offset="0%"></stop>
+            <stop stop-color="#B5002A" offset="100%"></stop>
         </linearGradient>
         <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-4">
             <stop stop-color="#FF5872" offset="0%"></stop>
             <stop stop-color="#FF4764" offset="100%"></stop>
         </linearGradient>
         <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-5">
-            <stop stop-color="#D41242" offset="0%"></stop>
-            <stop stop-color="#89001A" offset="100%"></stop>
+            <stop stop-color="#D61142" offset="0%"></stop>
+            <stop stop-color="#800024" offset="100%"></stop>
         </linearGradient>
         <linearGradient x1="50%" y1="0%" x2="50%" y2="97.5348395%" id="linearGradient-6">
-            <stop stop-color="#FF154C" offset="0%"></stop>
-            <stop stop-color="#B1011F" offset="100%"></stop>
+            <stop stop-color="#FF194F" offset="0%"></stop>
+            <stop stop-color="#BD001F" offset="100%"></stop>
         </linearGradient>
         <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-7">
             <stop stop-color="#B0E026" offset="0%"></stop>
