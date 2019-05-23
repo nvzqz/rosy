@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400px" height="400px" viewBox="0 0 400 400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#DE2B45" offset="0%"></stop>
+            <stop stop-color="#5C0714" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-2">
+            <stop stop-color="#F3284F" offset="0%"></stop>
+            <stop stop-color="#87071F" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="99.0155194%" id="linearGradient-3">
+            <stop stop-color="#ED2952" offset="0%"></stop>
+            <stop stop-color="#BD092C" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-4">
+            <stop stop-color="#FF5872" offset="0%"></stop>
+            <stop stop-color="#FF4764" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-5">
+            <stop stop-color="#D41242" offset="0%"></stop>
+            <stop stop-color="#89001A" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="97.5348395%" id="linearGradient-6">
+            <stop stop-color="#FF154C" offset="0%"></stop>
+            <stop stop-color="#B1011F" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-7">
+            <stop stop-color="#B0E026" offset="0%"></stop>
+            <stop stop-color="#609F06" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="99.2477829%" id="linearGradient-8">
+            <stop stop-color="#9DCD23" offset="0%"></stop>
+            <stop stop-color="#449108" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="99.6067356%" id="linearGradient-9">
+            <stop stop-color="#FE3D63" offset="0%"></stop>
+            <stop stop-color="#F40D46" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="rosy-icon" transform="translate(0.000000, 30.000000)">
+            <polygon id="Path-5-Copy-7" fill="url(#linearGradient-1)" points="280 0 120 140 280 140"></polygon>
+            <polygon id="Path-5-Copy-8" fill="url(#linearGradient-2)" points="120 0 120 140 280 140"></polygon>
+            <polygon id="Path-5-Copy" fill="url(#linearGradient-3)" points="320 40 120 140 280 160 400 140"></polygon>
+            <polygon id="Path-5-Copy-6" fill="url(#linearGradient-4)" points="80 40 0 140 120 160 280 140"></polygon>
+            <polygon id="Path-3" fill="url(#linearGradient-5)" points="200 340 0 140 400 140"></polygon>
+            <polygon id="Path-4" fill="url(#linearGradient-6)" points="120 140 200 340 280 140"></polygon>
+            <g id="Group" stroke-width="1" transform="translate(40.000000, 220.000000)">
+                <polygon id="Path-4-Copy" fill="url(#linearGradient-7)" points="120 40 160 120 200 40"></polygon>
+                <path d="M160,120 L192,40 L320,0 L160,120 Z M160,120 L0,0 L128,40 L160,120 Z" id="Combined-Shape" fill="url(#linearGradient-8)"></path>
+            </g>
+            <path d="M80,40 L120,140 L0,140 L80,40 Z M320,40 L400,140 L280,140 L320,40 Z" id="Combined-Shape" fill="url(#linearGradient-9)"></path>
+        </g>
+    </g>
+</svg>
