@@ -23,6 +23,7 @@ pub use crate::{
     mixin::{Mixin, Class, Module},
     num::{Float, Integer},
     object::{AnyObject, Object, RosyObject},
+    range::Range,
     Result,
     rosy::Rosy,
     string::String,

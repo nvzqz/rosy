@@ -114,6 +114,7 @@ pub mod mixin;
 pub mod num;
 pub mod object;
 pub mod prelude;
+pub mod range;
 pub mod string;
 pub mod symbol;
 pub mod vm;
@@ -129,6 +130,7 @@ pub use self::{
     mixin::{Mixin, Class, Module},
     num::{Float, Integer},
     object::{AnyObject, Object, RosyObject},
+    range::Range,
     rosy::Rosy,
     string::String,
     symbol::{Symbol, SymbolId},

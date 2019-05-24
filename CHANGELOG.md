@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+### Added
+- `Range` object type
 
 ## [0.0.8] - 2019-05-23
 ### Added

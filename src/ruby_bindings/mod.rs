@@ -17,6 +17,7 @@ mod hash;
 mod int;
 mod mixin;
 mod object;
+mod range;
 mod string;
 mod symbol;
 mod vm;
@@ -120,6 +121,7 @@ pub use self::{
     int::*,
     mixin::*,
     object::*,
+    range::*,
     string::*,
     symbol::*,
     vm::*,
