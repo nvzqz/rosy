@@ -397,10 +397,18 @@ a segmentation fault. Just like with Rutie, Rosy allows Rust code to be
 
 ## Authors
 
+Rosy is a part of the [Ocean] package manager.
+
+<a href="https://www.patreon.com/oceanpkg" target="_blank" rel="noopener noreferrer">
+  <img src="https://c5.patreon.com/external/logo/become_a_patron_button.png" alt="Support oceanpkg on Patreon" height="30">
+</a>
+
+And it is developed by the following individual contributors:
+
 - **Creator:** [Nikolai Vazquez](https://github.com/nvzqz)
 
   <a href="https://www.patreon.com/nvzqz" target="_blank" rel="noopener noreferrer">
-    <img src="https://c5.patreon.com/external/logo/become_a_patron_button.png" alt="Become a Patron!" height="30">
+    <img src="https://c5.patreon.com/external/logo/become_a_patron_button.png" alt="Support nvzqz on Patreon" height="30">
   </a>
   <a href="https://www.paypal.me/nvzqz" target="_blank" rel="noopener noreferrer">
     <img src="https://buymecoffee.intm.org/img/button-paypal-white.png" alt="Buy me a coffee" height="30">
@@ -431,6 +439,7 @@ Congrats on making it this far! ʕﾉ•ᴥ•ʔﾉ🌹
 [Helix]:          https://usehelix.com
 [Rutie]:          https://github.com/danielpclark/rutie
 [ruru]:           https://github.com/d-unseductable/ruru
+[Ocean]:          https://www.oceanpkg.org
 
 [DSL]:                https://en.wikipedia.org/wiki/Domain-specific_language
 [panic-ffi-ub]:       https://doc.rust-lang.org/nomicon/ffi.html#ffi-and-panics
