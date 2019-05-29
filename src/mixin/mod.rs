@@ -469,7 +469,12 @@ impl<S: Into<String>, F: Into<String>> EvalArgs for (S, F) {
 }
 
 /// The script, filename, and line number arguments.
-impl<S: Into<String>, F: Into<String>, L: Into<u32>> EvalArgs for (S, F, L) {
+impl<S, F, L> EvalArgs for (S, F, L)
+where
+    S: Into<String>,
+    F: Into<String>,
+    L: Into<Integer>,
+{
     #[inline]
     unsafe fn eval_in_protected(self, mixin: impl Mixin) -> Result<AnyObject> {
         let (s, f, l) = self;
