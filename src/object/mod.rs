@@ -97,7 +97,7 @@ pub unsafe trait Object: Copy
         std::slice::from_ref(self.as_any_object())
     }
 
-    /// Returns the raw object pointer.
+    /// Returns the raw object value.
     #[inline]
     fn raw(self) -> ruby::VALUE {
         self.as_any_object().raw()
