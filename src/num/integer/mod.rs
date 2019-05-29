@@ -455,6 +455,18 @@ impl Integer {
         val
     }
 
+    /// Returns `self` as a 64-bit floating point number.
+    ///
+    /// Note that this is very likely to be a lossy conversion.
+    #[inline]
+    pub fn to_f64(self) -> f64 {
+        if let Some(fixnum) = self.fixnum_value() {
+            fixnum as f64
+        } else {
+            unsafe { ruby::rb_big2dbl(self.raw()) }
+        }
+    }
+
     /// Packs the contents of `self` into `buf` with the platform's native byte
     /// order.
     ///

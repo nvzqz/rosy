@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 - `vm::backtrace`
 - `Array::subseq`
 - Ability to index with `Array::get` using a `Range<usize>`
+- `Integer::to_f64`
 
 ### Changed
 - `Object::call`, `eval`s, `vm::load`, `vm::require` to be `unsafe` due to

@@ -26,6 +26,9 @@ extern "C" {
     // VALUE rb_int2inum(intptr_t n)
     pub fn rb_int2inum(n: isize) -> VALUE;
 
+    // double rb_big2dbl(VALUE x)
+    pub fn rb_big2dbl(x: VALUE) -> f64;
+
     // int rb_integer_pack(VALUE val, void *words, size_t numwords, size_t wordsize, size_t nails, int flags)
     pub fn rb_integer_pack(
         val: VALUE,
