@@ -20,6 +20,11 @@ use pack::Word;
 
 /// An instance of Ruby's `Integer` class.
 ///
+/// This type supports conversions to/from _all_ of Rust's integer primitives,
+/// from 8-bit through 128-bit. For working with bigger numbers, one can operate
+/// over a buffer of `Word`s via [`pack`](#method.pack) and
+/// [`unpack`](#method.unpack).
+///
 /// # Logical Binary Operations
 ///
 /// The logical operations [AND], [OR], and [XOR] are all supported:
