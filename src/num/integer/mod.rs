@@ -348,6 +348,16 @@ impl Integer {
         }
     }
 
+    /// Returns whether `self == 0`.
+    #[inline]
+    pub fn is_zero(self) -> bool {
+        if let Some(fixnum) = self.to_fixnum() {
+            fixnum == 0
+        } else {
+            unsafe { ruby::rb_bigzero_p(self.raw()) != 0 }
+        }
+    }
+
     /// Returns whether `self >= 0`.
     ///
     /// # Examples

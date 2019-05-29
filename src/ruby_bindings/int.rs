@@ -29,6 +29,9 @@ extern "C" {
     // double rb_big2dbl(VALUE x)
     pub fn rb_big2dbl(x: VALUE) -> f64;
 
+    // int rb_bigzero_p(VALUE x)
+    pub fn rb_bigzero_p(x: VALUE) -> c_int;
+
     // int rb_integer_pack(VALUE val, void *words, size_t numwords, size_t wordsize, size_t nails, int flags)
     pub fn rb_integer_pack(
         val: VALUE,
