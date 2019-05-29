@@ -231,26 +231,26 @@ impl AnyObject {
 
     /// Returns whether `self` is `nil`.
     #[inline]
-    pub fn is_nil(self) -> bool {
-        self.raw() == crate::util::NIL_VALUE
+    pub const fn is_nil(self) -> bool {
+        self.raw == crate::util::NIL_VALUE
     }
 
     /// Returns whether `self` is undefined.
     #[inline]
-    pub fn is_undefined(self) -> bool {
-        self.raw() == crate::util::UNDEF_VALUE
+    pub const fn is_undefined(self) -> bool {
+        self.raw == crate::util::UNDEF_VALUE
     }
 
     /// Returns whether `self` is `true`.
     #[inline]
-    pub fn is_true(self) -> bool {
-        self.raw() == crate::util::TRUE_VALUE
+    pub const fn is_true(self) -> bool {
+        self.raw == crate::util::TRUE_VALUE
     }
 
     /// Returns whether `self` is `false`.
     #[inline]
-    pub fn is_false(self) -> bool {
-        self.raw() == crate::util::FALSE_VALUE
+    pub const fn is_false(self) -> bool {
+        self.raw == crate::util::FALSE_VALUE
     }
 
     /// Returns the boolean value for `self`, if any.
