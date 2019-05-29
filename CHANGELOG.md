@@ -10,9 +10,9 @@ The format is based on [Keep a Changelog] and this project adheres to
 - Generic `Classify` implementation for `Array<O>` and `Hash<K, V>`
 
 ### Changed
-- _All_ `Object::call` methods to be `unsafe` due to ability to break
-  assumptions made by types such as `Array<A>`, where a type `B` can be inserted
-  via `array.call_with("push", &[other_obj])`
+- `Object::call`, `eval`s, `vm::load`, `vm::require` to be `unsafe` due to
+  ability to break assumptions made by types such as `Array<A>`, where `push` is
+  called on a value of type `B`
 - `AnyObject::is_{nil|undefined|true|false}` to `const` functions
 
 ## [0.0.8] - 2019-05-23

@@ -315,19 +315,31 @@ pub trait Mixin: Object + Sealed {
     ///
     /// # Safety
     ///
+    /// Code executed from `args` may void the type safety of objects accessible
+    /// from Rust. For example, if one calls `push` on an `Array<A>` with an
+    /// object of type `B`, then the inserted object will be treated as being of
+    /// type `A`.
+    ///
     /// An exception may be raised by the code or by `args` being invalid.
     #[inline]
-    unsafe fn eval_unchecked(self, args: impl EvalArgs) -> AnyObject {
-        args.eval_in_unchecked(self)
+    unsafe fn eval(self, args: impl EvalArgs) -> AnyObject {
+        args.eval_in(self)
     }
 
     /// Evaluates `args` in the context of `self`, returning any raised
     /// exceptions.
     ///
     /// See the docs for `EvalArgs` for more info.
+    ///
+    /// # Safety
+    ///
+    /// Code executed from `args` may void the type safety of objects accessible
+    /// from Rust. For example, if one calls `push` on an `Array<A>` with an
+    /// object of type `B`, then the inserted object will be treated as being of
+    /// type `A`.
     #[inline]
-    fn eval(self, args: impl EvalArgs) -> Result<AnyObject> {
-        args.eval_in(self)
+    unsafe fn eval_protected(self, args: impl EvalArgs) -> Result<AnyObject> {
+        args.eval_in_protected(self)
     }
 }
 
@@ -363,24 +375,36 @@ impl Mixin for Module {
 pub trait EvalArgs: Sized {
     /// Evaluates `self` in the context of `mixin`, returning any thrown
     /// exceptions.
+    ///
+    /// # Safety
+    ///
+    /// Code executed from `self` may void the type safety of objects accessible
+    /// from Rust. For example, if one calls `push` on an `Array<A>` with an
+    /// object of type `B`, then the inserted object will be treated as being of
+    /// type `A`.
     #[inline]
-    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject>;
+    unsafe fn eval_in_protected(self, mixin: impl Mixin) -> Result<AnyObject>;
 
     /// Evaluates `self` in the context of `mixin`.
     ///
     /// # Safety
     ///
+    /// Code executed from `self` may void the type safety of objects accessible
+    /// from Rust. For example, if one calls `push` on an `Array<A>` with an
+    /// object of type `B`, then the inserted object will be treated as being of
+    /// type `A`.
+    ///
     /// If an exception is thrown due to an argument error or from evaluating
     /// the script itself, it should be caught.
-    unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject;
+    unsafe fn eval_in(self, mixin: impl Mixin) -> AnyObject;
 }
 
 /// Unchecked arguments directly to the evaluation function.
 impl<O: Object> EvalArgs for &[O] {
     #[inline]
-    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject> {
+    unsafe fn eval_in_protected(self, mixin: impl Mixin) -> Result<AnyObject> {
         // monomorphization
-        unsafe fn eval_in(args: &[AnyObject], mixin: VALUE) -> Result<AnyObject> {
+        unsafe fn eval(args: &[AnyObject], mixin: VALUE) -> Result<AnyObject> {
             let raw = crate::protected_no_panic(|| ruby::rb_mod_module_eval(
                 args.len() as _,
                 args.as_ptr() as *const ruby::VALUE,
@@ -388,11 +412,11 @@ impl<O: Object> EvalArgs for &[O] {
             ))?;
             Ok(AnyObject::from_raw(raw))
         }
-        unsafe { eval_in(AnyObject::convert_slice(self), mixin.raw()) }
+        eval(AnyObject::convert_slice(self), mixin.raw())
     }
 
     #[inline]
-    unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
+    unsafe fn eval_in(self, mixin: impl Mixin) -> AnyObject {
         let raw = ruby::rb_mod_module_eval(
             self.len() as _,
             self.as_ptr() as *const ruby::VALUE,
@@ -405,13 +429,13 @@ impl<O: Object> EvalArgs for &[O] {
 /// The script argument without any extra information.
 impl EvalArgs for String {
     #[inline]
-    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject> {
-        self.as_any_slice().eval_in(mixin)
+    unsafe fn eval_in_protected(self, mixin: impl Mixin) -> Result<AnyObject> {
+        self.as_any_slice().eval_in_protected(mixin)
     }
 
     #[inline]
-    unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
-        self.as_any_slice().eval_in_unchecked(mixin)
+    unsafe fn eval_in(self, mixin: impl Mixin) -> AnyObject {
+        self.as_any_slice().eval_in(mixin)
     }
 }
 
@@ -419,49 +443,49 @@ impl EvalArgs for String {
 // TODO: Impl for `Into<String>` when specialization stabilizes
 impl EvalArgs for &str {
     #[inline]
-    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject> {
-        String::from(self).eval_in(mixin)
+    unsafe fn eval_in_protected(self, mixin: impl Mixin) -> Result<AnyObject> {
+        String::from(self).eval_in_protected(mixin)
     }
 
     #[inline]
-    unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
-        String::from(self).eval_in_unchecked(mixin)
+    unsafe fn eval_in(self, mixin: impl Mixin) -> AnyObject {
+        String::from(self).eval_in(mixin)
     }
 }
 
 /// The script and filename arguments.
 impl<S: Into<String>, F: Into<String>> EvalArgs for (S, F) {
     #[inline]
-    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject> {
+    unsafe fn eval_in_protected(self, mixin: impl Mixin) -> Result<AnyObject> {
         let (s, f) = self;
-        [s.into(), f.into()].eval_in(mixin)
+        [s.into(), f.into()].eval_in_protected(mixin)
     }
 
     #[inline]
-    unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
+    unsafe fn eval_in(self, mixin: impl Mixin) -> AnyObject {
         let (s, f) = self;
-        [s.into(), f.into()].eval_in_unchecked(mixin)
+        [s.into(), f.into()].eval_in(mixin)
     }
 }
 
 /// The script, filename, and line number arguments.
 impl<S: Into<String>, F: Into<String>, L: Into<u32>> EvalArgs for (S, F, L) {
     #[inline]
-    fn eval_in(self, mixin: impl Mixin) -> Result<AnyObject> {
+    unsafe fn eval_in_protected(self, mixin: impl Mixin) -> Result<AnyObject> {
+        let (s, f, l) = self;
+        let s = AnyObject::from(s.into());
+        let f = AnyObject::from(f.into());
+        let l = AnyObject::from(l.into());
+        [s, f, l].eval_in_protected(mixin)
+    }
+
+    #[inline]
+    unsafe fn eval_in(self, mixin: impl Mixin) -> AnyObject {
         let (s, f, l) = self;
         let s = AnyObject::from(s.into());
         let f = AnyObject::from(f.into());
         let l = AnyObject::from(l.into());
         [s, f, l].eval_in(mixin)
-    }
-
-    #[inline]
-    unsafe fn eval_in_unchecked(self, mixin: impl Mixin) -> AnyObject {
-        let (s, f, l) = self;
-        let s = AnyObject::from(s.into());
-        let f = AnyObject::from(f.into());
-        let l = AnyObject::from(l.into());
-        [s, f, l].eval_in_unchecked(mixin)
     }
 }
 

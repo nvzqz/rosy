@@ -125,7 +125,7 @@ impl InstrSeq {
     /// let seq1 = InstrSeq::compile(script).expect("Invalid script");
     /// let seq2 = unsafe { InstrSeq::from_binary(seq1.to_binary()) };
     ///
-    /// assert_eq!(String::from("hihihi"), seq2.eval().unwrap());
+    /// assert_eq!(String::from("hihihi"), unsafe { seq2.eval() });
     /// # }).unwrap();
     /// ```
     #[inline]
@@ -138,6 +138,28 @@ impl InstrSeq {
 
     /// Evaluates `self` and returns the result.
     ///
+    /// # Safety
+    ///
+    /// Code executed from `self` may void the type safety of objects accessible
+    /// from Rust. For example, if one calls `push` on an `Array<A>` with an
+    /// object of type `B`, then the inserted object will be treated as being of
+    /// type `A`.
+    ///
+    /// If this instruction sequence throws an exception, it must be caught.
+    #[inline]
+    pub unsafe fn eval(self) -> AnyObject {
+        self.call("eval")
+    }
+
+    /// Evaluates `self` and returns the result.
+    ///
+    /// # Safety
+    ///
+    /// Code executed from `self` may void the type safety of objects accessible
+    /// from Rust. For example, if one calls `push` on an `Array<A>` with an
+    /// object of type `B`, then the inserted object will be treated as being of
+    /// type `A`.
+    ///
     /// # Examples
     ///
     /// This is equivalent to calling `eval` in a protected context:
@@ -149,22 +171,12 @@ impl InstrSeq {
     /// let script = "'hi' * 3";
     /// let instr_seq = InstrSeq::compile(script).expect("Invalid script");
     ///
-    /// let result = instr_seq.eval().unwrap();
-    /// assert_eq!(String::from("hihihi"), result);
+    /// let output = unsafe { instr_seq.eval_protected().unwrap() };
+    /// assert_eq!(String::from("hihihi"), output);
     /// ```
     #[inline]
-    pub fn eval(self) -> Result<AnyObject> {
+    pub fn eval_protected(self) -> Result<AnyObject> {
         unsafe { self.call_protected("eval") }
-    }
-
-    /// Evaluates `self` and returns the result.
-    ///
-    /// # Safety
-    ///
-    /// If this instruction sequence throws an exception, it must be caught.
-    #[inline]
-    pub unsafe fn eval_unchecked(self) -> AnyObject {
-        self.call("eval")
     }
 
     /// Returns the serialized binary data.

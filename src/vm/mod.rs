@@ -76,24 +76,25 @@ pub fn init_load_path() {
     unsafe { ruby::ruby_init_loadpath() };
 }
 
-// monomorphization
-fn _require(file: String, safe: c_int) -> Result<ruby::VALUE> {
-    unsafe {
-        crate::protected_no_panic(|| ruby::rb_require_safe(file.raw(), safe))
-    }
-}
-
-/// Loads `file` with the current `safe_level`.
+/// Loads `file` with the current `safe_level`, without checking for exceptions.
 ///
 /// This returns `true` if successful or `false` if already loaded.
 ///
 /// See [`require_with`](fn.require_with.html) for more info.
+///
+/// # Safety
+///
+/// Code executed from `file` may void the type safety of objects accessible
+/// from Rust. For example, if one calls `push` on `Array<A>` with an object of
+/// type `B`, then the inserted object will be treated as being of type `A`.
+///
+/// An exception may be raised by the code in `file` or by `file` being invalid.
 #[inline]
-pub fn require(file: impl Into<String>) -> Result<bool> {
+pub unsafe fn require(file: impl Into<String>) -> bool {
     require_with(file, safe_level())
 }
 
-/// Loads `file` with `safe_level`.
+/// Loads `file` with `safe_level`, without checking for exceptions.
 ///
 /// This returns `true` if successful or `false` if already loaded.
 ///
@@ -124,39 +125,63 @@ pub fn require(file: impl Into<String>) -> Result<bool> {
 /// Any constants or globals within the loaded source file will be available in
 /// the calling program's global namespace. However, local variables will not be
 /// propagated to the loading environment.
+///
+/// # Safety
+///
+/// Code executed from `file` may void the type safety of objects accessible
+/// from Rust. For example, if one calls `push` on `Array<A>` with an object of
+/// type `B`, then the inserted object will be treated as being of type `A`.
+///
+/// An exception may be raised by the code in `file` or by `file` being invalid.
 #[inline]
-pub fn require_with(
-    file: impl Into<String>,
-    safe_level: c_int,
-) -> Result<bool> {
-    // Convert to `bool` here for inlining
-    Ok(_require(file.into(), safe_level)? != 0)
-}
-
-/// Loads `file` with the current `safe_level`, without checking for exceptions.
-///
-/// This returns `true` if successful or `false` if already loaded.
-///
-/// See [`require_with`](fn.require_with.html) for more info.
-#[inline]
-pub unsafe fn require_unchecked(file: impl Into<String>) -> bool {
-    require_with_unchecked(file, safe_level())
-}
-
-/// Loads `file` with `safe_level`, without checking for exceptions.
-///
-/// This returns `true` if successful or `false` if already loaded.
-///
-/// See [`require_with`](fn.require_with.html) for more info.
-#[inline]
-pub unsafe fn require_with_unchecked(
+pub unsafe fn require_with(
     file: impl Into<String>,
     safe_level: c_int,
 ) -> bool {
     ruby::rb_require_safe(file.into().raw(), safe_level) != 0
 }
 
-/// Loads and executes the Ruby program `file`.
+/// Loads `file` with the current `safe_level`.
+///
+/// This returns `true` if successful or `false` if already loaded.
+///
+/// See [`require_with`](fn.require_with.html) for more info.
+///
+/// # Safety
+///
+/// Code executed from `file` may void the type safety of objects accessible
+/// from Rust. For example, if one calls `push` on `Array<A>` with an object of
+/// type `B`, then the inserted object will be treated as being of type `A`.
+#[inline]
+pub unsafe fn require_protected(file: impl Into<String>) -> Result<bool> {
+    require_with_protected(file, safe_level())
+}
+
+/// Loads `file` with `safe_level`.
+///
+/// This returns `true` if successful or `false` if already loaded.
+///
+/// See [`require_with`](fn.require_with.html) for more info.
+///
+/// # Safety
+///
+/// Code executed from `file` may void the type safety of objects accessible
+/// from Rust. For example, if one calls `push` on `Array<A>` with an object of
+/// type `B`, then the inserted object will be treated as being of type `A`.
+#[inline]
+pub unsafe fn require_with_protected(
+    file: impl Into<String>,
+    safe_level: c_int,
+) -> Result<bool> {
+    // monomorphization
+    unsafe fn require(file: String, safe: c_int) -> Result<ruby::VALUE> {
+        crate::protected_no_panic(|| ruby::rb_require_safe(file.raw(), safe))
+    }
+    // Convert to `bool` here for inlining
+    Ok(require(file.into(), safe_level)? != 0)
+}
+
+/// Loads and executes the Ruby program `file`, without checking for exceptions.
 ///
 /// If the filename does not resolve to an absolute path, the file is searched
 /// for in the library directories listed in `$:`.
@@ -165,59 +190,35 @@ pub unsafe fn require_with_unchecked(
 /// module, protecting the calling program's global namespace. In no
 /// circumstance will any local variables in the loaded file be propagated to
 /// the loading environment.
-#[inline]
-pub fn load(file: impl Into<String>, wrap: bool) -> Result {
-    unsafe {
-        let mut err = 0;
-        ruby::rb_load_protect(file.into().raw(), wrap as c_int, &mut err);
-        match err {
-            0 => Ok(()),
-            _ => Err(AnyException::_take_current()),
-        }
-    }
-}
-
-/// Loads and executes the Ruby program `file`, without checking for exceptions.
 ///
-/// See [`load`](fn.load.html) for more info.
+/// # Safety
+///
+/// Code executed from `file` may void the type safety of objects accessible
+/// from Rust. For example, if one calls `push` on `Array<A>` with an object of
+/// type `B`, then the inserted object will be treated as being of type `A`.
+///
+/// An exception may be raised by the code in `file` or by `file` being invalid.
 #[inline]
-pub unsafe fn load_unchecked(file: impl Into<String>, wrap: bool) {
+pub unsafe fn load(file: impl Into<String>, wrap: bool) {
     ruby::rb_load(file.into().raw(), wrap as c_int)
 }
 
-/// Evaluates `script` in an isolated binding, returning an exception if one is
-/// raised.
+/// Loads and executes the Ruby program `file`.
 ///
-/// Variables:
-/// - `__FILE__`: "(eval)"
-/// - `__LINE__`: starts at 1
-#[inline]
-pub fn eval(script: &CStr) -> Result<AnyObject> {
-    unsafe {
-        let mut err = 0;
-        let raw = ruby::rb_eval_string_protect(script.as_ptr(), &mut err);
-        match err {
-            0 => Ok(AnyObject::from_raw(raw)),
-            _ => Err(AnyException::_take_current()),
-        }
-    }
-}
-
-/// Evaluates `script` under a module binding in an isolated binding, returning
-/// an exception if one is raised.
+/// See [`load`](fn.load.html) for more info.
 ///
-/// Variables:
-/// - `__FILE__`: "(eval)"
-/// - `__LINE__`: starts at 1
+/// # Safety
+///
+/// Code executed from `file` may void the type safety of objects accessible
+/// from Rust. For example, if one calls `push` on `Array<A>` with an object of
+/// type `B`, then the inserted object will be treated as being of type `A`.
 #[inline]
-pub fn eval_wrapped(script: &CStr) -> Result<AnyObject> {
-    unsafe {
-        let mut err = 0;
-        let raw = ruby::rb_eval_string_wrap(script.as_ptr(), &mut err);
-        match err {
-            0 => Ok(AnyObject::from_raw(raw)),
-            _ => Err(AnyException::_take_current()),
-        }
+pub unsafe fn load_protected(file: impl Into<String>, wrap: bool) -> Result {
+    let mut err = 0;
+    ruby::rb_load_protect(file.into().raw(), wrap as c_int, &mut err);
+    match err {
+        0 => Ok(()),
+        _ => Err(AnyException::_take_current()),
     }
 }
 
@@ -229,10 +230,98 @@ pub fn eval_wrapped(script: &CStr) -> Result<AnyObject> {
 ///
 /// # Safety
 ///
-/// Any raised errors must be handled in Rust-land.
+/// Code executed from `script` may void the type safety of objects accessible
+/// from Rust. For example, if one calls `push` on `Array<A>` with an object of
+/// type `B`, then the inserted object will be treated as being of type `A`.
+///
+/// ```
+/// # rosy::vm::init().unwrap();
+/// use std::ffi::CStr;
+/// use rosy::prelude::*;
+///
+/// let array: Array<Integer> = (1..=3).collect(); // [1, 2, 3]
+///
+/// let module = Module::def("Evil").unwrap();
+/// unsafe { module.set_const("ARR", array) };
+///
+/// let script = b"Evil::ARR.push('hi')\0";
+/// let script = CStr::from_bytes_with_nul(script).unwrap();
+///
+/// unsafe { rosy::vm::eval(script) };
+/// let hi = array.get(3).unwrap();
+/// ```
+///
+/// If we try using `hi` as an `Integer` here, we will get a segmentation fault:
+///
+// Supports all failures, apparently
+/// ```should_panic
+// This is just for demonstration purposes
+/// # rosy::vm::init().unwrap();
+/// # use rosy::prelude::*;
+/// # let hi = unsafe { Integer::cast_unchecked(String::from("hi")) };
+/// let val = hi.to_truncated::<i32>();
+/// ```
+///
+/// However, we can see that `hi` is actually a `String` despite being typed as
+/// an `Integer`:
+///
+/// ```
+// This is just for demonstration purposes
+/// # rosy::vm::init().unwrap();
+/// # use rosy::prelude::*;
+/// # let hi = AnyObject::from("hi");
+/// let hi = unsafe { String::cast_unchecked(hi) };
+/// assert_eq!(hi, "hi");
+/// ```
+///
+/// ...also, any exceptions raised in `script` must be handled in Rust-land.
 #[inline]
-pub unsafe fn eval_unchecked(script: &CStr) -> AnyObject {
+pub unsafe fn eval(script: &CStr) -> AnyObject {
     AnyObject::from_raw(ruby::rb_eval_string(script.as_ptr()))
+}
+
+/// Evaluates `script` in an isolated binding, returning an exception if one is
+/// raised.
+///
+/// Variables:
+/// - `__FILE__`: "(eval)"
+/// - `__LINE__`: starts at 1
+///
+/// # Safety
+///
+/// Code executed from `script` may void the type safety of objects accessible
+/// from Rust. For example, if one calls `push` on `Array<A>` with an object of
+/// type `B`, then the inserted object will be treated as being of type `A`.
+#[inline]
+pub unsafe fn eval_protected(script: &CStr) -> Result<AnyObject> {
+    let mut err = 0;
+    let raw = ruby::rb_eval_string_protect(script.as_ptr(), &mut err);
+    match err {
+        0 => Ok(AnyObject::from_raw(raw)),
+        _ => Err(AnyException::_take_current()),
+    }
+}
+
+/// Evaluates `script` under a module binding in an isolated binding, returning
+/// an exception if one is raised.
+///
+/// Variables:
+/// - `__FILE__`: "(eval)"
+/// - `__LINE__`: starts at 1
+///
+/// # Safety
+///
+/// Code executed from `script` may void the type safety of objects accessible
+/// from Rust. For example, if one calls `push` on `Array<A>` with an object of
+/// type `B`, then the inserted object will be treated as being of type `A`.
+#[inline]
+pub unsafe fn eval_wrapped(script: &CStr) -> Result<AnyObject> {
+    let mut err = 0;
+    let raw = ruby::rb_eval_string_wrap(script.as_ptr(), &mut err);
+    match err {
+        0 => Ok(AnyObject::from_raw(raw)),
+        _ => Err(AnyException::_take_current()),
+    }
 }
 
 /// An error indicating that [`init`](fn.init.html) failed.
