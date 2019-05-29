@@ -20,4 +20,6 @@ extern "C" {
     pub fn rb_id2name(id: ID) -> *const c_char;
     // VALUE rb_sym_all_symbols(void)
     pub fn rb_sym_all_symbols() -> VALUE;
+    // VALUE rb_f_global_variables(void)
+    pub fn rb_f_global_variables() -> VALUE;
 }

@@ -114,6 +114,24 @@ impl Symbol {
         unsafe { Array::from_raw(ruby::rb_sym_all_symbols()) }
     }
 
+    /// Returns an array of the names of global variables.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use rosy::Symbol;
+    ///
+    /// let vars = Symbol::global_vars();
+    /// let safe = Symbol::from("$SAFE");
+    ///
+    /// assert!(vars.contains(safe));
+    /// ```
+    #[inline]
+    pub fn global_vars() -> Array<Self> {
+        unsafe { Array::from_raw(ruby::rb_f_global_variables()) }
+    }
+
     /// Returns whether `name` is valid as a symbol value.
     ///
     /// # Examples

@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 ### Added
 - `Range` object type
 - Generic `Classify` implementation for `Array<O>` and `Hash<K, V>`
-- `Symbol::all`
+- `Symbol::{all|global_vars}`
 
 ### Changed
 - `Object::call`, `eval`s, `vm::load`, `vm::require` to be `unsafe` due to
