@@ -265,8 +265,8 @@ impl AnyObject {
 
     /// Returns whether `self` is a fixed-sized number.
     #[inline]
-    pub fn is_fixnum(self) -> bool {
-        crate::util::value_is_fixnum(self.raw())
+    pub const fn is_fixnum(self) -> bool {
+        crate::util::value_is_fixnum(self.raw)
     }
 
     /// Returns whether `self` is a variable-sized number.

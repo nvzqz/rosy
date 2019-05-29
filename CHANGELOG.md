@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+### Changed
+- `Object::is_fixnum` to be `const`
 
 ## [0.0.9] - 2019-05-29
 ### Added
