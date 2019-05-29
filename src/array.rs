@@ -495,17 +495,18 @@ impl<O: Object> Array<O> {
     /// # rosy::protected(|| {
     /// use rosy::{Array, String};
     ///
-    /// let s = String::from("hi");
-    /// let a = Array::from_slice(&[String::from("yo"), s]);
+    /// let array = Array::from_slice(&[
+    ///     String::from("yo"),
+    ///     String::from("hi"),
+    /// ]);
     ///
-    /// assert!(a.contains(s));
+    /// assert!(array.contains("hi"));
     /// # }).unwrap();
     /// ```
-    // SAFETY: The use of `impl Object` is fine here since this method is not
-    // inserting it into `self`
     #[inline]
-    pub fn contains(self, obj: impl Object) -> bool {
-        let val = unsafe { ruby::rb_ary_includes(self.raw(), obj.raw()) };
+    pub fn contains(self, obj: impl Into<O>) -> bool {
+        let obj = obj.into().raw();
+        let val = unsafe { ruby::rb_ary_includes(self.raw(), obj) };
         val == crate::util::TRUE_VALUE
     }
 
@@ -517,14 +518,12 @@ impl<O: Object> Array<O> {
     ///
     /// The caller must ensure that `self` is not frozen or else a `FrozenError`
     /// exception will be raised.
-    // SAFETY: The use of `impl Object` is fine here since this method is not
-    // inserting it into `self`
     #[inline]
-    pub unsafe fn remove_all(self, obj: impl Object) -> AnyObject {
-        AnyObject::from_raw(ruby::rb_ary_delete(
-            self.raw(),
-            obj.raw(),
-        ))
+    pub unsafe fn remove_all(self, obj: impl Into<O>) -> Option<O> {
+        match ruby::rb_ary_delete(self.raw(), obj.into().raw()) {
+            crate::util::NIL_VALUE => None,
+            raw => Some(O::from_raw(raw)),
+        }
     }
 
     /// Reverses the contents of `self` in-palace.

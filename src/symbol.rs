@@ -102,12 +102,7 @@ impl Symbol {
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
-    /// use rosy::Symbol;
-    ///
-    /// let all = Symbol::all();
-    /// let eql = Symbol::from("eql?");
-    ///
-    /// assert!(all.contains(eql));
+    /// assert!(rosy::Symbol::all().contains("eql?"));
     /// ```
     #[inline]
     pub fn all() -> Array<Self> {
@@ -120,12 +115,7 @@ impl Symbol {
     ///
     /// ```
     /// # rosy::vm::init().unwrap();
-    /// use rosy::Symbol;
-    ///
-    /// let vars = Symbol::global_vars();
-    /// let safe = Symbol::from("$SAFE");
-    ///
-    /// assert!(vars.contains(safe));
+    /// assert!(rosy::Symbol::global_vars().contains("$SAFE"));
     /// ```
     #[inline]
     pub fn global_vars() -> Array<Self> {

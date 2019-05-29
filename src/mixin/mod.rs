@@ -185,8 +185,9 @@ pub trait Mixin: Object + Sealed {
 
     /// Sets the value a constant for `name` in `self` to `val`.
     #[inline]
-    fn set_const(self, name: impl Into<SymbolId>, val: impl Object) {
-        unsafe { ruby::rb_const_set(self.raw(), name.into().raw(), val.raw()) };
+    fn set_const(self, name: impl Into<SymbolId>, val: impl Into<AnyObject>) {
+        let val = val.into().raw();
+        unsafe { ruby::rb_const_set(self.raw(), name.into().raw(), val) };
     }
 
     /// Removes the constant value for `name`, returning it.
