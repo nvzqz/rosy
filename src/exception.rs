@@ -50,7 +50,7 @@ pub unsafe trait Exception: Object + Error {
     /// assert_eq!(exc, err);
     /// ```
     #[inline]
-    unsafe fn raise(self) {
+    unsafe fn raise(self) -> ! {
         ruby::rb_exc_raise(self.raw());
     }
 

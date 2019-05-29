@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog] and this project adheres to
   ability to break assumptions made by types such as `Array<A>`, where `push` is
   called on a value of type `B`
 - `AnyObject::is_{nil|undefined|true|false}` to `const` functions
+- `Exception::raise` return type to `!`
 
 ## [0.0.8] - 2019-05-23
 ### Added

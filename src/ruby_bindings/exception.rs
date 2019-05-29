@@ -6,8 +6,8 @@ extern "C" {
     // void rb_set_errinfo(VALUE err)
     pub fn rb_set_errinfo(err: VALUE);
 
-    // void rb_exc_raise(VALUE mesg)
-    pub fn rb_exc_raise(mesg: VALUE);
+    // NORETURN(void rb_exc_raise(VALUE mesg))
+    pub fn rb_exc_raise(mesg: VALUE) -> !;
     // VALUE rb_protect(VALUE (* proc) (VALUE), VALUE data, int *pstate)
     pub fn rb_protect(
         proc: Option<unsafe extern "C" fn(VALUE) -> VALUE>,
