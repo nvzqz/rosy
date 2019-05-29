@@ -107,7 +107,7 @@ pub fn value_to_fixnum(v: VALUE) -> c_long {
 }
 
 #[inline]
-pub fn value_is_fixnum(v: VALUE) -> bool {
+pub const fn value_is_fixnum(v: VALUE) -> bool {
     v & FIXNUM_FLAG as VALUE != 0
 }
 

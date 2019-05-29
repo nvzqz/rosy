@@ -11,7 +11,7 @@ use crate::AnyObject;
 #[derive(Clone, Copy)]
 #[repr(transparent)]
 pub struct NonNullObject {
-    raw: NonZeroUsize,
+    pub(crate) raw: NonZeroUsize,
     // !Send + !Sync
     _marker: PhantomData<*const c_void>,
 }

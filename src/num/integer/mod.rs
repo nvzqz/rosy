@@ -406,14 +406,14 @@ impl Integer {
 
     /// Returns whether `self` is a variable-sized integer.
     #[inline]
-    pub fn is_bignum(self) -> bool {
+    pub const fn is_bignum(self) -> bool {
         !self.is_fixnum()
     }
 
     /// Returns whether `self` is a fixed-sized integer.
     #[inline]
-    pub fn is_fixnum(self) -> bool {
-        crate::util::value_is_fixnum(self.raw())
+    pub const fn is_fixnum(self) -> bool {
+        crate::util::value_is_fixnum(self.0.raw.get())
     }
 
     /// Returns the value of the fixed-width integer stored in `self`.

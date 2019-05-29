@@ -21,7 +21,9 @@ The format is based on [Keep a Changelog] and this project adheres to
 - `Object::call`, `eval`s, `vm::load`, `vm::require` to be `unsafe` due to
   ability to break assumptions made by types such as `Array<A>`, where `push` is
   called on a value of type `B`
-- `AnyObject::is_{nil|undefined|true|false}` to `const` functions
+- Functions to be `const`:
+  - `AnyObject::is_{nil|undefined|true|false}`
+  - `Integer::is_{big|fix}num`
 - `Exception::raise` return type to `!`
 - `Mixin::attr` and friends to `Mixin::def_attr`
 - `Array::{contains|remove_all}` to take an arg that implements `Into<O>`
