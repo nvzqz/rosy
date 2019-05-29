@@ -408,7 +408,7 @@ impl Integer {
 
     /// Returns the value of the fixed-width integer stored in `self`.
     #[inline]
-    pub fn fixnum_value(self) -> Option<i64> {
+    pub fn to_fixnum(self) -> Option<i64> {
         if self.is_fixnum() {
             Some(crate::util::value_to_fixnum(self.raw()) as i64)
         } else {
@@ -460,7 +460,7 @@ impl Integer {
     /// Note that this is very likely to be a lossy conversion.
     #[inline]
     pub fn to_f64(self) -> f64 {
-        if let Some(fixnum) = self.fixnum_value() {
+        if let Some(fixnum) = self.to_fixnum() {
             fixnum as f64
         } else {
             unsafe { ruby::rb_big2dbl(self.raw()) }
