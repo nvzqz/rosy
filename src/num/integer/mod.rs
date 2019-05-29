@@ -292,17 +292,12 @@ macro_rules! impl_bit_ops {
 
             #[inline]
             fn $f(self, rhs: Self) -> Self {
-                let (a, b) = if self.is_fixnum() {
-                    if rhs.is_fixnum() {
-                        let a = crate::util::value_to_fixnum(self.raw());
-                        let b = crate::util::value_to_fixnum(rhs.raw());
-                        let val = crate::util::fixnum_to_value(a.$f(b));
-                        return unsafe { Self::from_raw(val) };
-                    } else {
-                        (rhs, self)
-                    }
-                } else {
-                    (self, rhs)
+                let (a, b) = match (self.to_fixnum(), rhs.to_fixnum()) {
+                    (Some(a), Some(b)) => {
+                        return Self::from_fixnum_wrapping(a.$f(b));
+                    },
+                    (Some(_), None) => (rhs, self),
+                    (None,    _)    => (self, rhs),
                 };
                 unsafe { Self::from_raw(ruby::$r(a.raw(), b.raw())) }
             }
