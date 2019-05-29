@@ -262,10 +262,12 @@ pub unsafe trait Object: Copy
         args: &[impl Object]
     ) -> Result<AnyObject> {
         // monomorphization
-        fn call_with_protected(object: AnyObject, method: SymbolId, args: &[AnyObject]) -> Result<AnyObject> {
-            unsafe { crate::protected_no_panic(|| {
-                object.call_with(method, args)
-            }) }
+        unsafe fn call_with_protected(
+            object: AnyObject,
+            method: SymbolId,
+            args: &[AnyObject],
+        ) -> Result<AnyObject> {
+            crate::protected_no_panic(|| object.call_with(method, args))
         }
         call_with_protected(self.into(), method.into(), AnyObject::convert_slice(args))
     }
