@@ -5,7 +5,7 @@ use std::{
     fmt,
     iter::FromIterator,
     marker::PhantomData,
-    ops::Add,
+    ops::{Add, Range},
 };
 use crate::{
     object::{NonNullObject, Ty},
@@ -371,16 +371,34 @@ impl<O: Object> Array<O> {
         std::slice::from_raw_parts_mut(self.as_ptr_mut(), self.len())
     }
 
-    /// Returns the object at `index` or `None` if `index` is out-of-bounds.
+    /// Returns the output at `index` or `None` if `index` is out-of-bounds.
     #[inline]
-    pub fn get(self, index: usize) -> Option<O> {
-        unsafe { self.as_slice().get(index).map(|&obj| obj) }
+    pub fn get<I: ArrayIndex<O>>(self, index: I) -> Option<I::Output> {
+        index.get(self)
     }
 
-    /// Returns the object at `index` without bounds checking.
+    /// Returns the output at `index` without safety checks on `index`.
     #[inline]
-    pub unsafe fn get_unchecked(self, index: usize) -> O {
-        *self.as_slice().get_unchecked(index)
+    pub unsafe fn get_unchecked<I: ArrayIndex<O>>(self, index: I) -> I::Output {
+        index.get_unchecked(self)
+    }
+
+    /// Returns the subsequence of `self` at `range`.
+    ///
+    /// **Note:** This respects the semantics of `rb_ary_subseq`, where indexing
+    /// out of the array with a range greater than the actual slice in `self`
+    /// will just return all remaining elements. Use [`get`](#method.get) for
+    /// slice indexing semantics.
+    #[inline]
+    pub fn subseq(self, range: Range<usize>) -> Option<Self> {
+        let start = range.start;
+        let len = range.end - range.start;
+        unsafe {
+            match ruby::rb_ary_subseq(self.raw(), start as _, len as _) {
+                crate::util::NIL_VALUE => None,
+                raw => Some(Self::from_raw(raw)),
+            }
+        }
     }
 
     /// Returns the first object in `self`.
@@ -560,6 +578,52 @@ impl<O: Object> Array<O> {
     pub fn join(self, separator: impl Into<String>) -> String {
         let separator = separator.into().raw();
         unsafe { String::from_raw(ruby::rb_ary_join(self.raw(), separator)) }
+    }
+}
+
+/// A type that can be used to index into an [`Array`](struct.Array.html).
+pub trait ArrayIndex<O: Object> {
+    /// The output returned from indexing.
+    type Output;
+
+    /// Returns the output at `self`, or `None` if `self` is out-of-bounds.
+    fn get(self, array: Array<O>) -> Option<Self::Output>;
+
+    /// Returns the output at `self` without safety checks.
+    unsafe fn get_unchecked(self, array: Array<O>) -> Self::Output;
+}
+
+impl<O: Object> ArrayIndex<O> for usize {
+    type Output = O;
+
+    #[inline]
+    fn get(self, array: Array<O>) -> Option<Self::Output> {
+        unsafe { array.as_slice().get(self).map(|&obj| obj) }
+    }
+
+    #[inline]
+    unsafe fn get_unchecked(self, array: Array<O>) -> Self::Output {
+        *array.as_slice().get_unchecked(self)
+    }
+}
+
+impl<O: Object> ArrayIndex<O> for Range<usize> {
+    type Output = Array<O>;
+
+    #[inline]
+    fn get(self, array: Array<O>) -> Option<Self::Output> {
+        if self.start > self.end || self.end > array.len() {
+            None
+        } else {
+            array.subseq(self)
+        }
+    }
+
+    #[inline]
+    unsafe fn get_unchecked(self, array: Array<O>) -> Self::Output {
+        array.subseq(self).unwrap_or_else(|| {
+            std::hint::unreachable_unchecked()
+        })
     }
 }
 

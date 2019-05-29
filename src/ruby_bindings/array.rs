@@ -120,4 +120,6 @@ extern "C" {
     pub fn rb_ary_sort(ary: VALUE) -> VALUE;
     // VALUE rb_ary_sort_bang(VALUE ary)
     pub fn rb_ary_sort_bang(ary: VALUE) -> VALUE;
+    // VALUE rb_ary_subseq(VALUE ary, long beg, long len)
+    pub fn rb_ary_subseq(ary: VALUE, beg: c_long, len: c_long) -> VALUE;
 }

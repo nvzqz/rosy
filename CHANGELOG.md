@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog] and this project adheres to
 - `Symbol::{all|global_vars}`
 - `Object::get_attr`
 - `vm::backtrace`
+- `Array::subseq`
+- Ability to index with `Array::get` using a `Range<usize>`
 
 ### Changed
 - `Object::call`, `eval`s, `vm::load`, `vm::require` to be `unsafe` due to
