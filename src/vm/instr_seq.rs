@@ -55,9 +55,11 @@ impl fmt::Display for InstrSeq {
 impl InstrSeq {
     #[inline]
     fn _compile(args: &[AnyObject]) -> Result<Self> {
-        Class::instr_seq().call_with("compile", args).map(|obj| unsafe {
-            Self::cast_unchecked(obj)
-        })
+        unsafe {
+            Class::instr_seq()
+                .call_with_protected("compile", args)
+                .map(|obj| Self::cast_unchecked(obj))
+        }
     }
 
     /// Compiles `script` into an instruction sequence.
@@ -77,9 +79,11 @@ impl InstrSeq {
 
     #[inline]
     fn _compile_file(args: &[AnyObject]) -> Result<Self> {
-        Class::instr_seq().call_with("compile_file", args).map(|obj| unsafe {
-            Self::cast_unchecked(obj)
-        })
+        unsafe {
+            Class::instr_seq()
+                .call_with_protected("compile_file", args)
+                .map(|obj| Self::cast_unchecked(obj))
+        }
     }
 
     /// Compiles the contents of a file at `path` into an instruction sequence.
@@ -126,7 +130,7 @@ impl InstrSeq {
     /// ```
     #[inline]
     pub unsafe fn from_binary(binary: impl Into<String>) -> Self {
-        Self::cast_unchecked(Class::instr_seq().call_with_unchecked(
+        Self::cast_unchecked(Class::instr_seq().call_with(
             "load_from_binary",
             &[binary.into()]
         ))
@@ -150,7 +154,7 @@ impl InstrSeq {
     /// ```
     #[inline]
     pub fn eval(self) -> Result<AnyObject> {
-        self.call("eval")
+        unsafe { self.call_protected("eval") }
     }
 
     /// Evaluates `self` and returns the result.
@@ -160,13 +164,13 @@ impl InstrSeq {
     /// If this instruction sequence throws an exception, it must be caught.
     #[inline]
     pub unsafe fn eval_unchecked(self) -> AnyObject {
-        self.call_unchecked("eval")
+        self.call("eval")
     }
 
     /// Returns the serialized binary data.
     #[inline]
     pub fn to_binary(self) -> String {
-        unsafe { String::cast_unchecked(self.call_unchecked("to_binary")) }
+        unsafe { String::cast_unchecked(self.call("to_binary")) }
     }
 
     /// Writes the serialized binary data of `self` to `w`.
@@ -184,21 +188,21 @@ impl InstrSeq {
     /// Returns a human-readable form of `self`.
     #[inline]
     pub fn disassemble(self) -> String {
-        unsafe { String::cast_unchecked(self.call_unchecked("disasm")) }
+        unsafe { String::cast_unchecked(self.call("disasm")) }
     }
 
     /// Returns the file path of `self`, or `<compiled>` if it was compiled from
     /// a string.
     #[inline]
     pub fn path(self) -> String {
-        unsafe { String::cast_unchecked(self.call_unchecked("path")) }
+        unsafe { String::cast_unchecked(self.call("path")) }
     }
 
     /// Returns the absolute path of `self` if it was compiled from a file.
     #[inline]
     pub fn absolute_path(self) -> Option<String> {
         unsafe {
-            let path = self.call_unchecked("absolute_path");
+            let path = self.call("absolute_path");
             if path.is_nil() {
                 None
             } else {

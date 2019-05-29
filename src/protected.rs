@@ -22,7 +22,7 @@ use crate::{
 /// use rosy::{Object, String, protected};
 ///
 /// let string = String::from("¡Hola!");
-/// let result = protected(|| unsafe { string.call_unchecked("likes_pie?") });
+/// let result = protected(|| unsafe { string.call("likes_pie?") });
 ///
 /// assert!(result.is_err());
 /// ```
@@ -37,7 +37,7 @@ use crate::{
 ///
 /// let outer = protected(|| {
 ///     protected(|| unsafe {
-///         string.call_unchecked("likes_pie?")
+///         string.call("likes_pie?")
 ///     }).unwrap_err();
 ///     string
 /// });

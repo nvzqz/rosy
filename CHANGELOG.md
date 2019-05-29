@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog] and this project adheres to
 ### Added
 - `Range` object type
 
+### Changed
+- _All_ `Object::call` methods to be `unsafe` due to ability to break
+  assumptions made by types such as `Array<A>`, where a type `B` can be inserted
+  via `array.call_with("push", &[other_obj])`
+
 ## [0.0.8] - 2019-05-23
 ### Added
 - `Array`-based `PartialEq<[A]>` and `PartialEq<Vec<A>>` implementations on

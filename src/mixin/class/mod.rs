@@ -415,7 +415,7 @@ impl<O: Object> Class<O> {
     ///     .unwrap();
     ///
     /// let array: Array = (0..10).collect();
-    /// let value = array.call_with("my_eql?", &[array]).unwrap();
+    /// let value = unsafe { array.call_with("my_eql?", &[array]) };
     ///
     /// assert!(value.is_true());
     /// ```
@@ -432,7 +432,9 @@ impl<O: Object> Class<O> {
     /// # let class = Class::of::<Array>();
     /// # let array = Array::from_slice(&[String::from("hello")]);
     /// # class.def_method("my_eql?", my_eq as extern fn(_, _) -> _).unwrap();
-    /// assert!(array.call("my_eql?").unwrap_err().is_arg_error());
+    /// let result = unsafe { array.call_protected("my_eql?") };
+    ///
+    /// assert!(result.unwrap_err().is_arg_error());
     /// ```
     ///
     /// ## Variable Arguments
@@ -463,7 +465,9 @@ impl<O: Object> Class<O> {
     /// class.def_method("eq_all?", eq_all as unsafe extern fn(_, _, _) -> _);
     ///
     /// let args = [string, String::from("byeee")];
-    /// assert!(string.call_with("eq_all?", &args).unwrap().is_false());
+    /// let value = unsafe { string.call_with("eq_all?", &args) };
+    ///
+    /// assert!(value.is_false());
     /// ```
     ///
     /// The second is by taking an `Array` as an argument:
@@ -481,9 +485,9 @@ impl<O: Object> Class<O> {
     /// class.def_method("joining", joining).unwrap();
     ///
     /// let string = String::from(", ");
-    /// let output = string.call_with("joining", &[string, string]).unwrap();
+    /// let joined = unsafe { string.call_with("joining", &[string, string]) };
     ///
-    /// assert_eq!(output, ", , , ");
+    /// assert_eq!(joined, ", , , ");
     /// ```
     ///
     // Link to docs.rs since `Class` may either be in `class` module or root

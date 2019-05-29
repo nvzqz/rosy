@@ -74,7 +74,7 @@
 //! let string = String::from("hello\r\n");
 //!
 //! rosy::protected(|| unsafe {
-//!     string.call_unchecked("chomp!");
+//!     string.call("chomp!");
 //! }).unwrap();
 //!
 //! assert_eq!(string.len(), 5);

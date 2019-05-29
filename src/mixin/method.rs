@@ -43,9 +43,9 @@ pub unsafe trait MethodFn<Receiver: Object> {
 /// }).unwrap();
 ///
 /// let string = String::from(" \n\r\t");
-/// let result = string.call("blank?");
+/// let output = unsafe { string.call("blank?") };
 ///
-/// assert_eq!(result.unwrap(), true);
+/// assert!(output.is_true());
 /// # }).unwrap();
 /// ```
 ///
@@ -63,9 +63,11 @@ pub unsafe trait MethodFn<Receiver: Object> {
 /// }).unwrap();
 ///
 /// let object = AnyObject::from("snap");
-/// let result = object.call_with("eql_either?", &[AnyObject::nil(), object]);
+/// let output = unsafe {
+///     object.call_with("eql_either?", &[AnyObject::nil(), object])
+/// };
 ///
-/// assert_eq!(result.unwrap(), true);
+/// assert!(output.is_true());
 /// # }).unwrap();
 /// ```
 ///
@@ -86,13 +88,10 @@ pub unsafe trait MethodFn<Receiver: Object> {
 /// let expected: &[i32] = &[0, 1, 2, 3, 4, 5, 6];
 /// let array: Array<Integer> = (0..4).collect();
 ///
-/// let value = array.call_with("plus_args", &[
-///     Integer::from(4),
-///     Integer::from(5),
-///     Integer::from(6),
-/// ]).unwrap().to_array().unwrap();
+/// let args = [Integer::from(4), Integer::from(5), Integer::from(6)];
+/// let value = unsafe { array.call_with("plus_args", &args) };
 ///
-/// assert_eq!(value, *expected);
+/// assert_eq!(value.to_array().unwrap(), *expected);
 /// # }).unwrap();
 /// ```
 ///

@@ -195,47 +195,46 @@ pub unsafe trait Object: Copy
         self.singleton_class().def_method_unchecked(name, f)
     }
 
-    /// Calls `method` on `self` and returns the result.
+    /// Calls `method` on `self` and returns its output.
+    ///
+    /// # Safety
+    ///
+    /// Calling `method` may void the type safety of `Self`. For example, if one
+    /// calls `push` on `Array<A>` with an object type `B`, then the inserted
+    /// object will be treated as being of type `A`.
+    ///
+    /// An exception will be raised if `method` is not defined on `self`.
     #[inline]
-    fn call(self, method: impl Into<SymbolId>) -> Result<AnyObject> {
+    unsafe fn call(self, method: impl Into<SymbolId>) -> AnyObject {
         let args: &[AnyObject] = &[];
         self.call_with(method, args)
     }
 
-    /// Calls `method` on `self` and returns the result.
+    /// Calls `method` on `self` and returns its output, or an exception if one
+    /// is raised.
     ///
     /// # Safety
     ///
-    /// An exception will be raised if `method` is not defined on `self`.
+    /// Calling `method` may void the type safety of `Self`. For example, if one
+    /// calls `push` on `Array<A>` with an object type `B`, then the inserted
+    /// object will be treated as being of type `A`.
     #[inline]
-    unsafe fn call_unchecked(self, method: impl Into<SymbolId>) -> AnyObject {
+    unsafe fn call_protected(self, method: impl Into<SymbolId>) -> Result<AnyObject> {
         let args: &[AnyObject] = &[];
-        self.call_with_unchecked(method, args)
+        self.call_with_protected(method, args)
     }
 
-    /// Calls `method` on `self` with `args` and returns the result.
-    #[inline]
-    fn call_with(
-        self,
-        method: impl Into<SymbolId>,
-        args: &[impl Object]
-    ) -> Result<AnyObject> {
-        // monomorphization
-        fn call_with(object: AnyObject, method: SymbolId, args: &[AnyObject]) -> Result<AnyObject> {
-            unsafe { crate::protected_no_panic(|| {
-                object.call_with_unchecked(method, args)
-            }) }
-        }
-        call_with(self.into(), method.into(), AnyObject::convert_slice(args))
-    }
-
-    /// Calls `method` on `self` with `args` and returns the result.
+    /// Calls `method` on `self` with `args` and returns its output.
     ///
     /// # Safety
     ///
+    /// Calling `method` may void the type safety of `Self`. For example, if one
+    /// calls `push` on `Array<A>` with an object type `B`, then the inserted
+    /// object will be treated as being of type `A`.
+    ///
     /// An exception will be raised if `method` is not defined on `self`.
     #[inline]
-    unsafe fn call_with_unchecked(
+    unsafe fn call_with(
         self,
         method: impl Into<SymbolId>,
         args: &[impl Object]
@@ -248,56 +247,77 @@ pub unsafe trait Object: Copy
         ))
     }
 
-    /// Calls the public `method` on `self` and returns the result.
-    #[inline]
-    fn call_public(
-        self,
-        method: impl Into<SymbolId>,
-    ) -> Result<AnyObject> {
-        let args: &[AnyObject] = &[];
-        self.call_public_with(method, args)
-    }
-
-    /// Calls the public `method` on `self` and returns the result.
+    /// Calls `method` on `self` with `args` and returns its output, or an
+    /// exception if one is raised.
     ///
     /// # Safety
     ///
-    /// An exception will be raised if either `method` is not defined on `self`
-    /// or `method` is not publicly callable.
+    /// Calling `method` may void the type safety of `Self`. For example, if one
+    /// calls `push` on `Array<A>` with an object type `B`, then the inserted
+    /// object will be treated as being of type `A`.
     #[inline]
-    unsafe fn call_public_unchecked(
-        self,
-        method: impl Into<SymbolId>,
-    ) -> AnyObject {
-        let args: &[AnyObject] = &[];
-        self.call_public_with_unchecked(method, args)
-    }
-
-    /// Calls the public `method` on `self` with `args` and returns the result.
-    #[inline]
-    fn call_public_with(
+    unsafe fn call_with_protected(
         self,
         method: impl Into<SymbolId>,
         args: &[impl Object]
     ) -> Result<AnyObject> {
         // monomorphization
-        fn call_public_with(object: AnyObject, method: SymbolId, args: &[AnyObject]) -> Result<AnyObject> {
+        fn call_with_protected(object: AnyObject, method: SymbolId, args: &[AnyObject]) -> Result<AnyObject> {
             unsafe { crate::protected_no_panic(|| {
-                object.call_public_with_unchecked(method, args)
+                object.call_with(method, args)
             }) }
         }
-        let args = AnyObject::convert_slice(args);
-        call_public_with(self.into(), method.into(), args)
+        call_with_protected(self.into(), method.into(), AnyObject::convert_slice(args))
     }
 
-    /// Calls the public `method` on `self` with `args` and returns the result.
+    /// Calls the public `method` on `self` and returns its output.
     ///
     /// # Safety
+    ///
+    /// Calling `method` may void the type safety of `Self`. For example, if one
+    /// calls `push` on `Array<A>` with an object type `B`, then the inserted
+    /// object will be treated as being of type `A`.
     ///
     /// An exception will be raised if either `method` is not defined on `self`
     /// or `method` is not publicly callable.
     #[inline]
-    unsafe fn call_public_with_unchecked(
+    unsafe fn call_public(
+        self,
+        method: impl Into<SymbolId>,
+    ) -> AnyObject {
+        let args: &[AnyObject] = &[];
+        self.call_public_with(method, args)
+    }
+
+    /// Calls the public `method` on `self` and returns its output, or an
+    /// exception if one is raised.
+    ///
+    /// # Safety
+    ///
+    /// Calling `method` may void the type safety of `Self`. For example, if one
+    /// calls `push` on `Array<A>` with an object type `B`, then the inserted
+    /// object will be treated as being of type `A`.
+    #[inline]
+    unsafe fn call_public_protected(
+        self,
+        method: impl Into<SymbolId>,
+    ) -> Result<AnyObject> {
+        let args: &[AnyObject] = &[];
+        self.call_public_with_protected(method, args)
+    }
+
+    /// Calls the public `method` on `self` with `args` and returns its output.
+    ///
+    /// # Safety
+    ///
+    /// Calling `method` may void the type safety of `Self`. For example, if one
+    /// calls `push` on `Array<A>` with an object type `B`, then the inserted
+    /// object will be treated as being of type `A`.
+    ///
+    /// An exception will be raised if either `method` is not defined on `self`
+    /// or `method` is not publicly callable.
+    #[inline]
+    unsafe fn call_public_with(
         self,
         method: impl Into<SymbolId>,
         args: &[impl Object]
@@ -310,6 +330,30 @@ pub unsafe trait Object: Copy
         ))
     }
 
+    /// Calls the public `method` on `self` with `args` and returns its output,
+    /// or an exception if one is raised.
+    ///
+    /// # Safety
+    ///
+    /// Calling `method` may void the type safety of `Self`. For example, if one
+    /// calls `push` on `Array<A>` with an object type `B`, then the inserted
+    /// object will be treated as being of type `A`.
+    #[inline]
+    unsafe fn call_public_with_protected(
+        self,
+        method: impl Into<SymbolId>,
+        args: &[impl Object]
+    ) -> Result<AnyObject> {
+        // monomorphization
+        fn call_public_with_protected(object: AnyObject, method: SymbolId, args: &[AnyObject]) -> Result<AnyObject> {
+            unsafe { crate::protected_no_panic(|| {
+                object.call_public_with(method, args)
+            }) }
+        }
+        let args = AnyObject::convert_slice(args);
+        call_public_with_protected(self.into(), method.into(), args)
+    }
+
     /// Returns a printable string representation of `self`.
     ///
     /// # Examples
@@ -318,8 +362,10 @@ pub unsafe trait Object: Copy
     /// # rosy::vm::init().unwrap();
     /// use rosy::{Object, Class};
     ///
-    /// let a = Class::array();
-    /// assert_eq!(a.inspect(), a.call("inspect").unwrap());
+    /// let array = Class::array();
+    ///
+    /// let expected = unsafe { array.call("inspect") };
+    /// assert_eq!(array.inspect(), expected);
     /// ```
     #[inline]
     fn inspect(self) -> String {

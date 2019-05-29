@@ -370,7 +370,9 @@ impl String {
     /// use rosy::{Object, String};
     ///
     /// let string = String::from("hellooo");
-    /// string.call_with("encode!", &[String::from("US-ASCII")]).unwrap();
+    /// unsafe {
+    ///     string.call_with("encode!", &[String::from("US-ASCII")]);
+    /// }
     ///
     /// assert!(string.encoding_is_us_ascii());
     /// ```
@@ -712,7 +714,7 @@ mod benches {
 
         let string = create_string();
         let enc = String::from("ASCII-8BIT");
-        string.call_with("force_encoding", &[enc]).unwrap();
+        string.call_with_protected("force_encoding", &[enc]).unwrap();
 
         b.bytes = string.len() as u64;
         b.iter(move || unsafe {
