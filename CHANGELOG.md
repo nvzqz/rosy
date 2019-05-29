@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 - `Integer` methods:
   - `to_f64`
   - `is_zero`
+  - `to_s_radix`
 
 ### Changed
 - `Object::call`, `eval`s, `vm::load`, `vm::require` to be `unsafe` due to

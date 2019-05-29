@@ -28,6 +28,8 @@ extern "C" {
 
     // double rb_big2dbl(VALUE x)
     pub fn rb_big2dbl(x: VALUE) -> f64;
+    // VALUE rb_big2str(VALUE x, int base)
+    pub fn rb_big2str(x: VALUE, base: c_int) -> VALUE;
 
     // int rb_bigzero_p(VALUE x)
     pub fn rb_bigzero_p(x: VALUE) -> c_int;

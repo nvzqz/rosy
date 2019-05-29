@@ -550,6 +550,24 @@ impl Integer {
         }
     }
 
+    /// Returns a string for `self` in the given base, or an exception if one is
+    /// raised.
+    pub fn to_s_radix(self, radix: u32) -> Result<String> {
+        unsafe {
+            crate::protected_no_panic(|| self.to_s_radix_unchecked(radix))
+        }
+    }
+
+    /// Returns a string for `self` in the given base.
+    ///
+    /// # Safety
+    ///
+    /// An exception will be raised if `self` is too large or if `radix > 36`.
+    #[inline]
+    pub unsafe fn to_s_radix_unchecked(self, radix: u32) -> String {
+        String::from_raw(ruby::rb_big2str(self.raw(), radix as _))
+    }
+
     /// Packs the contents of `self` into `buf` with the platform's native byte
     /// order.
     ///
