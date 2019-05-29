@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+
+## [0.0.9] - 2019-05-29
 ### Added
 - `Range` object type
 - Generic `Classify` implementation for `Array<O>` and `Hash<K, V>`
@@ -155,7 +157,8 @@ Initial release
 [Keep a Changelog]:    http://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: http://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/oceanpkg/rosy/compare/v0.0.8...HEAD
+[Unreleased]: https://github.com/oceanpkg/rosy/compare/v0.0.9...HEAD
+[0.0.9]: https://github.com/oceanpkg/rosy/compare/v0.0.8...v0.0.9
 [0.0.8]: https://github.com/oceanpkg/rosy/compare/v0.0.7...v0.0.8
 [0.0.7]: https://github.com/oceanpkg/rosy/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/oceanpkg/rosy/compare/v0.0.5...v0.0.6
