@@ -18,4 +18,6 @@ extern "C" {
     pub fn rb_id2sym(x: ID) -> VALUE;
     // const char * rb_id2name(ID id)
     pub fn rb_id2name(id: ID) -> *const c_char;
+    // VALUE rb_sym_all_symbols(void)
+    pub fn rb_sym_all_symbols() -> VALUE;
 }

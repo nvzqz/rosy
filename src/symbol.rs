@@ -96,6 +96,24 @@ impl Symbol {
         unsafe { ruby::rb_sym2id(self.raw()) }
     }
 
+    /// Returns an array of all the symbols currently in Ruby's symbol table.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use rosy::Symbol;
+    ///
+    /// let all = Symbol::all();
+    /// let eql = Symbol::from("eql?");
+    ///
+    /// assert!(all.contains(eql));
+    /// ```
+    #[inline]
+    pub fn all() -> Array<Self> {
+        unsafe { Array::from_raw(ruby::rb_sym_all_symbols()) }
+    }
+
     /// Returns whether `name` is valid as a symbol value.
     ///
     /// # Examples
