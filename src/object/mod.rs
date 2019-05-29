@@ -400,6 +400,13 @@ pub unsafe trait Object: Copy
         let that = other.raw();
         unsafe { ruby::rb_eql(this, that) != 0 }
     }
+
+    /// Returns the value for the attribute of `self` associated with `name`.
+    #[inline]
+    fn get_attr<N: Into<SymbolId>>(self, name: N) -> AnyObject {
+        let name = name.into().raw();
+        unsafe { AnyObject::from_raw(ruby::rb_attr_get(self.raw(), name)) }
+    }
 }
 
 #[cfg(test)]

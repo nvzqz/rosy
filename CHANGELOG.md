@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 - `Range` object type
 - Generic `Classify` implementation for `Array<O>` and `Hash<K, V>`
 - `Symbol::{all|global_vars}`
+- `Object::get_attr`
 
 ### Changed
 - `Object::call`, `eval`s, `vm::load`, `vm::require` to be `unsafe` due to
@@ -16,6 +17,7 @@ The format is based on [Keep a Changelog] and this project adheres to
   called on a value of type `B`
 - `AnyObject::is_{nil|undefined|true|false}` to `const` functions
 - `Exception::raise` return type to `!`
+- `Mixin::attr` and friends to `Mixin::def_attr`
 
 ## [0.0.8] - 2019-05-23
 ### Added

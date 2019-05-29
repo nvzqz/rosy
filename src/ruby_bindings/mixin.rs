@@ -90,6 +90,8 @@ extern "C" {
 
     // void rb_attr(VALUE klass, ID id, int read, int write, int ex)
     pub fn rb_attr(klass: VALUE, id: ID, read: c_int, write: c_int, ex: c_int);
+    // VALUE rb_ivar_get(VALUE obj, ID id)
+    pub fn rb_attr_get(obj: VALUE, id: ID) -> VALUE;
 
     // VALUE rb_call_super(int argc, const VALUE *argv)
     pub fn rb_call_super(argc: c_int, argv: *const VALUE) -> VALUE;

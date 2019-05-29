@@ -28,12 +28,12 @@ unsafe fn _get_const_unchecked(m: impl Mixin, name: impl Into<SymbolId>) -> AnyO
 }
 
 // monomorphization
-unsafe fn _attr(m: VALUE, name: ID, read: bool, write: bool) -> Result {
-    crate::protected_no_panic(|| _attr_unchecked(m, name, read, write))
+unsafe fn _set_attr(m: VALUE, name: ID, read: bool, write: bool) -> Result {
+    crate::protected_no_panic(|| _set_attr_unchecked(m, name, read, write))
 }
 
 #[inline]
-unsafe fn _attr_unchecked(m: VALUE, name: ID, read: bool, write: bool) {
+unsafe fn _set_attr_unchecked(m: VALUE, name: ID, read: bool, write: bool) {
     ruby::rb_attr(m, name, read as _, write as _, 0);
 }
 
@@ -260,8 +260,8 @@ pub trait Mixin: Object + Sealed {
 
     /// Defines an read-only attribute on `self` with `name`.
     #[inline]
-    fn attr_reader<N: Into<SymbolId>>(self, name: N) -> Result {
-        unsafe { _attr(self.raw(), name.into().raw(), true, false) }
+    fn def_attr_reader<N: Into<SymbolId>>(self, name: N) -> Result {
+        unsafe { _set_attr(self.raw(), name.into().raw(), true, false) }
     }
 
     /// Defines an read-only attribute on `self` with `name`.
@@ -271,14 +271,14 @@ pub trait Mixin: Object + Sealed {
     /// The caller must ensure that `self` is not frozen or else a `FrozenError`
     /// exception will be raised.
     #[inline]
-    unsafe fn attr_reader_unchecked<N: Into<SymbolId>>(self, name: N) {
-        _attr_unchecked(self.raw(), name.into().raw(), true, false);
+    unsafe fn def_attr_reader_unchecked<N: Into<SymbolId>>(self, name: N) {
+        _set_attr_unchecked(self.raw(), name.into().raw(), true, false);
     }
 
     /// Defines a write-only attribute on `self` with `name`.
     #[inline]
-    fn attr_writer<N: Into<SymbolId>>(self, name: N) -> Result {
-        unsafe { _attr(self.raw(), name.into().raw(), false, true) }
+    fn def_attr_writer<N: Into<SymbolId>>(self, name: N) -> Result {
+        unsafe { _set_attr(self.raw(), name.into().raw(), false, true) }
     }
 
     /// Defines a write-only attribute on `self` with `name`.
@@ -288,14 +288,14 @@ pub trait Mixin: Object + Sealed {
     /// The caller must ensure that `self` is not frozen or else a `FrozenError`
     /// exception will be raised.
     #[inline]
-    unsafe fn attr_writer_unchecked<N: Into<SymbolId>>(self, name: N) {
-        _attr_unchecked(self.raw(), name.into().raw(), false, true);
+    unsafe fn def_attr_writer_unchecked<N: Into<SymbolId>>(self, name: N) {
+        _set_attr_unchecked(self.raw(), name.into().raw(), false, true);
     }
 
     /// Defines a read-write attribute on `self` with `name`.
     #[inline]
-    fn attr_accessor<N: Into<SymbolId>>(self, name: N) -> Result {
-        unsafe { _attr(self.raw(), name.into().raw(), true, true) }
+    fn def_attr_accessor<N: Into<SymbolId>>(self, name: N) -> Result {
+        unsafe { _set_attr(self.raw(), name.into().raw(), true, true) }
     }
 
     /// Defines a read-write attribute on `self` with `name`.
@@ -305,8 +305,8 @@ pub trait Mixin: Object + Sealed {
     /// The caller must ensure that `self` is not frozen or else a `FrozenError`
     /// exception will be raised.
     #[inline]
-    unsafe fn attr_accessor_unchecked<N: Into<SymbolId>>(self, name: N) {
-        _attr_unchecked(self.raw(), name.into().raw(), true, true);
+    unsafe fn def_attr_accessor_unchecked<N: Into<SymbolId>>(self, name: N) {
+        _set_attr_unchecked(self.raw(), name.into().raw(), true, true);
     }
 
     /// Evaluates `args` in the context of `self`.
