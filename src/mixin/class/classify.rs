@@ -21,12 +21,24 @@ macro_rules! impl_trait {
     )+ };
 }
 
+impl<O: Object> Classify for Array<O> {
+    #[inline]
+    fn class() -> Class<Self> {
+        unsafe { Class::cast_unchecked(Class::array()) }
+    }
+}
+
+impl<K: Object, V: Object> Classify for Hash<K, V> {
+    #[inline]
+    fn class() -> Class<Self> {
+        unsafe { Class::cast_unchecked(Class::hash()) }
+    }
+}
+
 impl_trait! {
     AnyObject,    object;
     Class,        class;
     Module,       module;
-    Array,        array;
-    Hash,         hash;
     Integer,      integer;
     String,       string;
     Symbol,       symbol;

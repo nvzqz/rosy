@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 ## [Unreleased]
 ### Added
 - `Range` object type
+- Generic `Classify` implementation for `Array<O>` and `Hash<K, V>`
 
 ### Changed
 - _All_ `Object::call` methods to be `unsafe` due to ability to break
