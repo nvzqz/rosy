@@ -384,7 +384,7 @@ mod tests {
                 nxn_hash_ids! { expand $ids => $t1next, $($t2s),* }
             };
             (do_stuff $ids:expr => $t1next:ty, $($t1rest:ty),+ ; $($t2s:ty),*) => {
-                nxn_hash_ids! { expand   $ids => $t1next, $($t2s),* }
+                nxn_hash_ids! { expand   $ids => $t1next,       $($t2s),* }
                 nxn_hash_ids! { do_stuff $ids => $($t1rest),* ; $($t2s),* }
             };
             (expand $ids:expr => $t1:ty, $($t2s:ty),*) => {
