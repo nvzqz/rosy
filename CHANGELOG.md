@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog] and this project adheres to
   - `to_f64`
   - `is_zero`
   - `to_s_radix`
+- `EvalArgs::eval_in_object` and `Object::eval`
 
 ### Changed
 - `Object::call`, `eval`s, `vm::load`, `vm::require` to be `unsafe` due to
@@ -32,6 +33,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 - `Array::remove_all` to return `Option<O>`
 - `fixnum_value` in `Integer` to `to_fixnum`
 - Fixnum type for `Integer` from `i64` to `isize`
+- `EvalArgs::eval_in` to `eval_in_mixin`
 
 ### Fixed
 - `Integer::to_fixnum` value for negative numbers

@@ -5,6 +5,7 @@ use crate::{
     prelude::*,
     ruby,
     mixin::MethodFn,
+    vm::EvalArgs,
 };
 
 mod any;
@@ -406,6 +407,39 @@ pub unsafe trait Object: Copy
     fn get_attr<N: Into<SymbolId>>(self, name: N) -> AnyObject {
         let name = name.into().raw();
         unsafe { AnyObject::from_raw(ruby::rb_attr_get(self.raw(), name)) }
+    }
+
+    /// Evaluates `args` in the context of `self`.
+    ///
+    /// See the docs for `EvalArgs` for more info.
+    ///
+    /// # Safety
+    ///
+    /// Code executed from `args` may void the type safety of objects accessible
+    /// from Rust. For example, if one calls `push` on an `Array<A>` with an
+    /// object of type `B`, then the inserted object will be treated as being of
+    /// type `A`.
+    ///
+    /// An exception may be raised by the code or by `args` being invalid.
+    #[inline]
+    unsafe fn eval(self, args: impl EvalArgs) -> AnyObject {
+        args.eval_in_object(self)
+    }
+
+    /// Evaluates `args` in the context of `self`, returning any raised
+    /// exceptions.
+    ///
+    /// See the docs for `EvalArgs` for more info.
+    ///
+    /// # Safety
+    ///
+    /// Code executed from `args` may void the type safety of objects accessible
+    /// from Rust. For example, if one calls `push` on an `Array<A>` with an
+    /// object of type `B`, then the inserted object will be treated as being of
+    /// type `A`.
+    #[inline]
+    unsafe fn eval_protected(self, args: impl EvalArgs) -> Result<AnyObject> {
+        args.eval_in_object_protected(self)
     }
 }
 

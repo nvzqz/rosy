@@ -42,4 +42,7 @@ extern "C" {
 
     // VALUE rb_singleton_class(VALUE obj)
     pub fn rb_singleton_class(obj: VALUE) -> VALUE;
+
+    // VALUE rb_obj_instance_eval(int argc, const VALUE *argv, VALUE self)
+    pub fn rb_obj_instance_eval(argc: c_int, argv: *const VALUE, this: VALUE) -> VALUE;
 }
