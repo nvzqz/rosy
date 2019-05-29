@@ -505,9 +505,7 @@ impl<O: Object> Array<O> {
     /// ```
     #[inline]
     pub fn contains(self, obj: impl Into<O>) -> bool {
-        let obj = obj.into().raw();
-        let val = unsafe { ruby::rb_ary_includes(self.raw(), obj) };
-        val == crate::util::TRUE_VALUE
+        unsafe { ruby::rb_ary_includes(self.raw(), obj.into().raw()) != 0 }
     }
 
     /// Removes _all_ items in `self` that are equal to `obj`.

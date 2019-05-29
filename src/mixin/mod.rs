@@ -204,8 +204,7 @@ pub trait Mixin: Object + Sealed {
     /// Returns whether the class-level `var` is defined in `self`.
     #[inline]
     fn has_class_var(self, var: impl Into<SymbolId>) -> bool {
-        let t = unsafe { ruby::rb_cvar_defined(self.raw(), var.into().raw()) };
-        t == crate::util::TRUE_VALUE
+        unsafe { ruby::rb_cvar_defined(self.raw(), var.into().raw()) != 0 }
     }
 
     /// Returns the class-level `var` in `self`.
