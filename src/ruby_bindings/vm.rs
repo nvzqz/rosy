@@ -27,4 +27,7 @@ extern "C" {
     pub fn rb_eval_string_protect(str: *const c_char, pstate: *mut c_int) -> VALUE;
     // VALUE rb_eval_string_wrap(const char *str, int *pstate)
     pub fn rb_eval_string_wrap(str: *const c_char, pstate: *mut c_int) -> VALUE;
+
+    // VALUE rb_make_backtrace(void)
+    pub fn rb_make_backtrace() -> VALUE;
 }

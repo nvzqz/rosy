@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 - Generic `Classify` implementation for `Array<O>` and `Hash<K, V>`
 - `Symbol::{all|global_vars}`
 - `Object::get_attr`
+- `vm::backtrace`
 
 ### Changed
 - `Object::call`, `eval`s, `vm::load`, `vm::require` to be `unsafe` due to

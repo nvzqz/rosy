@@ -324,6 +324,12 @@ pub unsafe fn eval_wrapped(script: &CStr) -> Result<AnyObject> {
     }
 }
 
+/// Returns the current backtrace.
+#[inline]
+pub fn backtrace() -> Array<String> {
+    unsafe { Array::from_raw(ruby::rb_make_backtrace()) }
+}
+
 /// An error indicating that [`init`](fn.init.html) failed.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct InitError(NonZeroI32);
