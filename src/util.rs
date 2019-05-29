@@ -1,4 +1,3 @@
-use std::os::raw::c_long;
 use crate::{
     object::Ty,
     ruby::{
@@ -97,13 +96,13 @@ pub fn value_flag(v: VALUE) -> VALUE {
 }
 
 #[inline]
-pub fn fixnum_to_value(i: c_long) -> VALUE {
+pub const fn fixnum_to_value(i: isize) -> VALUE {
     ((i as VALUE) << 1) | FIXNUM_FLAG
 }
 
 #[inline]
-pub fn value_to_fixnum(v: VALUE) -> c_long {
-    ((v & !(FIXNUM_FLAG as VALUE)) >> 1) as c_long
+pub const fn value_to_fixnum(v: VALUE) -> isize {
+    ((v & !FIXNUM_FLAG) as isize) >> 1
 }
 
 #[inline]

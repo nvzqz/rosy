@@ -24,11 +24,16 @@ The format is based on [Keep a Changelog] and this project adheres to
 - Functions to be `const`:
   - `AnyObject::is_{nil|undefined|true|false}`
   - `Integer::is_{big|fix}num`
+  - `Integer::{{max|min}_fixnum|from_fixnum_wrapping|zero}`
 - `Exception::raise` return type to `!`
 - `Mixin::attr` and friends to `Mixin::def_attr`
 - `Array::{contains|remove_all}` to take an arg that implements `Into<O>`
 - `Array::remove_all` to return `Option<O>`
 - `fixnum_value` in `Integer` to `to_fixnum`
+- Fixnum type for `Integer` from `i64` to `isize`
+
+### Fixed
+- `Integer::to_fixnum` value for negative numbers
 
 ## [0.0.8] - 2019-05-23
 ### Added

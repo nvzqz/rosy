@@ -324,6 +324,70 @@ impl fmt::Display for Integer {
 }
 
 impl Integer {
+    #[inline]
+    const unsafe fn _from_raw(raw: ruby::VALUE) -> Self {
+        Self(NonNullObject::from_raw(raw))
+    }
+
+    /// Returns an instance with a value of 0.
+    #[inline]
+    pub const fn zero() -> Self {
+        Self::from_fixnum_wrapping(0)
+    }
+
+    /// Returns the maximum value that may be used as a fixnum.
+    ///
+    /// # Examples
+    ///
+    /// This value is equal to
+    /// [`isize::max_value()`](https://doc.rust-lang.org/std/primitive.isize.html#method.max_value)
+    /// shifted right by 1.
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use rosy::Integer;
+    ///
+    /// let fixnum = isize::max_value() >> 1;
+    /// let integer = Integer::from(fixnum);
+    ///
+    /// assert_eq!(integer, Integer::max_fixnum());
+    /// assert_eq!(integer.to_fixnum(), Some(fixnum));
+    /// ```
+    #[inline]
+    pub const fn max_fixnum() -> Self {
+        Self::from_fixnum_wrapping(isize::max_value() >> 1)
+    }
+
+    /// Returns the minimum value that may be used as a fixnum.
+    ///
+    /// # Examples
+    ///
+    /// This value is equal to
+    /// [`isize::min_value()`](https://doc.rust-lang.org/std/primitive.isize.html#method.min_value)
+    /// shifted right by 1.
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use rosy::Integer;
+    ///
+    /// let fixnum = isize::min_value() >> 1;
+    /// let integer = Integer::from(fixnum);
+    ///
+    /// assert_eq!(integer, Integer::min_fixnum());
+    /// assert_eq!(integer.to_fixnum(), Some(fixnum));
+    /// ```
+    #[inline]
+    pub const fn min_fixnum() -> Self {
+        Self::from_fixnum_wrapping(isize::min_value() >> 1)
+    }
+
+    /// Returns an instance from the fixed-size number, wrapping at the most
+    /// significant bit.
+    #[inline]
+    pub const fn from_fixnum_wrapping(n: isize) -> Self {
+        unsafe { Self::_from_raw(crate::util::fixnum_to_value(n)) }
+    }
+
     /// Unpacks the contents of `buf` into a new instance.
     #[inline]
     pub fn unpack<W: Word>(buf: &[W]) -> Self {
@@ -397,33 +461,47 @@ impl Integer {
     /// ```
     #[inline]
     pub fn is_negative(self) -> bool {
-        if self.is_fixnum() {
-            (self.raw() as isize) < 0
+        if let Some(fixnum) = self.to_fixnum() {
+            fixnum < 0
         } else {
             unsafe { ruby::rb_big_sign(self.raw()) == 0 }
         }
     }
 
-    /// Returns whether `self` is a variable-sized integer.
+    /// Returns whether `self` is a variable-width integer.
     #[inline]
     pub const fn is_bignum(self) -> bool {
         !self.is_fixnum()
     }
 
-    /// Returns whether `self` is a fixed-sized integer.
+    /// Returns whether `self` is a fixed-width integer.
     #[inline]
     pub const fn is_fixnum(self) -> bool {
-        crate::util::value_is_fixnum(self.0.raw.get())
+        crate::util::value_is_fixnum(self.0.raw())
     }
 
-    /// Returns the value of the fixed-width integer stored in `self`.
+    /// Returns the value of the fixed-width integer stored in `self`, if it is
+    /// not a bignum.
     #[inline]
-    pub fn to_fixnum(self) -> Option<i64> {
+    pub fn to_fixnum(self) -> Option<isize> {
         if self.is_fixnum() {
-            Some(crate::util::value_to_fixnum(self.raw()) as i64)
+            Some(crate::util::value_to_fixnum(self.raw()))
         } else {
             None
         }
+    }
+
+    /// Returns the value of the fixed-width integer stored in `self`, assuming
+    /// it is not a bignum.
+    ///
+    /// # Safety
+    ///
+    /// This method is not marked as `unsafe` because using it on a bignum is
+    /// simply a programming error and will not result in memory or type
+    /// unsafety.
+    #[inline]
+    pub const fn to_fixnum_unchecked(self) -> isize {
+        crate::util::value_to_fixnum(self.0.raw())
     }
 
     /// Converts `self` to `W` if it can be represented as `W`.

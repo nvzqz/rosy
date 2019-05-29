@@ -4,14 +4,17 @@ use std::{
     marker::PhantomData,
     num::NonZeroUsize,
 };
-use crate::AnyObject;
+use crate::{
+    AnyObject,
+    ruby,
+};
 
 // An `AnyObject` instance that doesn't use 0 (reserved for `false`). This type
 // is used as a memory optimization for objects wrapped in `Option`.
 #[derive(Clone, Copy)]
 #[repr(transparent)]
 pub struct NonNullObject {
-    pub(crate) raw: NonZeroUsize,
+    raw: NonZeroUsize,
     // !Send + !Sync
     _marker: PhantomData<*const c_void>,
 }
@@ -34,5 +37,20 @@ impl fmt::Debug for NonNullObject {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         AnyObject::from(*self).fmt(f)
+    }
+}
+
+impl NonNullObject {
+    #[inline]
+    pub const unsafe fn from_raw(raw: ruby::VALUE) -> Self {
+        NonNullObject {
+            raw: NonZeroUsize::new_unchecked(raw),
+            _marker: PhantomData,
+        }
+    }
+
+    #[inline]
+    pub const fn raw(self) -> usize {
+        self.raw.get()
     }
 }
