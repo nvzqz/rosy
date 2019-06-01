@@ -253,6 +253,14 @@ impl AnyObject {
         self.raw == crate::util::FALSE_VALUE
     }
 
+    /// Returns whether `self` is either `false` or `true`.
+    #[inline]
+    pub const fn is_bool(self) -> bool {
+        // HACK: Needed for working with `const fn` while `||` isn't stable;
+        // only returns `false` if neither is `true` since both can't be `true`
+        self.is_true() != self.is_false()
+    }
+
     /// Returns the boolean value for `self`, if any.
     #[inline]
     pub fn to_bool(self) -> Option<bool> {

@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog] and this project adheres to
 [Semantic Versioning].
 
 ## [Unreleased]
+### Added
+- `AnyObject::is_bool`
+
 ### Changed
 - `Object::is_fixnum` to be `const`
 
