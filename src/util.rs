@@ -9,10 +9,10 @@ use crate::{
     }
 };
 
-pub const NIL_VALUE:   VALUE = Qnil   as VALUE;
-pub const TRUE_VALUE:  VALUE = Qtrue  as VALUE;
-pub const FALSE_VALUE: VALUE = Qfalse as VALUE;
-pub const UNDEF_VALUE: VALUE = Qundef as VALUE;
+pub const NIL_VALUE:   VALUE = Qnil;
+pub const TRUE_VALUE:  VALUE = Qtrue;
+pub const FALSE_VALUE: VALUE = Qfalse;
+pub const UNDEF_VALUE: VALUE = Qundef;
 
 pub const MAX_VALUE: VALUE = !0;
 pub const MAX_VALUE_SHIFTED: VALUE = MAX_VALUE << SPECIAL_SHIFT;
@@ -107,7 +107,7 @@ pub const fn value_to_fixnum(v: VALUE) -> isize {
 
 #[inline]
 pub const fn value_is_fixnum(v: VALUE) -> bool {
-    v & FIXNUM_FLAG as VALUE != 0
+    v & FIXNUM_FLAG != 0
 }
 
 #[inline]
@@ -117,7 +117,7 @@ pub fn value_is_float(v: VALUE) -> bool {
 
 #[inline]
 pub const fn value_is_immediate(v: VALUE) -> bool {
-    v & IMMEDIATE_MASK as VALUE != 0
+    v & IMMEDIATE_MASK != 0
 }
 
 #[inline]
@@ -127,7 +127,7 @@ pub fn value_is_special_const(v: VALUE) -> bool {
 
 #[inline]
 pub const fn value_is_static_sym(v: VALUE) -> bool {
-    value_flag(v) == SYMBOL_FLAG as VALUE
+    value_flag(v) == SYMBOL_FLAG
 }
 
 #[inline]
