@@ -253,6 +253,14 @@ impl AnyObject {
         self.raw == crate::util::FALSE_VALUE
     }
 
+    /// Returns whether `self` is either `false` or `nil`.
+    ///
+    /// Ruby treats both values as falsey in control flow contexts.
+    #[inline]
+    pub const fn is_false_or_nil(self) -> bool {
+        crate::util::test_value(self.raw)
+    }
+
     /// Returns whether `self` is either `false` or `true`.
     #[inline]
     pub const fn is_bool(self) -> bool {

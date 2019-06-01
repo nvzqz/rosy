@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 
 ## [Unreleased]
 ### Added
-- `AnyObject::is_bool`
+- `AnyObject::is_{bool|false_or_nil}`
 
 ### Changed
 - `Object::is_fixnum` to be `const`
