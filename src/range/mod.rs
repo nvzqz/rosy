@@ -238,4 +238,36 @@ impl<S: Object, E: Object> Range<S, E> {
     pub fn contains(self, obj: impl Into<AnyObject>) -> bool {
         unsafe { self.call_with("include?", &[obj.into()]).is_true() }
     }
+
+    /// Returns the size of `self` as an `Integer`, if the bounds are `Numeric`
+    /// values.
+    #[inline]
+    pub fn size(self) -> Option<Integer> {
+        unsafe {
+            let size = self.call("size");
+            if size.is_nil() {
+                None
+            } else {
+                Some(Integer::cast_unchecked(size))
+            }
+        }
+    }
+
+    /// Returns the size of `self` as a `usize`, if the bounds are `Numeric`
+    /// values and the value can be represented as a `usize`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use rosy::prelude::*;
+    ///
+    /// let range = Range::<Integer>::new(0..10).unwrap();
+    ///
+    /// assert_eq!(range.len(), Some(10));
+    /// ```
+    #[inline]
+    pub fn len(self) -> Option<usize> {
+        self.size()?.to_value()
+    }
 }
