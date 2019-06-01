@@ -219,4 +219,23 @@ impl<S: Object, E: Object> Range<S, E> {
     pub fn into_bounds(self) -> (S, Bound<E>) {
         IntoBounds::into_bounds(self)
     }
+
+    /// Returns whether `obj` is contained within `self`.
+    ///
+    /// # Examples
+    ///
+    /// This corresponds to the `include?` method in Ruby.
+    ///
+    /// ```
+    /// # rosy::vm::init().unwrap();
+    /// use rosy::prelude::*;
+    ///
+    /// let range = Range::<Integer>::new(10..15).unwrap();
+    ///
+    /// assert!(range.contains(12));
+    /// ```
+    #[inline]
+    pub fn contains(self, obj: impl Into<AnyObject>) -> bool {
+        unsafe { self.call_with("include?", &[obj.into()]).is_true() }
+    }
 }

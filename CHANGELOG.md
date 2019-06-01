@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 ## [Unreleased]
 ### Added
 - `AnyObject::is_{bool|false_or_nil}`
+- `Range::contains`
 
 ### Changed
 - `Object::is_fixnum` to be `const`
