@@ -25,7 +25,7 @@ pub fn matches_ruby_size_align<T>() -> bool {
 }
 
 #[inline]
-pub fn test_value(v: VALUE) -> bool {
+pub const fn test_value(v: VALUE) -> bool {
     v & !NIL_VALUE != 0
 }
 
@@ -91,7 +91,7 @@ pub fn value_is_built_in_ty(v: VALUE, ty: Ty) -> bool {
 }
 
 #[inline]
-pub fn value_flag(v: VALUE) -> VALUE {
+pub const fn value_flag(v: VALUE) -> VALUE {
     v & !MAX_VALUE_SHIFTED
 }
 
@@ -116,7 +116,7 @@ pub fn value_is_float(v: VALUE) -> bool {
 }
 
 #[inline]
-pub fn value_is_immediate(v: VALUE) -> bool {
+pub const fn value_is_immediate(v: VALUE) -> bool {
     v & IMMEDIATE_MASK as VALUE != 0
 }
 
@@ -126,7 +126,7 @@ pub fn value_is_special_const(v: VALUE) -> bool {
 }
 
 #[inline]
-pub fn value_is_static_sym(v: VALUE) -> bool {
+pub const fn value_is_static_sym(v: VALUE) -> bool {
     value_flag(v) == SYMBOL_FLAG as VALUE
 }
 
