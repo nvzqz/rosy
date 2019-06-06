@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 - `Range::{contains|size|len}`
 - Pre-interned `SymbolId` getters
 - `SymbolId::from_raw`
+- `Symbol::is_{static|dynamic}`
 
 ### Changed
 - Functions to be `const`:

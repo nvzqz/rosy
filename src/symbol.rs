@@ -157,6 +157,18 @@ impl Symbol {
     pub fn name(self) -> &'static CStr {
         self.id().name()
     }
+
+    /// Returns whether the symbol has its identifier encoded directly.
+    #[inline]
+    pub const fn is_static(self) -> bool {
+        crate::util::value_is_static_sym(self.0.raw())
+    }
+
+    /// Returns whether `self` is backed by an `RSymbol` runtime value.
+    #[inline]
+    pub const fn is_dynamic(self) -> bool {
+        !self.is_static()
+    }
 }
 
 /// An identifier for a [`Symbol`](struct.Symbol.html).
