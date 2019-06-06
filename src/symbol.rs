@@ -215,6 +215,16 @@ impl From<SymbolId> for Symbol {
 }
 
 impl SymbolId {
+    /// Creates a symbol ID from the raw value.
+    ///
+    /// # Safety
+    ///
+    /// The value must have come from the Ruby VM.
+    #[inline]
+    pub const unsafe fn from_raw(raw: ruby::ID) -> Self {
+        SymbolId(raw)
+    }
+
     /// Returns the raw underlying ID.
     #[inline]
     pub const fn raw(self) -> ruby::ID {

@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 - `AnyObject::is_{bool|false_or_nil}`
 - `Range::{contains|size|len}`
 - Pre-interned `SymbolId` getters
+- `SymbolId::from_raw`
 
 ### Changed
 - Functions to be `const`:
