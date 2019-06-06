@@ -162,8 +162,9 @@ impl AnyException {
     /// # Safety
     ///
     /// The `class` argument must inherit from an exception class.
-    pub unsafe fn of_class(
-        class: impl Into<Class>,
+    #[inline]
+    pub unsafe fn of_class<O: Object>(
+        class: impl Into<Class<O>>,
         message: impl Into<String>,
     ) -> Self {
         Self::cast_unchecked(class.into().new_instance_with_unchecked(&[
