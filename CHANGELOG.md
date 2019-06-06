@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog] and this project adheres to
 - Pre-interned `SymbolId` getters
 - `SymbolId::from_raw`
 - `Symbol::is_{static|dynamic}`
+- Concrete `Exception` types
+  - Allows for safely creating instances of specific exceptions via
+    `Exception::new`
 
 ### Changed
 - Functions to be `const`:

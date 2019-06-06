@@ -19,6 +19,9 @@ use crate::{
 /// like [`backtrace`](#method.backtrace) and [`cause`](#method.cause) will
 /// cause a segmentation fault.
 pub unsafe trait Exception: Object + Error {
+    /// Creates a new instance of `Self` with `message`.
+    fn new(message: impl Into<String>) -> Self;
+
     /// Returns `self` as an [`AnyException`](struct.AnyException.html).
     #[inline]
     fn into_any_exception(self) -> AnyException { *self.as_any_exception() }
@@ -123,7 +126,10 @@ impl fmt::Display for AnyException {
 impl Error for AnyException {}
 
 unsafe impl Exception for AnyException {
-
+    #[inline]
+    fn new(message: impl Into<String>) -> Self {
+        unsafe { Self::of_class(Class::exception(), message) }
+    }
 }
 
 impl From<Infallible> for AnyException {
@@ -150,11 +156,6 @@ impl AnyException {
         let exc = ruby::rb_errinfo();
         ruby::rb_set_errinfo(crate::util::NIL_VALUE);
         AnyException::from_raw(exc)
-    }
-
-    /// Creates a new instance of `Exception` with `message`.
-    pub fn new(message: impl Into<String>) -> Self {
-        unsafe { Self::of_class(Class::exception(), message) }
     }
 
     /// Creates a new instance of `class` with `message`.
@@ -190,202 +191,166 @@ impl AnyException {
         unsafe { ruby::rb_set_errinfo(crate::util::NIL_VALUE) };
         Some(current)
     }
+}
 
-    /// Returns whether `self` is a `StandardError`.
-    #[inline]
-    pub fn is_standard_error(self) -> bool {
-        self.class() == Class::standard_error()
-    }
+macro_rules! typed_exceptions {
+    ($($name:ident => $is:ident $to:ident $class:ident;)+) => {
+        typed_exceptions! { $(
+            $name,
+            stringify!($name),
+            concat!("A `", stringify!($name), "` exception.")
+            => $is $to $class;
+        )+ }
+    };
+    ($($name:ident, $name_str:expr, $ty_doc:expr => $is:ident $to:ident $class:ident;)+) => {
+        $(
+            #[doc = $ty_doc]
+            #[derive(Clone, Copy)]
+            pub struct $name(AnyException);
 
-    /// Returns whether `self` is a `SystemExit`.
-    #[inline]
-    pub fn is_system_exit(self) -> bool {
-        self.class() == Class::system_exit()
-    }
+            impl From<$name> for AnyException {
+                #[inline]
+                fn from(exc: $name) -> Self {
+                    exc.0
+                }
+            }
 
-    /// Returns whether `self` is a `Interrupt`.
-    #[inline]
-    pub fn is_interrupt(self) -> bool {
-        self.class() == Class::interrupt()
-    }
+            impl AsRef<AnyException> for $name {
+                #[inline]
+                fn as_ref(&self) -> &AnyException {
+                    &self.0
+                }
+            }
 
-    /// Returns whether `self` is a `Signal`.
-    #[inline]
-    pub fn is_signal(self) -> bool {
-        self.class() == Class::signal()
-    }
+            impl From<$name> for AnyObject {
+                #[inline]
+                fn from(exc: $name) -> Self {
+                    exc.0.into()
+                }
+            }
 
-    /// Returns whether `self` is a `Fatal`.
-    #[inline]
-    pub fn is_fatal(self) -> bool {
-        self.class() == Class::fatal()
-    }
+            impl AsRef<AnyObject> for $name {
+                #[inline]
+                fn as_ref(&self) -> &AnyObject {
+                    self.0.as_ref()
+                }
+            }
 
-    /// Returns whether `self` is a `ArgumentError`.
-    #[inline]
-    pub fn is_arg_error(self) -> bool {
-        self.class() == Class::arg_error()
-    }
+            impl<O: Object> PartialEq<O> for $name {
+                #[inline]
+                fn eq(&self, other: &O) -> bool {
+                    self.raw() == other.raw()
+                }
+            }
 
-    /// Returns whether `self` is a `EOFError`.
-    #[inline]
-    pub fn is_eof_error(self) -> bool {
-        self.class() == Class::eof_error()
-    }
+            impl Eq for $name {}
 
-    /// Returns whether `self` is a `IndexError`.
-    #[inline]
-    pub fn is_index_error(self) -> bool {
-        self.class() == Class::index_error()
-    }
+            unsafe impl Object for $name {
+                #[inline]
+                fn cast<A: Object>(obj: A) -> Option<Self> {
+                    if obj.class().inherits(Class::$class()) {
+                        unsafe { Some(Self::from_raw(obj.raw())) }
+                    } else {
+                        None
+                    }
+                }
 
-    /// Returns whether `self` is a `StopIteration`.
-    #[inline]
-    pub fn is_stop_iteration(self) -> bool {
-        self.class() == Class::stop_iteration()
-    }
+                #[inline]
+                fn class(self) -> Class<Self> {
+                    let ptr = self.raw() as *const ruby::RBasic;
+                    unsafe { Class::from_raw((*ptr).klass) }
+                }
+            }
 
-    /// Returns whether `self` is a `KeyError`.
-    #[inline]
-    pub fn is_key_error(self) -> bool {
-        self.class() == Class::key_error()
-    }
+            impl fmt::Debug for $name {
+                #[inline]
+                fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                    f.debug_tuple(stringify!($name))
+                        .field(self.as_any_object())
+                        .finish()
+                }
+            }
 
-    /// Returns whether `self` is a `RangeError`.
-    #[inline]
-    pub fn is_range_error(self) -> bool {
-        self.class() == Class::range_error()
-    }
+            impl fmt::Display for $name {
+                #[inline]
+                fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                    self.as_any_object().fmt(f)
+                }
+            }
 
-    /// Returns whether `self` is a `IOError`.
-    #[inline]
-    pub fn is_io_error(self) -> bool {
-        self.class() == Class::io_error()
-    }
+            impl Error for $name {}
 
-    /// Returns whether `self` is a `RuntimeError`.
-    #[inline]
-    pub fn is_runtime_error(self) -> bool {
-        self.class() == Class::runtime_error()
-    }
+            unsafe impl Exception for $name {
+                #[inline]
+                fn new(message: impl Into<String>) -> Self {
+                    unsafe {
+                        let class = Class::$class();
+                        let any = AnyException::of_class(class, message);
+                        Self::cast_unchecked(any)
+                    }
+                }
+            }
+        )+
 
-    /// Returns whether `self` is a `FrozenError`.
-    #[inline]
-    pub fn is_frozen_error(self) -> bool {
-        self.class() == Class::frozen_error()
-    }
+        /// Typed exceptions.
+        impl AnyException {
+            $(
+                /// Returns whether `self` is a `
+                #[doc = $name_str]
+                /// `.
+                #[inline]
+                pub fn $is(self) -> bool {
+                    self.class().inherits(Class::$class())
+                }
 
-    /// Returns whether `self` is a `SecurityError`.
-    #[inline]
-    pub fn is_security_error(self) -> bool {
-        self.class() == Class::security_error()
-    }
+                /// Returns `self` as a `
+                #[doc = $name_str]
+                /// ` if it is one.
+                #[inline]
+                pub fn $to(self) -> Option<$name> {
+                    if self.$is() {
+                        Some($name(self))
+                    } else {
+                        None
+                    }
+                }
+            )+
+        }
+    };
+}
 
-    /// Returns whether `self` is a `SystemCallError`.
-    #[inline]
-    pub fn is_system_call_error(self) -> bool {
-        self.class() == Class::system_call_error()
-    }
-
-    /// Returns whether `self` is a `ThreadError`.
-    #[inline]
-    pub fn is_thread_error(self) -> bool {
-        self.class() == Class::thread_error()
-    }
-
-    /// Returns whether `self` is a `TypeError`.
-    #[inline]
-    pub fn is_type_error(self) -> bool {
-        self.class() == Class::type_error()
-    }
-
-    /// Returns whether `self` is a `ZeroDivError`.
-    #[inline]
-    pub fn is_zero_div_error(self) -> bool {
-        self.class() == Class::zero_div_error()
-    }
-
-    /// Returns whether `self` is a `NotImpError`.
-    #[inline]
-    pub fn is_not_imp_error(self) -> bool {
-        self.class() == Class::not_imp_error()
-    }
-
-    /// Returns whether `self` is a `NoMemError`.
-    #[inline]
-    pub fn is_no_mem_error(self) -> bool {
-        self.class() == Class::no_mem_error()
-    }
-
-    /// Returns whether `self` is a `NoMethodError`.
-    #[inline]
-    pub fn is_no_method_error(self) -> bool {
-        self.class() == Class::no_method_error()
-    }
-
-    /// Returns whether `self` is a `FloatDomainErr`.
-    #[inline]
-    pub fn is_float_domain_error(self) -> bool {
-        self.class() == Class::float_domain_error()
-    }
-
-    /// Returns whether `self` is a `LocalJumpError`.
-    #[inline]
-    pub fn is_local_jump_error(self) -> bool {
-        self.class() == Class::local_jump_error()
-    }
-
-    /// Returns whether `self` is a `SysStackError`.
-    #[inline]
-    pub fn is_sys_stack_error(self) -> bool {
-        self.class() == Class::sys_stack_error()
-    }
-
-    /// Returns whether `self` is a `RegexpError`.
-    #[inline]
-    pub fn is_regexp_error(self) -> bool {
-        self.class() == Class::regexp_error()
-    }
-
-    /// Returns whether `self` is a `EncodingError`.
-    #[inline]
-    pub fn is_encoding_error(self) -> bool {
-        self.class() == Class::encoding_error()
-    }
-
-    /// Returns whether `self` is a `EncCompatError`.
-    #[inline]
-    pub fn is_enc_compat_error(self) -> bool {
-        self.class() == Class::enc_compat_error()
-    }
-
-    /// Returns whether `self` is a `ScriptError`.
-    #[inline]
-    pub fn is_script_error(self) -> bool {
-        self.class() == Class::script_error()
-    }
-
-    /// Returns whether `self` is a `NameError`.
-    #[inline]
-    pub fn is_name_error(self) -> bool {
-        self.class() == Class::name_error()
-    }
-
-    /// Returns whether `self` is a `SyntaxError`.
-    #[inline]
-    pub fn is_syntax_error(self) -> bool {
-        self.class() == Class::syntax_error()
-    }
-
-    /// Returns whether `self` is a `LoadError`.
-    #[inline]
-    pub fn is_load_error(self) -> bool {
-        self.class() == Class::load_error()
-    }
-
-    /// Returns whether `self` is a `MathDomainError`.
-    #[inline]
-    pub fn is_math_domain_error(self) -> bool {
-        self.class() == Class::math_domain_error()
-    }
+typed_exceptions! {
+    StandardError    => is_standard_error     to_standard_error     standard_error;
+    SystemExit       => is_system_exit        to_system_exit        system_exit;
+    Interrupt        => is_interrupt          to_interrupt          interrupt;
+    Signal           => is_signal             to_signal             signal;
+    Fatal            => is_fatal              to_fatal              fatal;
+    ArgumentError    => is_arg_error          to_arg_error          arg_error;
+    EOFError         => is_eof_error          to_eof_error          eof_error;
+    IndexError       => is_index_error        to_index_error        index_error;
+    StopIteration    => is_stop_iteration     to_stop_iteration     stop_iteration;
+    KeyError         => is_key_error          to_key_error          key_error;
+    RangeError       => is_range_error        to_range_error        range_error;
+    IOError          => is_io_error           to_io_error           io_error;
+    RuntimeError     => is_runtime_error      to_runtime_error      runtime_error;
+    FrozenError      => is_frozen_error       to_frozen_error       frozen_error;
+    SecurityError    => is_security_error     to_security_error     security_error;
+    SystemCallError  => is_system_call_error  to_system_call_error  system_call_error;
+    ThreadError      => is_thread_error       to_thread_error       thread_error;
+    TypeError        => is_type_error         to_type_error         type_error;
+    ZeroDivError     => is_zero_div_error     to_zero_div_error     zero_div_error;
+    NotImpError      => is_not_imp_error      to_not_imp_error      not_imp_error;
+    NoMemError       => is_no_mem_error       to_no_mem_error       no_mem_error;
+    NoMethodError    => is_no_method_error    to_no_method_error    no_method_error;
+    FloatDomainError => is_float_domain_error to_float_domain_error float_domain_error;
+    LocalJumpError   => is_local_jump_error   to_local_jump_error   local_jump_error;
+    SysStackError    => is_sys_stack_error    to_sys_stack_error    sys_stack_error;
+    RegexpError      => is_regexp_error       to_regexp_error       regexp_error;
+    EncodingError    => is_encoding_error     to_encoding_error     encoding_error;
+    EncCompatError   => is_enc_compat_error   to_enc_compat_error   enc_compat_error;
+    ScriptError      => is_script_error       to_script_error       script_error;
+    NameError        => is_name_error         to_name_error         name_error;
+    SyntaxError      => is_syntax_error       to_syntax_error       syntax_error;
+    LoadError        => is_load_error         to_load_error         load_error;
+    MathDomainError  => is_math_domain_error  to_math_domain_error  math_domain_error;
 }
