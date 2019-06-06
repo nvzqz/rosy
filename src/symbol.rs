@@ -217,7 +217,7 @@ impl From<SymbolId> for Symbol {
 impl SymbolId {
     /// Returns the raw underlying ID.
     #[inline]
-    pub fn raw(self) -> ruby::ID {
+    pub const fn raw(self) -> ruby::ID {
         self.0
     }
 
