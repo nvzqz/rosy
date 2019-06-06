@@ -714,7 +714,8 @@ mod benches {
 
         let string = create_string();
         let enc = String::from("ASCII-8BIT");
-        string.call_with_protected("force_encoding", &[enc]).unwrap();
+        let sym = "force_encoding";
+        unsafe { string.call_with_protected(sym, &[enc]).unwrap(); }
 
         b.bytes = string.len() as u64;
         b.iter(move || unsafe {
