@@ -19,6 +19,15 @@ pub struct RData {
 
 #[repr(C)]
 #[derive(Clone, Copy)]
+pub struct RTypedData {
+    pub basic: RBasic,
+    pub type_: *const rb_data_type_t,
+    pub typed_flag: VALUE, // 1 or not
+    pub data: *mut c_void,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
 pub struct rb_data_type_t {
     pub wrap_struct_name: *const c_char,
     pub function: rb_data_type_t_function,

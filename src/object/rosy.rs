@@ -79,7 +79,7 @@ unsafe impl<R: Rosy> Object for RosyObject<R> {
 
     #[inline]
     fn class(self) -> Class<Self> {
-        unsafe { Class::from_raw((*self.rdata()).basic.klass) }
+        unsafe { Class::from_raw((*self.r_typed_data()).basic.klass) }
     }
 }
 
@@ -143,13 +143,13 @@ impl<R: Rosy> RosyObject<R> {
     }
 
     #[inline]
-    fn rdata(self) -> *mut ruby::RData {
-        self.raw() as *mut ruby::RData
+    fn r_typed_data(self) -> *mut ruby::RTypedData {
+        self.raw() as *mut ruby::RTypedData
     }
 
     #[inline]
     fn data(self) -> *mut R {
-        unsafe { (*self.rdata()).data as *mut R }
+        unsafe { (*self.r_typed_data()).data as *mut R }
     }
 
     /// Returns a reference to the inner `Rosy` value.
