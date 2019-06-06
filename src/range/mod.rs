@@ -236,7 +236,8 @@ impl<S: Object, E: Object> Range<S, E> {
     /// ```
     #[inline]
     pub fn contains(self, obj: impl Into<AnyObject>) -> bool {
-        unsafe { self.call_with("include?", &[obj.into()]).is_true() }
+        let include = SymbolId::include_q();
+        unsafe { self.call_with(include, &[obj.into()]).is_true() }
     }
 
     /// Returns the size of `self` as an `Integer`, if the bounds are `Numeric`
@@ -244,7 +245,7 @@ impl<S: Object, E: Object> Range<S, E> {
     #[inline]
     pub fn size(self) -> Option<Integer> {
         unsafe {
-            let size = self.call("size");
+            let size = self.call(SymbolId::size());
             if size.is_nil() {
                 None
             } else {

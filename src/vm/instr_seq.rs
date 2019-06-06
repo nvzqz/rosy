@@ -57,7 +57,7 @@ impl InstrSeq {
     fn _compile(args: &[AnyObject]) -> Result<Self> {
         unsafe {
             Class::instr_seq()
-                .call_with_protected("compile", args)
+                .call_with_protected(SymbolId::compile(), args)
                 .map(|obj| Self::cast_unchecked(obj))
         }
     }
@@ -81,7 +81,7 @@ impl InstrSeq {
     fn _compile_file(args: &[AnyObject]) -> Result<Self> {
         unsafe {
             Class::instr_seq()
-                .call_with_protected("compile_file", args)
+                .call_with_protected(SymbolId::compile_file(), args)
                 .map(|obj| Self::cast_unchecked(obj))
         }
     }
@@ -131,7 +131,7 @@ impl InstrSeq {
     #[inline]
     pub unsafe fn from_binary(binary: impl Into<String>) -> Self {
         Self::cast_unchecked(Class::instr_seq().call_with(
-            "load_from_binary",
+            SymbolId::load_from_binary(),
             &[binary.into()]
         ))
     }
@@ -148,7 +148,7 @@ impl InstrSeq {
     /// If this instruction sequence throws an exception, it must be caught.
     #[inline]
     pub unsafe fn eval(self) -> AnyObject {
-        self.call("eval")
+        self.call(SymbolId::eval())
     }
 
     /// Evaluates `self` and returns the result.
@@ -176,13 +176,13 @@ impl InstrSeq {
     /// ```
     #[inline]
     pub fn eval_protected(self) -> Result<AnyObject> {
-        unsafe { self.call_protected("eval") }
+        unsafe { self.call_protected(SymbolId::eval()) }
     }
 
     /// Returns the serialized binary data.
     #[inline]
     pub fn to_binary(self) -> String {
-        unsafe { String::cast_unchecked(self.call("to_binary")) }
+        unsafe { String::cast_unchecked(self.call(SymbolId::to_binary())) }
     }
 
     /// Writes the serialized binary data of `self` to `w`.
@@ -200,21 +200,21 @@ impl InstrSeq {
     /// Returns a human-readable form of `self`.
     #[inline]
     pub fn disassemble(self) -> String {
-        unsafe { String::cast_unchecked(self.call("disasm")) }
+        unsafe { String::cast_unchecked(self.call(SymbolId::disasm())) }
     }
 
     /// Returns the file path of `self`, or `<compiled>` if it was compiled from
     /// a string.
     #[inline]
     pub fn path(self) -> String {
-        unsafe { String::cast_unchecked(self.call("path")) }
+        unsafe { String::cast_unchecked(self.call(SymbolId::path())) }
     }
 
     /// Returns the absolute path of `self` if it was compiled from a file.
     #[inline]
     pub fn absolute_path(self) -> Option<String> {
         unsafe {
-            let path = self.call("absolute_path");
+            let path = self.call(SymbolId::absolute_path());
             if path.is_nil() {
                 None
             } else {

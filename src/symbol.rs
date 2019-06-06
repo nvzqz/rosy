@@ -227,3 +227,87 @@ impl SymbolId {
         unsafe { CStr::from_ptr(ruby::rb_id2name(self.raw())) }
     }
 }
+
+macro_rules! common_ids {
+    ($($name:ident => $sym:expr,)+) => {
+        struct Common {
+            $($name: SymbolId,)+
+        }
+
+        impl Common {
+            // Initializes the `COMMON` table when first called and makes
+            // subsequent calls simply access `COMMON` directly
+            #[inline]
+            fn get() -> &'static Common {
+                static mut COMMON: Common = Common {
+                    $($name: SymbolId(0),)+
+                };
+
+                static mut GET_COMMON: fn() -> &'static Common = || unsafe {
+                    $(COMMON.$name = SymbolId::from($sym);)+
+
+                    GET_COMMON = || &COMMON;
+
+                    &COMMON
+                };
+                unsafe { GET_COMMON() }
+            }
+        }
+
+        /// Commonly used symbol IDs.
+        ///
+        /// These functions are generally faster than using `SymbolId::from`.
+        impl SymbolId {
+            $(
+                /// ID for the
+                /// `
+                #[doc = $sym]
+                /// ` symbol.
+                #[inline]
+                pub fn $name() -> SymbolId {
+                    Common::get().$name
+                }
+            )+
+        }
+    };
+}
+
+common_ids! {
+    equal_op            => "==",
+    backtrace           => "backtrace",
+    cause               => "cause",
+    size                => "size",
+    eval                => "eval",
+    to_binary           => "to_binary",
+    load_from_binary    => "load_from_binary",
+    disasm              => "disasm",
+    path                => "path",
+    absolute_path       => "absolute_path",
+    include_q           => "include?",
+    compile             => "compile",
+    compile_file        => "compile_file",
+}
+
+#[cfg(all(test, nightly))]
+mod benches {
+    use test::{Bencher, black_box};
+    use super::*;
+
+    #[bench]
+    fn get_equal_op_sym(b: &mut Bencher) {
+        crate::vm::init().unwrap();
+
+        b.iter(|| {
+            black_box(black_box(SymbolId::equal_op)());
+        });
+    }
+
+    #[bench]
+    fn intern_equal_op_sym(b: &mut Bencher) {
+        crate::vm::init().unwrap();
+
+        b.iter(|| {
+            black_box(SymbolId::from(black_box("==")));
+        });
+    }
+}

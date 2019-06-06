@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 ### Added
 - `AnyObject::is_{bool|false_or_nil}`
 - `Range::{contains|size|len}`
+- Pre-interned `SymbolId` getters
 
 ### Changed
 - `Object::is_fixnum` to be `const`

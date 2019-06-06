@@ -58,7 +58,7 @@ pub unsafe trait Exception: Object + Error {
     #[inline]
     fn backtrace(&self) -> Option<Array<String>> {
         unsafe {
-            let obj = self.call("backtrace");
+            let obj = self.call(SymbolId::backtrace());
             if obj.is_nil() {
                 None
             } else {
@@ -71,7 +71,7 @@ pub unsafe trait Exception: Object + Error {
     #[inline]
     fn cause(&self) -> Option<AnyException> {
         unsafe {
-            let obj = self.call("cause");
+            let obj = self.call(SymbolId::cause());
             if obj.is_nil() {
                 None
             } else {

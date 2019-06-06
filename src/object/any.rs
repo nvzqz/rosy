@@ -58,7 +58,7 @@ unsafe impl Object for AnyObject {
 impl<O: Object> PartialEq<O> for AnyObject {
     #[inline]
     fn eq(&self, other: &O) -> bool {
-        let result = unsafe { self.call_with("==", &[*other]) };
+        let result = unsafe { self.call_with(SymbolId::equal_op(), &[*other]) };
         result.raw() == crate::util::TRUE_VALUE
     }
 }
