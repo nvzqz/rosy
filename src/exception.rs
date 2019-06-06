@@ -105,6 +105,12 @@ unsafe impl Object for AnyException {
             None
         }
     }
+
+    #[inline]
+    fn class(self) -> Class<Self> {
+        let ptr = self.raw() as *const ruby::RBasic;
+        unsafe { Class::from_raw((*ptr).klass) }
+    }
 }
 
 impl fmt::Display for AnyException {

@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog] and this project adheres to
 - Functions to be `const`:
   - `Object::is_fixnum`
   - `SymbolId::raw`
+- `AnyException::class` to be faster
 
 ## [0.0.9] - 2019-05-29
 ### Added
