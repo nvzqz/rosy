@@ -5,7 +5,7 @@ mod prelude {
         ffi::c_void,
         os::raw::{c_char, c_int, c_uint, c_long},
     };
-    pub use super::{VALUE, ID};
+    pub use super::{VALUE, ID, Var};
 }
 
 mod array;
@@ -173,12 +173,70 @@ pub enum value_type {
 }
 
 extern "C" {
-    pub static ruby_api_version:  [prelude::c_int;  3];
-    pub static ruby_version:      [prelude::c_char; 0];
-    pub static ruby_release_date: [prelude::c_char; 0];
-    pub static ruby_platform:     [prelude::c_char; 0];
-    pub static ruby_patchlevel:   [prelude::c_char; 0];
-    pub static ruby_description:  [prelude::c_char; 0];
-    pub static ruby_copyright:    [prelude::c_char; 0];
-    pub static ruby_engine:       [prelude::c_char; 0];
+    #[cfg_attr(dllimport, link_name="__imp_ruby_api_version")]
+    pub static ruby_api_version:  Var<[prelude::c_int;  3]>;
+    #[cfg_attr(dllimport, link_name="__imp_ruby_version")]
+    pub static ruby_version:      Var<[prelude::c_char; 0]>;
+    #[cfg_attr(dllimport, link_name="__imp_ruby_release_date")]
+    pub static ruby_release_date: Var<[prelude::c_char; 0]>;
+    #[cfg_attr(dllimport, link_name="__imp_ruby_platform")]
+    pub static ruby_platform:     Var<[prelude::c_char; 0]>;
+    #[cfg_attr(dllimport, link_name="__imp_ruby_patchlevel")]
+    pub static ruby_patchlevel:   Var<[prelude::c_char; 0]>;
+    #[cfg_attr(dllimport, link_name="__imp_ruby_description")]
+    pub static ruby_description:  Var<[prelude::c_char; 0]>;
+    #[cfg_attr(dllimport, link_name="__imp_ruby_copyright")]
+    pub static ruby_copyright:    Var<[prelude::c_char; 0]>;
+    #[cfg_attr(dllimport, link_name="__imp_ruby_engine")]
+    pub static ruby_engine:       Var<[prelude::c_char; 0]>;
 }
+
+#[cfg(not(dllimport))]
+mod var {
+    use std::ops::Deref;
+
+    #[repr(C)]
+    pub struct Var<T> {
+        inner: T,
+    }
+
+    impl<T> Var<T> {
+        pub fn inner(&self) -> T where T: Copy {
+            self.inner
+        }
+    }
+
+    impl<T> Deref for Var<T> {
+        type Target = T;
+
+        fn deref(&self) -> &T {
+            &self.inner
+        }
+    }
+}
+
+#[cfg(dllimport)]
+mod var {
+    // module for variables declared with __declspec(dllimport) on Windows
+    use std::ops::Deref;
+
+    #[repr(C)]
+    pub struct Var<T> {
+        inner: *const T,
+    }
+
+    impl<T> Var<T> {
+        pub fn inner(&self) -> T where T: Copy {
+            unsafe { *self.inner }
+        }
+    }
+
+    impl<T> Deref for Var<T> {
+        type Target = T;
+
+        fn deref(&self) -> &T {
+            unsafe { &*self.inner }
+        }
+    }
+}
+pub use var::Var;

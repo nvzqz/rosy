@@ -21,7 +21,7 @@ unsafe fn convert_c_str<'a>(s: &'a CStr, debug_message: &str) -> &'a str {
 /// Note that this may differ from the result of `version_str`.
 #[inline]
 pub fn api_version() -> (u16, u16, u16) {
-    let [major, minor, teeny] = unsafe { ruby::ruby_api_version };
+    let [major, minor, teeny] = unsafe { ruby::ruby_api_version.inner() };
     (major as u16, minor as u16, teeny as u16)
 }
 

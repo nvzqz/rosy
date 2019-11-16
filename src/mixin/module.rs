@@ -186,7 +186,7 @@ macro_rules! built_in_modules {
             ///` module.
             #[inline]
             pub fn $method() -> Self {
-                unsafe { Self::from_raw(ruby::$konst) }
+                unsafe { Self::from_raw(ruby::$konst.inner()) }
             }
         )+}
     }

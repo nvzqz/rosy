@@ -26,6 +26,11 @@ fn main() {
         }
     }
 
+    // Ruby variables are declared with __declspec(dllimport) on Windows.
+    if cfg!(all(windows, not(feature = "static"))) {
+        println!("cargo:rustc-cfg=dllimport");
+    }
+
     let out_dir = env::var_os("OUT_DIR").expect("Couldn't get 'OUT_DIR'");
     let out_dir = PathBuf::from(out_dir);
 
