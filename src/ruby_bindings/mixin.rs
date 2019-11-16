@@ -1,92 +1,174 @@
 use super::prelude::*;
 
 extern "C" {
-    pub static rb_mKernel: VALUE;
-    pub static rb_mComparable: VALUE;
-    pub static rb_mEnumerable: VALUE;
-    pub static rb_mErrno: VALUE;
-    pub static rb_mFileTest: VALUE;
-    pub static rb_mGC: VALUE;
-    pub static rb_mMath: VALUE;
-    pub static rb_mProcess: VALUE;
-    pub static rb_mWaitReadable: VALUE;
-    pub static rb_mWaitWritable: VALUE;
+    #[cfg_attr(dllimport, link_name="__imp_rb_mKernel")]
+    pub static rb_mKernel: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_mComparable")]
+    pub static rb_mComparable: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_mEnumerable")]
+    pub static rb_mEnumerable: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_mErrno")]
+    pub static rb_mErrno: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_mFileTest")]
+    pub static rb_mFileTest: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_mGC")]
+    pub static rb_mGC: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_mMath")]
+    pub static rb_mMath: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_mProcess")]
+    pub static rb_mProcess: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_mWaitReadable")]
+    pub static rb_mWaitReadable: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_mWaitWritable")]
+    pub static rb_mWaitWritable: Var<VALUE>;
 
-    pub static rb_cBasicObject: VALUE;
-    pub static rb_cObject: VALUE;
-    pub static rb_cArray: VALUE;
-    pub static rb_cBinding: VALUE;
-    pub static rb_cClass: VALUE;
-    pub static rb_cCont: VALUE;
-    pub static rb_cData: VALUE;
-    pub static rb_cDir: VALUE;
-    pub static rb_cEncoding: VALUE;
-    pub static rb_cEnumerator: VALUE;
-    pub static rb_cFalseClass: VALUE;
-    pub static rb_cFile: VALUE;
-    pub static rb_cComplex: VALUE;
-    pub static rb_cFloat: VALUE;
-    pub static rb_cHash: VALUE;
-    pub static rb_cIO: VALUE;
-    pub static rb_cInteger: VALUE;
-    pub static rb_cMatch: VALUE;
-    pub static rb_cMethod: VALUE;
-    pub static rb_cModule: VALUE;
-    pub static rb_cNameErrorMesg: VALUE;
-    pub static rb_cNilClass: VALUE;
-    pub static rb_cNumeric: VALUE;
-    pub static rb_cProc: VALUE;
-    pub static rb_cRandom: VALUE;
-    pub static rb_cRange: VALUE;
-    pub static rb_cRational: VALUE;
-    pub static rb_cRegexp: VALUE;
-    pub static rb_cStat: VALUE;
-    pub static rb_cString: VALUE;
-    pub static rb_cStruct: VALUE;
-    pub static rb_cSymbol: VALUE;
-    pub static rb_cThread: VALUE;
-    pub static rb_cTime: VALUE;
-    pub static rb_cTrueClass: VALUE;
-    pub static rb_cUnboundMethod: VALUE;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cBasicObject")]
+    pub static rb_cBasicObject: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cObject")]
+    pub static rb_cObject: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cArray")]
+    pub static rb_cArray: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cBinding")]
+    pub static rb_cBinding: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cClass")]
+    pub static rb_cClass: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cCont")]
+    pub static rb_cCont: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cData")]
+    pub static rb_cData: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cDir")]
+    pub static rb_cDir: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cEncoding")]
+    pub static rb_cEncoding: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cEnumerator")]
+    pub static rb_cEnumerator: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cFalseClass")]
+    pub static rb_cFalseClass: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cFile")]
+    pub static rb_cFile: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cComplex")]
+    pub static rb_cComplex: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cFloat")]
+    pub static rb_cFloat: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cHash")]
+    pub static rb_cHash: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cIO")]
+    pub static rb_cIO: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cInteger")]
+    pub static rb_cInteger: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cMatch")]
+    pub static rb_cMatch: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cMethod")]
+    pub static rb_cMethod: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cModule")]
+    pub static rb_cModule: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cNameErrorMesg")]
+    pub static rb_cNameErrorMesg: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cNilClass")]
+    pub static rb_cNilClass: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cNumeric")]
+    pub static rb_cNumeric: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cProc")]
+    pub static rb_cProc: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cRandom")]
+    pub static rb_cRandom: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cRange")]
+    pub static rb_cRange: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cRational")]
+    pub static rb_cRational: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cRegexp")]
+    pub static rb_cRegexp: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cStat")]
+    pub static rb_cStat: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cString")]
+    pub static rb_cString: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cStruct")]
+    pub static rb_cStruct: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cSymbol")]
+    pub static rb_cSymbol: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cThread")]
+    pub static rb_cThread: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cTime")]
+    pub static rb_cTime: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cTrueClass")]
+    pub static rb_cTrueClass: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cUnboundMethod")]
+    pub static rb_cUnboundMethod: Var<VALUE>;
 
     // Found in 'vm_core.h'
-    pub static rb_cRubyVM: VALUE;
-    pub static rb_cISeq: VALUE;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cRubyVM")]
+    pub static rb_cRubyVM: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_cISeq")]
+    pub static rb_cISeq: Var<VALUE>;
 
-    pub static rb_eException: VALUE;
-    pub static rb_eStandardError: VALUE;
-    pub static rb_eSystemExit: VALUE;
-    pub static rb_eInterrupt: VALUE;
-    pub static rb_eSignal: VALUE;
-    pub static rb_eFatal: VALUE;
-    pub static rb_eArgError: VALUE;
-    pub static rb_eEOFError: VALUE;
-    pub static rb_eIndexError: VALUE;
-    pub static rb_eStopIteration: VALUE;
-    pub static rb_eKeyError: VALUE;
-    pub static rb_eRangeError: VALUE;
-    pub static rb_eIOError: VALUE;
-    pub static rb_eRuntimeError: VALUE;
-    pub static rb_eFrozenError: VALUE;
-    pub static rb_eSecurityError: VALUE;
-    pub static rb_eSystemCallError: VALUE;
-    pub static rb_eThreadError: VALUE;
-    pub static rb_eTypeError: VALUE;
-    pub static rb_eZeroDivError: VALUE;
-    pub static rb_eNotImpError: VALUE;
-    pub static rb_eNoMemError: VALUE;
-    pub static rb_eNoMethodError: VALUE;
-    pub static rb_eFloatDomainError: VALUE;
-    pub static rb_eLocalJumpError: VALUE;
-    pub static rb_eSysStackError: VALUE;
-    pub static rb_eRegexpError: VALUE;
-    pub static rb_eEncodingError: VALUE;
-    pub static rb_eEncCompatError: VALUE;
-    pub static rb_eScriptError: VALUE;
-    pub static rb_eNameError: VALUE;
-    pub static rb_eSyntaxError: VALUE;
-    pub static rb_eLoadError: VALUE;
-    pub static rb_eMathDomainError: VALUE;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eException")]
+    pub static rb_eException: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eStandardError")]
+    pub static rb_eStandardError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eSystemExit")]
+    pub static rb_eSystemExit: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eInterrupt")]
+    pub static rb_eInterrupt: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eSignal")]
+    pub static rb_eSignal: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eFatal")]
+    pub static rb_eFatal: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eArgError")]
+    pub static rb_eArgError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eEOFError")]
+    pub static rb_eEOFError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eIndexError")]
+    pub static rb_eIndexError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eStopIteration")]
+    pub static rb_eStopIteration: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eKeyError")]
+    pub static rb_eKeyError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eRangeError")]
+    pub static rb_eRangeError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eIOError")]
+    pub static rb_eIOError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eRuntimeError")]
+    pub static rb_eRuntimeError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eFrozenError")]
+    pub static rb_eFrozenError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eSecurityError")]
+    pub static rb_eSecurityError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eSystemCallError")]
+    pub static rb_eSystemCallError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eThreadError")]
+    pub static rb_eThreadError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eTypeError")]
+    pub static rb_eTypeError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eZeroDivError")]
+    pub static rb_eZeroDivError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eNotImpError")]
+    pub static rb_eNotImpError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eNoMemError")]
+    pub static rb_eNoMemError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eNoMethodError")]
+    pub static rb_eNoMethodError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eFloatDomainError")]
+    pub static rb_eFloatDomainError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eLocalJumpError")]
+    pub static rb_eLocalJumpError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eSysStackError")]
+    pub static rb_eSysStackError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eRegexpError")]
+    pub static rb_eRegexpError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eEncodingError")]
+    pub static rb_eEncodingError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eEncCompatError")]
+    pub static rb_eEncCompatError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eScriptError")]
+    pub static rb_eScriptError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eNameError")]
+    pub static rb_eNameError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eSyntaxError")]
+    pub static rb_eSyntaxError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eLoadError")]
+    pub static rb_eLoadError: Var<VALUE>;
+    #[cfg_attr(dllimport, link_name="__imp_rb_eMathDomainError")]
+    pub static rb_eMathDomainError: Var<VALUE>;
 
     // void rb_attr(VALUE klass, ID id, int read, int write, int ex)
     pub fn rb_attr(klass: VALUE, id: ID, read: c_int, write: c_int, ex: c_int);
